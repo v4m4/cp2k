@@ -11,7 +11,7 @@
 !> \author Matthias Krack (04.07.2000)
 ! *****************************************************************************
 MODULE basis_set_types
-
+  USE buildin_basis_set,               ONLY: buildin_basis_set_get_text
   USE ai_coulomb,                      ONLY: coulomb2
   USE bibliography,                    ONLY: VandeVondele2007,&
                                              cite_reference
@@ -1177,7 +1177,11 @@ CONTAINS
       IF (.NOT.read_from_input) THEN
         NULLIFY(parser)
         basis_set_file_name = cbasis(ibasis)
-        CALL parser_create(parser,basis_set_file_name,para_env=para_env,error=error)
+        IF(TRIM(basis_set_file_name) == "__BUILDIN__") THEN
+          CALL parser_create(parser,text=buildin_basis_set_get_text(),para_env=para_env,error=error)
+        ELSE
+          CALL parser_create(parser,file_name=basis_set_file_name,para_env=para_env,error=error)
+        ENDIF
       END IF
 
       bsname = basis_set_name

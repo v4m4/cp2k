@@ -35,6 +35,10 @@ def main():
     output += "CHARACTER(len=*), PARAMETER :: block00000 = ''"
 
     lines = content.split("\n")
+
+    #lines = [l for l in lines if not l.startswith("#")]
+    #lines = [l for l in lines if len(l.strip()) > 0]
+
     for line_no, line in enumerate(lines, start=1):
         if(line_no%100 == 0):
             b = line_no/100

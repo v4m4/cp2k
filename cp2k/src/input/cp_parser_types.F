@@ -25,7 +25,8 @@ MODULE cp_parser_types
   USE cp_para_types,                   ONLY: cp_para_env_type
   USE cp_parser_buffer_types,          ONLY: buffer_type,&
                                              create_buffer_type,&
-                                             release_buffer_type
+                                             release_buffer_type,&
+                                             create_buffer_from_string
   USE cp_parser_ilist_types,           ONLY: create_ilist_type,&
                                              ilist_type,&
                                              release_ilist_type
@@ -85,14 +86,14 @@ MODULE cp_parser_types
      CHARACTER(LEN=default_path_length)             :: input_file_name
      CHARACTER(LEN=max_line_length)                 :: input_line
      INTEGER                                        :: icol,icol1,icol2
-     INTEGER                                        :: input_unit, input_line_number
+     INTEGER                                        :: input_unit=-1, input_line_number
      LOGICAL                                        :: first_separator, parse_white_lines
      CHARACTER (len=default_path_length), DIMENSION(:,:), POINTER :: initial_variables
-     TYPE(buffer_type), POINTER                     :: buffer
-     TYPE(status_type), POINTER                     :: status
-     TYPE(cp_para_env_type), POINTER                :: para_env
-     TYPE(inpp_type), POINTER                       :: inpp
-     TYPE(ilist_type), POINTER                      :: ilist
+     TYPE(buffer_type), POINTER                     :: buffer => Null()
+     TYPE(status_type), POINTER                     :: status => Null()
+     TYPE(cp_para_env_type), POINTER                :: para_env => Null()
+     TYPE(inpp_type), POINTER                       :: inpp => Null()
+     TYPE(ilist_type), POINTER                      :: ilist => Null()
   END TYPE cp_parser_type
 
 CONTAINS
@@ -178,12 +179,13 @@ CONTAINS
 !> \author  MK
 !> \version 1.0
 ! *****************************************************************************
-  SUBROUTINE parser_create(parser, file_name, unit_nr, para_env, end_section_label,&
+  SUBROUTINE parser_create(parser, file_name, unit_nr, text, para_env, end_section_label,&
        separator_chars, comment_char, continuation_char, section_char, parse_white_lines,&
        initial_variables, error)
     TYPE(cp_parser_type), POINTER            :: parser
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: file_name
     INTEGER, INTENT(in), OPTIONAL            :: unit_nr
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: text
     TYPE(cp_para_env_type), OPTIONAL, &
       POINTER                                :: para_env
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: end_section_label, &
@@ -250,16 +252,13 @@ CONTAINS
           IF (PRESENT(unit_nr)) THEN
              parser%input_unit=unit_nr
              IF (PRESENT(file_name)) parser%input_file_name=file_name
+          ELSE IF(PRESENT(file_name)) THEN
+             CALL open_file(file_name=TRIM(file_name), unit_number=parser%input_unit)
+             parser%input_file_name=file_name
+          ELSE IF(PRESENT(text)) THEN
+            CALL create_buffer_from_string(parser%buffer, text, error)
           ELSE
-             CALL cp_assert(PRESENT(file_name),cp_failure_level,cp_assertion_failed,&
-                  routineP,"at least one of filename and unit_nr must be present"//&
-                  CPSourceFileRef,&
-                  error,failure)
-             IF (.NOT.failure) THEN
-                CALL open_file(file_name=TRIM(file_name),&
-                     unit_number=parser%input_unit)
-                parser%input_file_name=file_name
-             END IF
+           STOP "parser_create: requires either of unit_nr, file_name, or text."
           END IF
        END IF
 
@@ -276,14 +275,11 @@ CONTAINS
        parser%icol1=0
        parser%icol2=0
        parser%first_separator=.TRUE.
-       NULLIFY(parser%buffer)
-       NULLIFY(parser%status)
-       NULLIFY(parser%inpp)
-       NULLIFY(parser%ilist)
        CALL create_inpp_type(parser%inpp, parser%initial_variables, error)
        CALL create_ilist_type(parser%ilist, error)
-       CALL create_buffer_type(parser%buffer, error)
        CALL create_status_type(parser%status, error)
+       IF(.NOT. ASSOCIATED(parser%buffer)) &
+         CALL create_buffer_type(parser%buffer, error)
     END IF
   END SUBROUTINE parser_create
 

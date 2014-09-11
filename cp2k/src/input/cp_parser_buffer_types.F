@@ -11,6 +11,8 @@
 MODULE cp_parser_buffer_types
   USE f77_blas
   USE kinds,                           ONLY: max_line_length
+  USE string_utilities,                ONLY: newline
+
 #include "../common/cp_common_uses.f90"
 
   IMPLICIT NONE
@@ -33,7 +35,7 @@ MODULE cp_parser_buffer_types
   END TYPE buffer_type
 
   PUBLIC :: buffer_type, create_buffer_type, release_buffer_type, copy_buffer_type,&
-            initialize_sub_buffer, finalize_sub_buffer
+            initialize_sub_buffer, finalize_sub_buffer, create_buffer_from_string
   CHARACTER(len=*), PARAMETER, PRIVATE :: moduleN = 'cp_parser_buffer_types'
   INTEGER, PARAMETER, PRIVATE          :: buffer_size=1000
 
@@ -72,6 +74,56 @@ CONTAINS
     buffer%last_line_number    = buffer%size
     NULLIFY(buffer%sub_buffer)
   END SUBROUTINE create_buffer_type
+
+! ****************************************************************************
+!> \brief  Creates the parser buffer and fills it with given text
+!> \param buffer ...
+!> \param error ...
+!> \author Ole Schuett
+! *****************************************************************************
+  SUBROUTINE create_buffer_from_string(buffer, text, error)
+    TYPE(buffer_type), POINTER               :: buffer
+    CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: text
+    TYPE(cp_error_type), INTENT(inout)       :: error
+
+    CHARACTER(len=*), PARAMETER :: routineN = 'create_buffer_from_string', &
+      routineP = moduleN//':'//routineN
+
+    INTEGER                                  :: stat, i, j, iline
+    LOGICAL                                  :: failure
+
+    CPPostcondition(.NOT.ASSOCIATED(buffer),cp_failure_level,routineP,error,failure)
+    ALLOCATE(buffer)
+
+    buffer%size = 1
+    DO i=1, LEN(text)
+      IF(text(i:i) == newline) &
+        buffer%size = buffer%size + 1
+    ENDDO
+
+    ALLOCATE(buffer%input_lines(buffer%size))
+    ALLOCATE(buffer%input_line_numbers(buffer%size))
+
+    iline = 1; j=1
+    DO i=1, LEN(text)
+       IF(text(i:i) == newline) THEN
+          buffer%input_line_numbers(iline) = iline
+          buffer%input_lines(iline) = text(j:i-1)
+          j=i+1
+          iline = iline + 1
+       ENDIF
+    ENDDO
+    IF(iline /= buffer%size) STOP "create_buffer_from_string: bug"
+
+    buffer%input_line_numbers(iline) = iline
+    buffer%input_lines(iline) = text(j:)
+
+    buffer%buffer_id           = 0
+    buffer%istat               = -1 !buffer contains entire file
+    buffer%present_line_number = 0
+    buffer%last_line_number    = buffer%size
+    NULLIFY(buffer%sub_buffer)
+  END SUBROUTINE create_buffer_from_string
 
 ! ****************************************************************************
 !> \brief  Releases the parser buffer type
