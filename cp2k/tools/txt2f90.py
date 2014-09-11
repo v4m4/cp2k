@@ -25,7 +25,7 @@ def main():
     output += "MODULE %s\n"%mod_name
     output += "IMPLICIT NONE\n"
     output += "PRIVATE\n"
-    output += "PUBLIC :: M_filename, M_date, M_md5sum, M_text\n".replace("M", mod_name)
+    output += "PUBLIC :: M_filename, M_date, M_md5sum, M_get_text\n".replace("M", mod_name)
     output += "\n"
     output += "CHARACTER(LEN=*), PARAMETER :: %s_filename = '%s'\n"%(mod_name, basename(txt_fn))
     output += "CHARACTER(LEN=*), PARAMETER :: %s_date = '%s'\n"%(mod_name, now.isoformat())
@@ -44,7 +44,18 @@ def main():
             output += "//&\n   '%s'"%escape(line[i*100:(i+1)*100])
         if(line_no<len(lines)): output += "//nl"
 
-    output += "\n\nCHARACTER(len=*), PARAMETER :: %s_text = block%.5d"%(mod_name,len(lines)/100)
+    #output += "\n\nCHARACTER(len=*), PARAMETER :: %s_text = block%.5d"%(mod_name,len(lines)/100)
+
+    output += "\n\nCONTAINS\n\n"
+    output += "! *****************************************************************************\n"
+    output += "!> \\brief Returns content of the file.\n"
+    output += "!>        Wrapping this in a function allows to add compression someday.\n"
+    output += "!> \\author Ole Schuett\n"
+    output += "! *****************************************************************************\n"
+    output += "FUNCTION %s_get_text() RESULT(text)\n"%mod_name
+    output += "  CHARACTER(LEN=LEN(block%.5d)) :: text\n"%(len(lines)/100)
+    output += "  text = block%.5d\n"%(len(lines)/100)
+    output += "END FUNCTION\n"
 
     output  += "\nEND MODULE %s\n"%mod_name
     print output
