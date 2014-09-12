@@ -10,6 +10,7 @@
 !> \author Matthias Krack (04.07.2000)
 ! *****************************************************************************
 MODULE external_potential_types
+  USE buildin_potentials,              ONLY: buildin_potentials_get_text
   USE ao_util,                         ONLY: exp_radius
   USE bibliography,                    ONLY: Goedecker1996,&
                                              Hartwigsen1998,&
@@ -1559,7 +1560,11 @@ CONTAINS
     IF (.NOT.read_from_input) THEN
        CALL section_vals_val_get(dft_section,"POTENTIAL_FILE_NAME",c_val=potential_file_name,&
             error=error)
-       CALL parser_create(parser,potential_file_name,para_env=para_env,error=error)
+       IF(TRIM(potential_file_name) == "__BUILDIN__") THEN
+          CALL parser_create(parser,text=buildin_potentials_get_text(),para_env=para_env,error=error)
+        ELSE
+          CALL parser_create(parser,file_name=potential_file_name,para_env=para_env,error=error)
+        ENDIF
     END IF
 
     !initialize extended form

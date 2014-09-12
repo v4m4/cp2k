@@ -178,7 +178,16 @@ CONTAINS
     failure = .FALSE.
     CPPostcondition(ASSOCIATED(buffer_in),cp_failure_level,routineP,error,failure)
     CPPostcondition(ASSOCIATED(buffer_out),cp_failure_level,routineP,error,failure)
-    CPPostcondition(buffer_in%size==buffer_out%size,cp_failure_level,routineP,error,failure)
+
+    IF(buffer_in%size/=buffer_out%size) THEN
+      ! reallocate
+      DEALLOCATE(buffer_out%input_lines)
+      DEALLOCATE(buffer_out%input_line_numbers)
+      buffer_out%size = buffer_in%size
+      ALLOCATE(buffer_out%input_lines(buffer_out%size))
+      ALLOCATE(buffer_out%input_line_numbers(buffer_out%size))
+    ENDIF
+
     my_force = .FALSE.
     IF (PRESENT(force)) my_force = force
     ! Copy buffer structure
