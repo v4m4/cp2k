@@ -248,18 +248,17 @@ CONTAINS
        END IF
 
        !   *** Get the logical output unit number for error messages ***
-       IF (parser%para_env%mepos==parser%para_env%source) THEN
-          IF (PRESENT(unit_nr)) THEN
-             parser%input_unit=unit_nr
-             IF (PRESENT(file_name)) parser%input_file_name=file_name
-          ELSE IF(PRESENT(file_name)) THEN
-             CALL open_file(file_name=TRIM(file_name), unit_number=parser%input_unit)
-             parser%input_file_name=file_name
-          ELSE IF(PRESENT(text)) THEN
-            CALL create_buffer_from_string(parser%buffer, text, error)
-          ELSE
-           STOP "parser_create: requires either of unit_nr, file_name, or text."
-          END IF
+       IF (PRESENT(unit_nr)) THEN
+          parser%input_unit=unit_nr
+          IF (PRESENT(file_name)) parser%input_file_name=file_name
+       ELSE IF(PRESENT(file_name)) THEN
+          IF (parser%para_env%mepos==parser%para_env%source) &
+            CALL open_file(file_name=TRIM(file_name), unit_number=parser%input_unit)
+          parser%input_file_name=file_name
+       ELSE IF(PRESENT(text)) THEN
+          CALL create_buffer_from_string(parser%buffer, text, error)
+       ELSE
+          STOP "parser_create: requires either of unit_nr, file_name, or text."
        END IF
 
        IF (PRESENT(initial_variables)) THEN
