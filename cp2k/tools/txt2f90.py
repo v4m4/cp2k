@@ -1,20 +1,32 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
+#-----------------------------------------------------------------------------#
+#   CP2K: A general program to perform molecular dynamics simulations         #
+#   Copyright (C) 2000 - 2014  CP2K developers group                          #
+#-----------------------------------------------------------------------------#
+
 import sys
 from os.path import basename
 from datetime import datetime
 from hashlib import md5
 
-#=============================================================================
+#*****************************************************************************
+# \brief Generator to store an entire text-files in a Fortran module.
+# \author Ole Schuett
+#*****************************************************************************
 def main():
-    txt_fn, mod_name = sys.argv[1:]
+    if(len(sys.argv) != 3):
+        print("Usage: txt2f90.py <txt-filename> <module-name>")
+        sys.exit(1)
 
-    now = datetime.now().replace(microsecond=0)
+    txt_fn, mod_name = sys.argv[1:]
+    year = datetime.now().year
 
     content = open(txt_fn).read()
     output  = "!-----------------------------------------------------------------------------!\n"
     output += "!   CP2K: A general program to perform molecular dynamics simulations         !\n"
-    output += "!   Copyright (C) 2000 - %d  CP2K developers group                          !\n"%now.year
+    output += "!   Copyright (C) 2000 - %d  CP2K developers group                          !\n"%year
     output += "!-----------------------------------------------------------------------------!\n"
     output += "\n"
     output += "! *****************************************************************************\n"
@@ -25,19 +37,15 @@ def main():
     output += "MODULE %s\n"%mod_name
     output += "IMPLICIT NONE\n"
     output += "PRIVATE\n"
-    output += "PUBLIC :: M_filename, M_date, M_md5sum, M_get_text\n".replace("M", mod_name)
+    output += "PUBLIC :: M_filename, M_md5sum, M_get_text\n".replace("M", mod_name)
     output += "\n"
     output += "CHARACTER(LEN=*), PARAMETER :: %s_filename = '%s'\n"%(mod_name, basename(txt_fn))
-    output += "CHARACTER(LEN=*), PARAMETER :: %s_date = '%s'\n"%(mod_name, now.isoformat())
     output += "CHARACTER(LEN=*), PARAMETER :: %s_md5sum = '%s'\n"%(mod_name, md5(content).hexdigest())
     output += "CHARACTER(LEN=1), PARAMETER :: nl = ACHAR(10) !newline\n"
     output += "\n"
     output += "CHARACTER(len=*), PARAMETER :: block00000 = ''"
 
     lines = content.split("\n")
-
-    #lines = [l for l in lines if not l.startswith("#")]
-    #lines = [l for l in lines if len(l.strip()) > 0]
 
     for line_no, line in enumerate(lines, start=1):
         if(line_no%100 == 0):
@@ -47,8 +55,6 @@ def main():
         for i in range(1,len(line)/100 + 1):
             output += "//&\n   '%s'"%escape(line[i*100:(i+1)*100])
         if(line_no<len(lines)): output += "//nl"
-
-    #output += "\n\nCHARACTER(len=*), PARAMETER :: %s_text = block%.5d"%(mod_name,len(lines)/100)
 
     output += "\n\nCONTAINS\n\n"
     output += "! *****************************************************************************\n"
@@ -64,7 +70,6 @@ def main():
     output  += "\nEND MODULE %s\n"%mod_name
     print output
 
-#=============================================================================
 def escape(s):
     return s.replace("'", "'//\"'\"//'")
 
