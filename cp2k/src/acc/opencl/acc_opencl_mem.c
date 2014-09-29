@@ -60,7 +60,8 @@ int acc_dev_mem_allocate (void **dev_mem, size_t n){
 
   // debug info
   if (verbose_print){
-    fprintf(stdout, "      DEVICE buffer address:  HEX=%p INT=%ld\n", dev_buffer, (uintptr_t) dev_buffer);
+    fprintf(stdout, "      DEVICE buffer address: HEX=%p INT=%ld\n", dev_buffer, (uintptr_t) dev_buffer);
+    fprintf(stdout, "      SIZE [bytes]:          INT=%ld\n", n);
     fprintf(stdout, " <--- Leaving: acc_dev_mem_allocate.\n");
   }
 
@@ -121,8 +122,7 @@ extern "C" {
  * Create a host memory pointer to memory of size 'n' bytes and an associated
  * host buffer object of 'cl_mem' type.
  *
- * Note: The allocation is prefaced by the buffer object, but only the
- *       pointer to the host_mem is given back.
+ * Note: Only the pointer to the host_mem is given back.
  */
 int acc_host_mem_allocate (void **host_mem, size_t n, void *stream){
 
@@ -181,6 +181,9 @@ int acc_host_mem_allocate (void **host_mem, size_t n, void *stream){
   // debug infos
   if (verbose_print){
     fprintf(stdout, "      HOST memory address:  HEX=%p INT=%ld\n", *host_mem, (uintptr_t) *host_mem);
+    fprintf(stdout, "      SIZE [bytes]:         INT=%ld\n", n);
+    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "      STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <--- Leaving: acc_host_mem_allocate.\n");
   }
 
@@ -244,6 +247,8 @@ int acc_host_mem_deallocate (void *host_mem, void *stream){
 
   // debug info
   if (verbose_print){
+    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "      STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <--- Leaving: acc_host_mem_deallocate.\n");
   }
 
@@ -291,6 +296,8 @@ int acc_memcpy_h2d (const void *host_mem, void *dev_mem, size_t count, void *str
     fprintf(stdout, "      HOST memory address:   HEX=%p INT=%ld\n", host_mem, (uintptr_t) host_mem);
     fprintf(stdout, "      DEVICE buffer address: HEX=%p INT=%ld\n", dev_buffer, (uintptr_t) dev_buffer);
     fprintf(stdout, "      SIZE [bytes]:          INT=%ld\n", count);
+    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "      STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <--- Leaving: acc_memcpy_h2d.\n");
   }
 
@@ -338,6 +345,8 @@ int acc_memcpy_d2h (const void *dev_mem, void *host_mem, size_t count, void *str
     fprintf(stdout, "      DEVICE buffer address: HEX=%p INT=%ld\n", dev_buffer, (uintptr_t) dev_buffer);
     fprintf(stdout, "      HOST memory address:   HEX=%p INT=%ld\n", host_mem, (uintptr_t) host_mem);
     fprintf(stdout, "      SIZE [bytes]:          INT=%ld\n", count);
+    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "      STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <--- Leaving: acc_memcpy_d2h.\n");
   }
 
@@ -391,6 +400,8 @@ int acc_memcpy_d2d (const void *devmem_src, void *devmem_dst, size_t count, void
     fprintf(stdout, "      DEVICE buffer src address: HEX=%p INT=%ld\n", buffer_src, (uintptr_t) buffer_src);
     fprintf(stdout, "      DEVICE buffer dst address: HEX=%p INT=%ld\n", buffer_dst, (uintptr_t) buffer_dst);
     fprintf(stdout, "      SIZE [bytes]:          INT=%ld\n", count);
+    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "      STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <--- Leaving: acc_memcpy_d2d.\n");
   }
 
@@ -463,6 +474,8 @@ int acc_memset_zero (void *dev_mem, size_t offset, size_t length, void *stream){
   // debug info
   if (verbose_print){
     fprintf(stdout, "     DEVICE buffer address:  HEX=%p INT=%ld\n", dev_buffer, (uintptr_t) dev_buffer);
+    fprintf(stdout, "     STREAM address:  HEX=%p INT=%ld\n", &opencl_queue, (uintptr_t) &opencl_queue);
+    fprintf(stdout, "     STREAM value:  %u\n", opencl_queue);
     fprintf(stdout, " <-- Leaving: acc_memset_zero.\n");
   }
 

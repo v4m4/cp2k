@@ -94,7 +94,8 @@ int acc_stream_create (void** stream_p, char* name, int priority){
 
   // debug info
   if (verbose_print){
-    fprintf(stdout, "      STREAM address:  HEX=%p INT=%ld\n", &((*clstream).queue), (uintptr_t) &((*clstream).queue));
+    fprintf(stdout, " +    STREAM address:  HEX=%p INT=%ld\n", &((*clstream).queue), (uintptr_t) &((*clstream).queue));
+    fprintf(stdout, " +    STREAM value:  %u\n", (*clstream).queue);
     fprintf(stdout, " ---> Leaving: acc_stream_create.\n");
   }
 
@@ -129,6 +130,7 @@ int acc_stream_destroy (void* stream){
 
   // debug info
   if (verbose_print){
+    fprintf(stdout, " -    STREAM value:  %u\n", (*clstream).queue);
     fprintf(stdout, " ---> Leaving: acc_stream_destroy.\n");
   }
 
@@ -165,6 +167,7 @@ int acc_stream_sync (void* stream){
 
   // debug info
   if (verbose_print){
+    fprintf(stdout, "      STREAM value:  %u\n", (*clstream).queue);
     fprintf(stdout, " ---> Leaving: acc_stream_sync.\n");
   }
 

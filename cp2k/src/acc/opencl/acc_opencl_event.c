@@ -47,9 +47,8 @@ int acc_event_create (void** event_p){
   if (verbose_print){
     fprintf(stdout, " ---> Leaving: acc_event_create.\n");
   }
-//foxtest
-cl_error = clSetUserEventStatus(*clevent, CL_COMPLETE);
-//foxtest
+
+  cl_error = clSetUserEventStatus(*clevent, CL_COMPLETE);
 
   // assign return value
   return 0;
