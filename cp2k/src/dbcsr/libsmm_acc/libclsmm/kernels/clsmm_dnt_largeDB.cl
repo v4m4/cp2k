@@ -15,9 +15,8 @@ __kernel void clsmm_dnt_largeDB_16_23_23_12_23_96_2_3_12_10 (
                          int    nruns,
                 __global double *a_data,
                 __global double *b_data,
-                __global double *c_data,
-                __global int    *c_locks){
-
+                __global double *c_data)
+{
     const int m = 23;
     const int n = 23;
     const int k = 23;
@@ -147,25 +146,14 @@ __kernel void clsmm_dnt_largeDB_16_23_23_12_23_96_2_3_12_10 (
 
             barrier(CLK_LOCAL_MEM_FENCE);
 
-            // lock for atomic updates
-            int my_id, lock_owner;
-            int c_id = param_stack[7 * (get_group_id(0) * grouping + run) + 6] - 1;
-            if (get_local_id(0) == 0) {
-              my_id = get_group_id(0) + 1;
-              lock_owner = 0;
-              while ((lock_owner != my_id))
-                lock_owner = atomic_cmpxchg(&(c_locks[c_id]), 0, my_id);
-            }
-
             // results are written in output-slabs of width v
             for (int t = 0; t < (n / v) * v; t += v) {
                 // copy output slab from registers to shared memory
                 store_results_into_smem(myc, buff, t, v, m, n, M, N, blockdim);
                 barrier(CLK_LOCAL_MEM_FENCE);
                 // Add our results to the accumulator in global memory
-                for (int i = get_local_id(0); i < m * v; i += blockdim) {
-                    c_data[c_loc + i] += buff[i];
-                }
+                for (int i = get_local_id(0); i < m * v; i += blockdim)
+                    AddAtomic(&c_data[c_loc + i], buff[i]);
                 c_loc += m * v;
                 barrier(CLK_LOCAL_MEM_FENCE);
             }
@@ -178,16 +166,10 @@ __kernel void clsmm_dnt_largeDB_16_23_23_12_23_96_2_3_12_10 (
                 store_results_into_smem(myc, buff, t, va, m, n, M, N, blockdim);
                 barrier(CLK_LOCAL_MEM_FENCE);
                 for (int i = get_local_id(0); i < m * va; i += blockdim)
-                    c_data[c_loc + i] += buff[i];
+                    AddAtomic(&c_data[c_loc + i], buff[i]);
                 barrier(CLK_LOCAL_MEM_FENCE);
 
             }
-
-            // unlock
-            if (get_local_id(0) == 0) {
-              c_locks[c_id] = 0;
-            }
-
         }
     }
 }

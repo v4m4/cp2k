@@ -19,56 +19,64 @@
 #pragma OPENCL EXTENSION cl_amd_printf : enable
 #endif
 
-#if defined (cl_khr_int64_base_atomics) // native 64-bit atomics support
-#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
+
 /******************************************************************************
- * There is no nativ support for atomicAdd on doubles in OpenCL 1.1.          *
+ * There is no native support for atomicAdd on doubles in OpenCL 1.1.         *
  ******************************************************************************/
-inline void AtomicAdd (__global volatile double       *address,
-                                         const double val)
+
+#if defined (__USE_INTEL_CL)
+#if defined (__ENDIAN_LITTLE__) && (__ENDIAN_LITTLE__ == 1)
+inline void AddAtomic_inner (volatile __global unsigned int *address, double incr)
 {
-  union {
-    unsigned long intVal;
-    double dblVal;
-  } newVal;
-  union {
-    unsigned long intVal;
-    double dblVal;
-  } prevVal;
+  typedef union diunion {
+    double        dble;
+    signed int  ui[2];
+  } dble2uint;
+
+  __private       dble2uint    old_val, new_val;
+  __private       signed int   assumed;
+  __private const unsigned int NaNmask = 0x7FF80000;
+
+  assumed = *(address + 1);
   do {
-    prevVal.dblVal = *address;
-    newVal.dblVal = prevVal.dblVal + val;
-  } while (atomic_cmpxchg((volatile __global unsigned long *) address, prevVal.intVal, newVal.intVal) != prevVal.intVal);
+      assumed = atomic_cmpxchg(address + 1, assumed, NaNmask);
+  } while (assumed == NaNmask);
+
+  old_val.ui[0] = atomic_xchg(address, 42);
+  old_val.ui[1] = assumed;
+
+  new_val.dble = old_val.dble + incr;
+  if(new_val.ui[1] == NaNmask) new_val.ui[1] = 0;
+
+  atomic_xchg(address, new_val.ui[0]);
+  atomic_xchg(address + 1, new_val.ui[1]);
 }
 
-#else // build-in 32-bit atomics support
-inline void AtomicAdd (__global volatile double       *address,
-                                         const double val)
+
+inline void AddAtomic (volatile __global double *address,
+                                         double incr)
 {
-  __global volatile unsigned int *ahi, *alo;
-  __private         unsigned int *phi, *plo, *nhi, *nlo;
-  __private         bool         failure;
-  failure = true;
-  while (failure) {
-    ahi = (__global volatile unsigned int *) ((char *) address + 0);
-    alo = (__global volatile unsigned int *) ((char *) address + 4);
-    __private double p = *address;
-    phi = (__private unsigned int *) ((char *) &p + 0);
-    plo = (__private unsigned int *) ((char *) &p + 4);
-    __private double n = p + val;
-    nhi = (__private unsigned int *) ((char *) &n + 0);
-    nlo = (__private unsigned int *) ((char *) &n + 4);
-    if (atom_cmpxchg((__global volatile unsigned int *) ahi, *phi, *nhi) == *phi) {
-      while (failure) {   
-        if (atomic_cmpxchg((__global volatile unsigned int *) alo, *plo, *nlo) == *plo) {
-          failure = false;
-        }
-      }
-    }
-  }
+      AddAtomic_inner ((volatile __global unsigned int*) address, incr);
 }
 #endif
+#else
+// For CUDA we assume this extension to be there!!!
+#pragma OPENCL EXTENSION cl_khr_int64_base_atomics: enable // native 64-bit atomics support
+inline void AddAtomic (volatile __global double *address,
+                                         double incr)
+{
+  typedef union dlunion {
+    double        dble;
+    unsigned long ul;
+  } dble2ulng;
+  __private dble2ulng old_val, new_val;
+  do {
+    old_val.dble = *address;
+    new_val.dble = old_val.dble + incr;
+  } while (atomic_cmpxchg((volatile __global unsigned long *) ((char *) address), old_val.ul, new_val.ul) != old_val.ul);
 
+}
+#endif
 //**************************************************************************//
 inline void load_gmem_into_smem(__global double    *from,
                                 __local  double    *dest,
