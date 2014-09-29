@@ -45,10 +45,7 @@ static int launch_clsmm_dnt_largeDB_16_23_23_12_23_96_2_3_12_10 (void *param_sta
   int careful = (stack_size / 16);
   int nruns = stack_size - careful * 16;
 
-  int i, c_locks_size;
-  int *c_locks = NULL;
-  cl_mem host_buf_c_locks = NULL;
-  cl_mem dev_buf_c_locks = NULL;
+  int i;
   cl_kernel opencl_kernel = NULL;
   cl_program opencl_program = NULL;
 
@@ -59,61 +56,6 @@ static int launch_clsmm_dnt_largeDB_16_23_23_12_23_96_2_3_12_10 (void *param_sta
   cl_device_id            opencl_dev    = opencl_device.device_id;
   cl_command_queue        opencl_queue  = (*opencl_stream).queue;
 
-  // C matrix locking (groupwise)
-  // arrays and buffers for transfer and calculations
-  if (verbose_print) fprintf(stdout,"create c_lock buffers ...\n");
-
-/*  // get size of c_locks buffer (correct: max(param_stack[i * 7 + 6]))
-  c_locks_size = 70000;
-
-  // create host memory buffer
-  host_buf_c_locks = clCreateBuffer(                                // cl_mem
-                       opencl_ctx,                                  // cl_context    context
-                       (CL_MEM_READ_WRITE | CL_MEM_ALLOC_HOST_PTR), // cl_mem_flags  flags
-                       (size_t) c_locks_size * sizeof(int),         // size_t        size
-                       NULL,                                        // void          *host_ptr
-                       &cl_error);                                  // cl_int        *errcode_ret
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clCreateBuffer(host) %d\n", (int) cl_error);
-
-  // create device buffer for transfer
-  dev_buf_c_locks = clCreateBuffer(                          // cl_mem
-                      opencl_ctx,                            // cl_context    context
-                      CL_MEM_READ_WRITE,                     // cl_mem_flags  flags
-                      (size_t) c_locks_size * sizeof(int),   // size_t        size
-                      NULL,                                  // void          *host_ptr
-                      &cl_error);                            // cl_int        *errcode_ret
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clCreateBuffer(dev) %d\n", (int) cl_error);
-
-  // get the associated memory region on host side
-  c_locks = (int *) clEnqueueMapBuffer(                       // void *
-                      opencl_queue,                           // cl_command_queue  command_queue
-                      host_buf_c_locks,                       // cl_mem            buffer
-                      CL_TRUE,                                // cl_bool           blocking_map
-                      CL_MAP_READ,                            // cl_map_flags      map_flags
-                      (size_t) 0,                             // size_t            offset
-                      (size_t) c_locks_size * sizeof(int),    // size_t            cb
-                      (cl_uint) 0,                            // cl_uint           num_events_in_wait_list
-                      NULL,                                   // const cl_event    *event_wait_list
-                      NULL,                                   // cl_event          *event
-                      &cl_error);                             // cl_int            *errcode_ret
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clEnqueueMapBuffer %d\n", (int) cl_error);
-
-  // set initial values for c_locks and submit changes to device  
-  for (i = 0; i < c_locks_size; i++) {
-    c_locks[i] = 0;
-  }
-  cl_error = clEnqueueWriteBuffer(                  // cl_int
-               opencl_queue,                        // cl_command_queue command_queue
-               dev_buf_c_locks,                     // cl_mem           buffer
-               CL_FALSE,                            // cl_bool          blocking_write
-               (size_t) 0,                          // size_t           offset
-               (size_t) c_locks_size * sizeof(int), // size_t           cb
-               (void *) c_locks,                    // const void       *ptr
-               (cl_uint) 0,                         // cl_uint          num_events_in_wait_list
-               NULL,                                // const cl_event   *cl_event_wait_list
-               NULL);                               // cl_event         *event
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clEnqueueWriteBuffer %d\n", (int) cl_error);
-*/
   // get or create kernel
   if (multiply_kernel) {
     opencl_kernel = multiply_kernel;
@@ -197,8 +139,6 @@ fprintf(stdout, "BINARIES:\n %s\n", binaries);
   if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clSetKernelArg(4) %d\n", (int) cl_error);
   cl_error = clSetKernelArg(opencl_kernel, (cl_uint) 5, sizeof(cl_mem), (void *) c_data);
   if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clSetKernelArg(5) %d\n", (int) cl_error);
-//  cl_error = clSetKernelArg(opencl_kernel, (cl_uint) 6, sizeof(cl_mem), (void *) &dev_buf_c_locks);
-//  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clSetKernelArg(6) %d\n", (int) cl_error);
 
   // set kernel sizes and submit kernel
   if (verbose_print) fprintf(stdout,"set multiplication kernel sizes ...\n");
@@ -220,20 +160,6 @@ fprintf(stdout, "BINARIES:\n %s\n", binaries);
                NULL);                // cl_event         *event
   if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clEnqueueNDRangeKernel %d\n", (int) cl_error);
 
-/*  // clean up c_locks memory
-  cl_error = clEnqueueUnmapMemObject( // cl_int 
-               opencl_queue,          // cl_command_queue command_queue
-               host_buf_c_locks,      // cl_mem           mem_obj
-               (void *) c_locks,      // void             *mapped_ptr
-               (cl_uint) 0,           // cl_uint          num_events_in_wait_list
-               NULL,                  // cl_event         *event_wait_list
-               NULL);                 // cl_event         *event
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clEnqueueUnmapMemObject %d\n", (int) cl_error);
-  cl_error = clReleaseMemObject(host_buf_c_locks);
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clReleaseMemObject %d\n", (int) cl_error);
-  cl_error = clReleaseMemObject(dev_buf_c_locks);
-  if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clReleaseMemObject %d\n", (int) cl_error);
-*/
   //cl_error = clFinish(opencl_queue);
   //if (cl_error != CL_SUCCESS) fprintf(stdout,"Error in: clFinish %d\n", (int) cl_error);
 
