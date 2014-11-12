@@ -222,13 +222,13 @@ CONTAINS
 
     ALLOCATE(rho_r(nspins), single_mo_coeff(nspins), stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_allocate_matrix_set(orbital_density_matrix,nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(orbital_density_matrix,nspins)
     DO ispin=1,nspins
        rho_r(ispin)%pw => rho_struct%rho_r(ispin)%pw
        ALLOCATE(orbital_density_matrix(ispin)%matrix)
-       CALL cp_dbcsr_init(orbital_density_matrix(ispin)%matrix, error=error)
+       CALL cp_dbcsr_init(orbital_density_matrix(ispin)%matrix)
        CALL cp_dbcsr_copy(orbital_density_matrix(ispin)%matrix,&
-            rho_struct%rho_ao(ispin)%matrix,"orbital density",error=error)
+            rho_struct%rho_ao(ispin)%matrix,"orbital density")
     END DO
     bo = rho_r(1)%pw%pw_grid%bounds_local
 
@@ -359,7 +359,7 @@ CONTAINS
                                    1, orb, nrow(ispin), 1, error=error)
           CALL cp_fm_set_submatrix(single_mo_coeff(ispin)%matrix, coeff_col, &
                                    1, orb, error=error)
-          CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp)
           CALL cp_dbcsr_plus_fm_fm_t(orbital_density_matrix(ispin)%matrix,&
                                   matrix_v=single_mo_coeff(ispin)%matrix,&
                                   matrix_g=single_mo_coeff(ispin)%matrix,&
@@ -430,7 +430,7 @@ CONTAINS
                                    1, orb, nrow(ispin), 1, error=error)
           CALL cp_fm_set_submatrix(single_mo_coeff(ispin)%matrix, coeff_col, &
                                    1, orb, error=error)
-          CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp)
           CALL cp_dbcsr_plus_fm_fm_t(orbital_density_matrix(ispin)%matrix,&
                                   matrix_v=single_mo_coeff(ispin)%matrix,&
                                   matrix_g=single_mo_coeff(ispin)%matrix,&
@@ -451,7 +451,7 @@ CONTAINS
        END DO
 
        CALL cp_fm_release(single_mo_coeff(ispin)%matrix, error=error)
-       CALL cp_dbcsr_deallocate_matrix(orbital_density_matrix(ispin)%matrix,error=error)
+       CALL cp_dbcsr_deallocate_matrix(orbital_density_matrix(ispin)%matrix)
 
        DEALLOCATE(coeff_col)
 
@@ -636,7 +636,7 @@ CONTAINS
              stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
-    CALL cp_dbcsr_allocate_matrix_set(orbital_density_matrix,nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(orbital_density_matrix,nspins)
 
     DO ispin=1, nspins
        CALL get_mo_set(molecular_orbitals(ispin)%mo_set, &
@@ -649,10 +649,10 @@ CONTAINS
        CALL cp_fm_get_info(single_mo_coeff(ispin)%matrix, &
                            nrow_global=nrow(ispin), ncol_global=ncol(ispin),error=error)
        ALLOCATE(orbital_density_matrix(ispin)%matrix)
-       CALL cp_dbcsr_init(orbital_density_matrix(ispin)%matrix, error=error)
+       CALL cp_dbcsr_init(orbital_density_matrix(ispin)%matrix)
        CALL cp_dbcsr_copy(orbital_density_matrix(ispin)%matrix,&
             rho_structure%rho_ao(ispin)%matrix, &
-            "orbital density", error=error)
+            "orbital density")
     END DO
     CALL local_rho_set_create(local_rho_set, error=error)
     CALL allocate_rho_atom_internals(qs_env, local_rho_set%rho_atom_set,error=error)
@@ -847,7 +847,7 @@ CONTAINS
                                          1, orb, nrow(ispin), 1, error=error)
                 CALL cp_fm_set_submatrix(single_mo_coeff(ispin)%matrix, coeff_col, &
                                          1, orb, error=error)
-                CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp)
                 CALL cp_dbcsr_plus_fm_fm_t(orbital_density_matrix(ispin)%matrix,&
                                         matrix_v=single_mo_coeff(ispin)%matrix,&
                                         matrix_g=single_mo_coeff(ispin)%matrix,&
@@ -950,7 +950,7 @@ CONTAINS
                                          1, orb, nrow(ispin), 1, error=error)
                 CALL cp_fm_set_submatrix(single_mo_coeff(ispin)%matrix, coeff_col, &
                                          1, orb, error=error)
-                CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(orbital_density_matrix(ispin)%matrix,0.0_dp)
                 CALL cp_dbcsr_plus_fm_fm_t(orbital_density_matrix(ispin)%matrix,&
                                         matrix_v=single_mo_coeff(ispin)%matrix,&
                                         matrix_g=single_mo_coeff(ispin)%matrix,&
@@ -1088,7 +1088,7 @@ CONTAINS
     END DO
     DEALLOCATE(mo_coeff, single_mo_coeff, mo_eigenvalues, stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_deallocate_matrix_set(orbital_density_matrix,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(orbital_density_matrix)
 
   END SUBROUTINE gapw_add_atomic_saop_pot
 
@@ -1336,3 +1336,4 @@ CONTAINS
   END FUNCTION calc_expbe_r
 
 END MODULE xc_pot_saop
+

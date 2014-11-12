@@ -177,10 +177,10 @@ SUBROUTINE wfs_release(snapshot,error)
         ! snapshot%rho_r & snapshot%rho_g is deallocated in wfs_update
         ! of qs_wf_history_methods, in case you wonder about it.
         IF (ASSOCIATED(snapshot%rho_ao)) THEN
-           CALL cp_dbcsr_deallocate_matrix_set(snapshot%rho_ao,error=error)
+           CALL cp_dbcsr_deallocate_matrix_set(snapshot%rho_ao)
         END IF
         IF (ASSOCIATED(snapshot%overlap)) THEN
-           CALL cp_dbcsr_deallocate_matrix(snapshot%overlap,error=error)
+           CALL cp_dbcsr_deallocate_matrix(snapshot%overlap)
         END IF
         IF (ASSOCIATED(snapshot%rho_frozen)) THEN
            CALL qs_rho_release(snapshot%rho_frozen,error=error)
@@ -337,3 +337,4 @@ SUBROUTINE wfi_clear_history(wf_history,flush_buffer,error)
 END SUBROUTINE wfi_clear_history
 
 END MODULE qs_wf_history_types
+

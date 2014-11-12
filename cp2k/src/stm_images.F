@@ -165,9 +165,9 @@ CONTAINS
      END IF
 
      ALLOCATE(stm_density_ao)
-     CALL cp_dbcsr_init(stm_density_ao, error=error)
+     CALL cp_dbcsr_init(stm_density_ao)
      CALL cp_dbcsr_copy(stm_density_ao,rho%rho_ao(1)%matrix,&
-          name="stm_density_ao",error=error)
+          name="stm_density_ao")
 
      CALL pw_env_get(pw_env, auxbas_pw_pool=auxbas_pw_pool,&
                      pw_pools=pw_pools,error=error)
@@ -240,7 +240,7 @@ CONTAINS
      DEALLOCATE(occupation,STAT=istat)
           CPPrecondition(istat==0,cp_failure_level,routineP,error,failure)
 
-     CALL cp_dbcsr_deallocate_matrix(stm_density_ao,error=error)
+     CALL cp_dbcsr_deallocate_matrix(stm_density_ao)
      CALL pw_pool_give_back_pw(auxbas_pw_pool,wf_r%pw, error=error)
      CALL pw_pool_give_back_pw(auxbas_pw_pool,wf_g%pw, error=error)
 
@@ -392,7 +392,7 @@ CONTAINS
        CALL cp_fm_column_scale(matrix_vf,occ_tot(1:istates))
        alpha=1.0_dp
 
-       CALL cp_dbcsr_set(stm_density_ao,0.0_dp,error=error)
+       CALL cp_dbcsr_set(stm_density_ao,0.0_dp)
        CALL cp_dbcsr_plus_fm_fm_t(stm_density_ao,matrix_v=matrix_v, matrix_g=matrix_vf,ncol=istates,&
                                alpha=alpha,error=error)
 
@@ -431,3 +431,4 @@ CONTAINS
   END SUBROUTINE stm_cubes
 
 END MODULE stm_images
+

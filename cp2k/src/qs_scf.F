@@ -470,13 +470,13 @@ CONTAINS
                 DO ic=1,SIZE(rho%rho_ao_kp,2)
                    DO ispin=1,dft_control%nspins
                       CALL cp_dbcsr_copy(rho%rho_ao_kp(ispin,ic)%matrix,scf_env%p_mix_kp(ispin,ic)%matrix,&
-                                      name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)),error=error)
+                                      name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)))
                    END DO
                 END DO
              ELSE
                 DO ispin=1,dft_control%nspins
                    CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,scf_env%p_mix_new(ispin)%matrix,&
-                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)),error=error)
+                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)))
                 END DO
              END IF
           END IF
@@ -825,21 +825,21 @@ CPSourceFileRef)
        IF (ASSOCIATED(scf_env%ortho_m1)) CALL cp_fm_release(scf_env%ortho_m1,error=error)
 
        IF (ASSOCIATED(scf_env%ortho_dbcsr)) THEN
-           CALL cp_dbcsr_deallocate_matrix(scf_env%ortho_dbcsr,error=error)
+           CALL cp_dbcsr_deallocate_matrix(scf_env%ortho_dbcsr)
        END IF
        IF (ASSOCIATED(scf_env%buf1_dbcsr)) THEN
-           CALL cp_dbcsr_deallocate_matrix(scf_env%buf1_dbcsr,error=error)
+           CALL cp_dbcsr_deallocate_matrix(scf_env%buf1_dbcsr)
        END IF
        IF (ASSOCIATED(scf_env%buf2_dbcsr)) THEN
-           CALL cp_dbcsr_deallocate_matrix(scf_env%buf2_dbcsr,error=error)
+           CALL cp_dbcsr_deallocate_matrix(scf_env%buf2_dbcsr)
        END IF
 
        IF (ASSOCIATED(scf_env%p_mix_new)) THEN
-          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new,error=error)
+          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new)
        END IF
 
        IF (ASSOCIATED(scf_env%p_delta)) THEN
-          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta,error=error)
+          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta)
        END IF
 
 ! *** method dependent cleanup
@@ -880,10 +880,10 @@ CPSourceFileRef)
 
        IF (scf_env%do_diag_sub) THEN
           IF(ASSOCIATED(scf_env%subspace_env%p_matrix_store)) THEN
-            CALL cp_dbcsr_deallocate_matrix_set(scf_env%subspace_env%p_matrix_store,error=error)
+            CALL cp_dbcsr_deallocate_matrix_set(scf_env%subspace_env%p_matrix_store)
           END IF
           IF(ASSOCIATED(scf_env%subspace_env%p_matrix_mix)) THEN
-            CALL cp_dbcsr_deallocate_matrix_set(scf_env%subspace_env%p_matrix_mix,error=error)
+            CALL cp_dbcsr_deallocate_matrix_set(scf_env%subspace_env%p_matrix_mix)
           END IF
        END IF
 
@@ -893,3 +893,4 @@ CPSourceFileRef)
   END SUBROUTINE scf_env_cleanup
 
 END MODULE qs_scf
+

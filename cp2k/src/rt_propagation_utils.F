@@ -149,8 +149,8 @@ MODULE  rt_propagation_utils
 
     NULLIFY(tmp_mat)
     ALLOCATE(tmp_mat)
-    CALL cp_dbcsr_init(tmp_mat,error=error)
-    CALL cp_dbcsr_create(tmp_mat,template=S_der(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp_mat)
+    CALL cp_dbcsr_create(tmp_mat,template=S_der(1)%matrix,matrix_type="N")
 
     IF(rtp%iter<2) THEN
        ! calculate the overlap derivative matrices
@@ -164,13 +164,13 @@ MODULE  rt_propagation_utils
 
        NULLIFY(tmp_mat2)
        ALLOCATE(tmp_mat2)
-       CALL cp_dbcsr_init(tmp_mat2,error=error)
-       CALL cp_dbcsr_create(tmp_mat2,template=S_der(1)%matrix,matrix_type="S",error=error)
+       CALL cp_dbcsr_init(tmp_mat2)
+       CALL cp_dbcsr_create(tmp_mat2,template=S_der(1)%matrix,matrix_type="S")
        DO m=1,9
-          CALL cp_dbcsr_copy(tmp_mat2,s_derivs(m+1)%matrix,error=error)
-          CALL cp_dbcsr_desymmetrize(tmp_mat2,S_der(m)%matrix,error=error)
-          CALL cp_dbcsr_scale(S_der(m)%matrix,-one,error=error) 
-          CALL cp_dbcsr_filter(S_der(m)%matrix,rtp%filter_eps,error=error)
+          CALL cp_dbcsr_copy(tmp_mat2,s_derivs(m+1)%matrix)
+          CALL cp_dbcsr_desymmetrize(tmp_mat2,S_der(m)%matrix)
+          CALL cp_dbcsr_scale(S_der(m)%matrix,-one) 
+          CALL cp_dbcsr_filter(S_der(m)%matrix,rtp%filter_eps)
           !The diagonal should be zero
           CALL cp_dbcsr_iterator_start(iter, S_der(m)%matrix)
           DO WHILE (cp_dbcsr_iterator_blocks_left (iter))
@@ -179,15 +179,15 @@ MODULE  rt_propagation_utils
           END DO
           CALL cp_dbcsr_iterator_stop (iter) 
        END DO
-       CALL cp_dbcsr_deallocate_matrix_set(s_derivs,error=error)
-       CALL cp_dbcsr_deallocate_matrix(tmp_mat2,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(s_derivs)
+       CALL cp_dbcsr_deallocate_matrix(tmp_mat2)
     END IF
 
     !calculate scalar product v(Rb)*<alpha|d/dRb beta> (B_mat), and store the first derivatives
 
-     CALL cp_dbcsr_set(B_mat,zero,error=error)
+     CALL cp_dbcsr_set(B_mat,zero)
      DO m=1,3
-       CALL cp_dbcsr_copy(tmp_mat,S_der(m)%matrix,error=error)
+       CALL cp_dbcsr_copy(tmp_mat,S_der(m)%matrix)
        CALL cp_dbcsr_iterator_start(iter, tmp_mat)
        DO WHILE (cp_dbcsr_iterator_blocks_left (iter))
           CALL cp_dbcsr_iterator_next_block(iter, row_atom, col_atom, block_values)
@@ -195,9 +195,9 @@ MODULE  rt_propagation_utils
           block_values=block_values*particle_set(col_atom)%v(m)
        END DO
        CALL cp_dbcsr_iterator_stop (iter) 
-       CALL cp_dbcsr_add(B_mat,tmp_mat,one,one,error=error)
+       CALL cp_dbcsr_add(B_mat,tmp_mat,one,one)
     END DO
-    CALL cp_dbcsr_filter(B_mat,rtp%filter_eps,error=error)
+    CALL cp_dbcsr_filter(B_mat,rtp%filter_eps)
     !calculate C matrix: v(Rb)*<d/dRa alpha| d/dRb beta>
 
     c_map_mat=0
@@ -213,13 +213,13 @@ MODULE  rt_propagation_utils
 
 
     DO i=1,3
-       CALL cp_dbcsr_set(C_mat(i)%matrix,zero,error=error)
+       CALL cp_dbcsr_set(C_mat(i)%matrix,zero)
     END DO
     DO m=1,6
-       CALL cp_dbcsr_copy(tmp_mat,S_der(m+3)%matrix,error=error)
+       CALL cp_dbcsr_copy(tmp_mat,S_der(m+3)%matrix)
        DO j=1,2
           IF(c_map_mat(m,j)==0)CYCLE
-          CALL cp_dbcsr_add(C_mat(c_map_mat(m,j))%matrix,tmp_mat,one,one,error)
+          CALL cp_dbcsr_add(C_mat(c_map_mat(m,j))%matrix,tmp_mat,one,one)
        END DO
     END DO
 
@@ -230,11 +230,11 @@ MODULE  rt_propagation_utils
           block_values=block_values*particle_set(row_atom)%v(m)
        END DO
        CALL cp_dbcsr_iterator_stop (iter)
-       CALL cp_dbcsr_filter(C_mat(m)%matrix,rtp%filter_eps,error=error)
+       CALL cp_dbcsr_filter(C_mat(m)%matrix,rtp%filter_eps)
     END DO
 
 
-    CALL cp_dbcsr_deallocate_matrix(tmp_mat,error=error)
+    CALL cp_dbcsr_deallocate_matrix(tmp_mat)
     CALL timestop(handle)
   END SUBROUTINE
 
@@ -322,7 +322,7 @@ MODULE  rt_propagation_utils
                   keep_sparsity=.FALSE.,alpha=alpha,error=error)
           END DO
           DO i=1,nspin
-             CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix,error=error)
+             CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix)
           ENDDO
           CALL calc_update_rho_sparse(qs_env,error)
        ELSE
@@ -340,21 +340,21 @@ MODULE  rt_propagation_utils
              im=2*ispin
              WRITE(file_name,'(A,I0,A)') "LS_DM_SPIN_RE",ispin,"_RESTART.dm"
              CALL cp_dbcsr_binary_read(file_name, distribution=cp_dbcsr_distribution(rho_old(re)%matrix), &
-                                       matrix_new=rho_old(re)%matrix, error=error)
-             cs_pos = cp_dbcsr_checksum (rho_old(re)%matrix, pos=.TRUE., error=error)
+                                       matrix_new=rho_old(re)%matrix)
+             cs_pos = cp_dbcsr_checksum (rho_old(re)%matrix, pos=.TRUE.)
              IF (unit_nr>0) THEN
                 WRITE(unit_nr,'(T2,A,E20.8)') "Read restart DM "//TRIM(file_name)//" with checksum: ",cs_pos
              ENDIF
              WRITE(file_name,'(A,I0,A)') "LS_DM_SPIN_IM",ispin,"_RESTART.dm"
              CALL cp_dbcsr_binary_read(file_name, distribution=cp_dbcsr_distribution(rho_old(im)%matrix), &
-                                       matrix_new=rho_old(im)%matrix, error=error)
-             cs_pos = cp_dbcsr_checksum (rho_old(im)%matrix, pos=.TRUE., error=error)
+                                       matrix_new=rho_old(im)%matrix)
+             cs_pos = cp_dbcsr_checksum (rho_old(im)%matrix, pos=.TRUE.)
              IF (unit_nr>0) THEN
                 WRITE(unit_nr,'(T2,A,E20.8)') "Read restart DM "//TRIM(file_name)//" with checksum: ",cs_pos
              ENDIF
           ENDDO
           DO i=1,SIZE(rho_new)
-             CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix,error=error)
+             CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix)
           ENDDO
           CALL calc_update_rho_sparse(qs_env,error)
        ELSE
@@ -448,10 +448,10 @@ MODULE  rt_propagation_utils
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     ALLOCATE(rho_im_sparse,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp_dbcsr,error=error)
-    CALL cp_dbcsr_create(tmp_dbcsr,template=SinvH(1)%matrix, error=error)
-    CALL cp_dbcsr_init(rho_im_sparse,error=error)
-    CALL cp_dbcsr_create(rho_im_sparse,template=SinvH(1)%matrix, error=error)
+    CALL cp_dbcsr_init(tmp_dbcsr)
+    CALL cp_dbcsr_create(tmp_dbcsr,template=SinvH(1)%matrix)
+    CALL cp_dbcsr_init(rho_im_sparse)
+    CALL cp_dbcsr_create(rho_im_sparse,template=SinvH(1)%matrix)
 
     natom = SIZE(particle_set)
     ALLOCATE (atom_of_kind(natom),STAT=stat)
@@ -469,36 +469,36 @@ MODULE  rt_propagation_utils
        CALL get_mo_set(mos(ispin)%mo_set, nao=nao,nmo=nmo)
        
        CALL dbcsr_create_dist_r_unrot (dist, SinvB(ispin)%matrix%matrix%m%dist, nmo, col_blk_size)
-       CALL cp_dbcsr_init(db_mos_re, error)
+       CALL cp_dbcsr_init(db_mos_re)
        CALL cp_dbcsr_create(db_mos_re, "D", dist, dbcsr_type_no_symmetry, &
             cp_dbcsr_row_block_sizes(SinvB(ispin)%matrix), col_blk_size,&
-            0, 0, error=error)
-       CALL cp_dbcsr_init(db_mos_im, error)
-       CALL cp_dbcsr_create(db_mos_im,template=db_mos_re, error=error)
-       CALL cp_dbcsr_init(db_mo_tmp1, error)
-       CALL cp_dbcsr_create(db_mo_tmp1,template=db_mos_re, error=error)
-       CALL cp_dbcsr_init(db_mo_tmp2, error)
-       CALL cp_dbcsr_create(db_mo_tmp2,template=db_mos_re, error=error)
+            0, 0)
+       CALL cp_dbcsr_init(db_mos_im)
+       CALL cp_dbcsr_create(db_mos_im,template=db_mos_re)
+       CALL cp_dbcsr_init(db_mo_tmp1)
+       CALL cp_dbcsr_create(db_mo_tmp1,template=db_mos_re)
+       CALL cp_dbcsr_init(db_mo_tmp2)
+       CALL cp_dbcsr_create(db_mo_tmp2,template=db_mos_re)
 
        CALL copy_fm_to_dbcsr(mos_new(im)%matrix,db_mos_im,error=error)
        CALL copy_fm_to_dbcsr(mos_new(re)%matrix,db_mos_re,error=error)
 
-       CALL cp_dbcsr_multiply("N","N",alpha, SinvB(ispin)%matrix,db_mos_im,0.0_dp,db_mo_tmp1,error=error)       
-       CALL cp_dbcsr_multiply("N","N",alpha, SinvH(ispin)%matrix,db_mos_re,1.0_dp,db_mo_tmp1,error=error)       
-       CALL cp_dbcsr_multiply("N","N",-alpha,SinvB(ispin)%matrix,db_mos_re,0.0_dp,db_mo_tmp2,error=error)       
-       CALL cp_dbcsr_multiply("N","N",alpha, SinvH(ispin)%matrix,db_mos_im,1.0_dp,db_mo_tmp2,error=error)
-       CALL cp_dbcsr_multiply("N","T",1.0_dp,db_mo_tmp1,db_mos_re,0.0_dp,tmp_dbcsr,error=error)
-       CALL cp_dbcsr_multiply("N","T",1.0_dp,db_mo_tmp2,db_mos_im,1.0_dp,tmp_dbcsr,error=error)
+       CALL cp_dbcsr_multiply("N","N",alpha, SinvB(ispin)%matrix,db_mos_im,0.0_dp,db_mo_tmp1)       
+       CALL cp_dbcsr_multiply("N","N",alpha, SinvH(ispin)%matrix,db_mos_re,1.0_dp,db_mo_tmp1)       
+       CALL cp_dbcsr_multiply("N","N",-alpha,SinvB(ispin)%matrix,db_mos_re,0.0_dp,db_mo_tmp2)       
+       CALL cp_dbcsr_multiply("N","N",alpha, SinvH(ispin)%matrix,db_mos_im,1.0_dp,db_mo_tmp2)
+       CALL cp_dbcsr_multiply("N","T",1.0_dp,db_mo_tmp1,db_mos_re,0.0_dp,tmp_dbcsr)
+       CALL cp_dbcsr_multiply("N","T",1.0_dp,db_mo_tmp2,db_mos_im,1.0_dp,tmp_dbcsr)
        
-       CALL cp_dbcsr_multiply("N","T",alpha,db_mos_re,db_mos_im,0.0_dp,rho_im_sparse,error=error)
-       CALL cp_dbcsr_multiply("N","T",-alpha,db_mos_im,db_mos_re,1.0_dp,rho_im_sparse,error=error)
+       CALL cp_dbcsr_multiply("N","T",alpha,db_mos_re,db_mos_im,0.0_dp,rho_im_sparse)
+       CALL cp_dbcsr_multiply("N","T",-alpha,db_mos_im,db_mos_re,1.0_dp,rho_im_sparse)
               
        CALL compute_forces(force,tmp_dbcsr,S_der,rho_im_sparse,C_mat,kind_of,atom_of_kind,error) 
 
-       CALL cp_dbcsr_release(db_mos_re,error)     
-       CALL cp_dbcsr_release(db_mos_im,error)     
-       CALL cp_dbcsr_release(db_mo_tmp1,error)     
-       CALL cp_dbcsr_release(db_mo_tmp2,error)     
+       CALL cp_dbcsr_release(db_mos_re)     
+       CALL cp_dbcsr_release(db_mos_im)     
+       CALL cp_dbcsr_release(db_mo_tmp1)     
+       CALL cp_dbcsr_release(db_mo_tmp2)     
        
        CALL array_release(col_blk_size)
        CALL dbcsr_distribution_release(dist) 
@@ -509,8 +509,8 @@ MODULE  rt_propagation_utils
        force(i)%ehrenfest(:,:)=- force(i)%ehrenfest(:,:)
     END DO
  
-    CALL cp_dbcsr_release(tmp_dbcsr,error)     
-    CALL cp_dbcsr_release(rho_im_sparse,error)     
+    CALL cp_dbcsr_release(tmp_dbcsr)     
+    CALL cp_dbcsr_release(rho_im_sparse)     
     DEALLOCATE (atom_of_kind,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     DEALLOCATE (kind_of,STAT=stat)
@@ -590,18 +590,18 @@ MODULE  rt_propagation_utils
     NULLIFY(tmp)
     ALLOCATE(tmp,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp,error=error)
-    CALL cp_dbcsr_create(tmp,template=SinvB(1)%matrix,error=error)
+    CALL cp_dbcsr_init(tmp)
+    CALL cp_dbcsr_create(tmp,template=SinvB(1)%matrix)
     NULLIFY(tmp2)
     ALLOCATE(tmp2,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp2,error=error)
-    CALL cp_dbcsr_create(tmp2,template=SinvB(1)%matrix,error=error)
+    CALL cp_dbcsr_init(tmp2)
+    CALL cp_dbcsr_create(tmp2,template=SinvB(1)%matrix)
     NULLIFY(tmp3)
     ALLOCATE(tmp3,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp3,error=error)
-    CALL cp_dbcsr_create(tmp3,template=SinvB(1)%matrix,error=error)
+    CALL cp_dbcsr_init(tmp3)
+    CALL cp_dbcsr_create(tmp3,template=SinvB(1)%matrix)
 
     CALL get_rtp(rtp=rtp,rho_new=rho_new,S_minus_half=S_minus_half,error=error)
 
@@ -610,22 +610,22 @@ MODULE  rt_propagation_utils
        im=2*ispin
        IF(rtp_control%orthonormal) THEN
           CALL cp_dbcsr_multiply("N","N",one,S_minus_half,SinvH(ispin)%matrix,zero,tmp2,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",one,tmp2,rho_new(re)%matrix,zero,tmp3,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",one,tmp3,S_minus_half,zero,tmp,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",one,S_minus_half,SinvB(ispin)%matrix,zero,tmp2,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",one,tmp2,rho_new(im)%matrix,zero,tmp3,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",one,tmp3,S_minus_half,one,tmp,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
        ELSE
           CALL cp_dbcsr_multiply("N","N",one,SinvH(ispin)%matrix,rho_new(re)%matrix,zero,tmp,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
           CALL cp_dbcsr_multiply("N","N",-one,SinvB(ispin)%matrix,rho_new(im)%matrix,one,tmp,&
-               filter_eps=rtp%filter_eps,error=error)
+               filter_eps=rtp%filter_eps)
        ENDIF
 
        CALL compute_forces(force,tmp,S_der,rho_new(im)%matrix,C_mat,kind_of,atom_of_kind,error)
@@ -637,9 +637,9 @@ MODULE  rt_propagation_utils
        force(i)%ehrenfest(:,:)=- force(i)%ehrenfest(:,:)
     END DO
 
-    CALL cp_dbcsr_deallocate_matrix(tmp,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmp2,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmp3,error=error)
+    CALL cp_dbcsr_deallocate_matrix(tmp)
+    CALL cp_dbcsr_deallocate_matrix(tmp2)
+    CALL cp_dbcsr_deallocate_matrix(tmp3)
 
     DEALLOCATE (atom_of_kind,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
@@ -722,3 +722,4 @@ MODULE  rt_propagation_utils
  END SUBROUTINE compute_forces
 
 END MODULE rt_propagation_utils
+

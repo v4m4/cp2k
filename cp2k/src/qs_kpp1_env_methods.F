@@ -409,7 +409,7 @@ CONTAINS
 
                 END IF
                 ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-                CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp)
                 CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                      p=rho%rho_ao(ispin),&
                      h=kpp1_env%v_ao(ispin),&
@@ -430,7 +430,7 @@ CONTAINS
                 END IF
              ELSE
                ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-               CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+               CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp)
                CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                     p=rho%rho_ao(ispin),&
                     h=kpp1_env%v_ao(ispin),&
@@ -479,7 +479,7 @@ CONTAINS
             END IF
 
             ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-            CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+            CALL cp_dbcsr_set(kpp1_env%v_ao(ispin)%matrix,0.0_dp)
             CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                  p=rho%rho_ao(ispin),&
                  h=kpp1_env%v_ao(ispin),&
@@ -488,7 +488,7 @@ CONTAINS
 
           END IF
 
-          CALL cp_dbcsr_copy(k_p_p1(ispin)%matrix,kpp1_env%v_ao(ispin)%matrix,error=error)
+          CALL cp_dbcsr_copy(k_p_p1(ispin)%matrix,kpp1_env%v_ao(ispin)%matrix)
        END DO
 
        IF (gapw) THEN
@@ -570,7 +570,7 @@ CONTAINS
     my_diff=my_diff/2.0_dp
     DO ispin=1,SIZE(k_p_p1)
        CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix,rho1%rho_ao(ispin)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=my_diff,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=my_diff)
        rho%rho_r(ispin)%pw%cr3d=rho%rho_r(ispin)%pw%cr3d+&
             my_diff*rho1%rho_r(ispin)%pw%cr3d
        rho%rho_g(ispin)%pw%cc=rho%rho_g(ispin)%pw%cc+&
@@ -583,19 +583,19 @@ CONTAINS
                                       just_energy=.FALSE.,&
                                       error=error)
 
-    CALL cp_dbcsr_allocate_matrix_set(ks_2,nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(ks_2,nspins)
     DO ispin=1,nspins
        ALLOCATE(ks_2(ispin)%matrix)
-       CALL cp_dbcsr_init(ks_2(ispin)%matrix,error=error)
+       CALL cp_dbcsr_init(ks_2(ispin)%matrix)
        CALL cp_dbcsr_copy(ks_2(ispin)%matrix,matrix_s(1)%matrix,&
-            name="tmp_ks2-"//ADJUSTL(cp_to_string(ispin)),error=error)
+            name="tmp_ks2-"//ADJUSTL(cp_to_string(ispin)))
     END DO
 
     ! rho = rho0-h/2*rho1
     my_diff=-2.0_dp*my_diff
     DO ispin=1,nspins
        CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix,rho1%rho_ao(ispin)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=my_diff,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=my_diff)
        rho%rho_r(ispin)%pw%cr3d=rho%rho_r(ispin)%pw%cr3d+&
             my_diff*rho1%rho_r(ispin)%pw%cr3d
        rho%rho_g(ispin)%pw%cc=rho%rho_g(ispin)%pw%cc+&
@@ -612,7 +612,7 @@ CONTAINS
     my_diff=-0.5_dp*my_diff
     DO ispin=1,nspins
        CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix,rho1%rho_ao(ispin)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=my_diff,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=my_diff)
        rho%rho_r(ispin)%pw%cr3d=rho%rho_r(ispin)%pw%cr3d+&
             my_diff*rho1%rho_r(ispin)%pw%cr3d
        rho%rho_g(ispin)%pw%cc=rho%rho_g(ispin)%pw%cc+&
@@ -622,11 +622,11 @@ CONTAINS
     ! k_p_p1=(H(rho0+h/2 rho1)-H(rho0-h/2 rho1))/h
     DO ispin=1,nspins
        CALL cp_dbcsr_add(k_p_p1(ispin)%matrix,ks_2(ispin)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
-       CALL cp_dbcsr_scale(k_p_p1(ispin)%matrix,alpha_scalar=0.5_dp/my_diff,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
+       CALL cp_dbcsr_scale(k_p_p1(ispin)%matrix,alpha_scalar=0.5_dp/my_diff)
     END DO
 
-    CALL cp_dbcsr_deallocate_matrix_set(ks_2,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(ks_2)
     CALL deallocate_qs_energy(qs_energy)
   END SUBROUTINE kpp1_calc_k_p_p1_fdiff
 
@@ -692,12 +692,12 @@ CONTAINS
        END IF
 
        IF (.NOT.ASSOCIATED(kpp1_env%v_ao)) THEN
-          CALL cp_dbcsr_allocate_matrix_set(kpp1_env%v_ao,nspins,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(kpp1_env%v_ao,nspins)
              DO ispin=1,nspins
                 ALLOCATE(kpp1_env%v_ao(ispin)%matrix)
-                CALL cp_dbcsr_init(kpp1_env%v_ao(ispin)%matrix,error=error)
+                CALL cp_dbcsr_init(kpp1_env%v_ao(ispin)%matrix)
                 CALL cp_dbcsr_copy(kpp1_env%v_ao(ispin)%matrix,matrix_s(1)%matrix,&
-                     name="kpp1%v_ao-"//ADJUSTL(cp_to_string(ispin)),error=error)
+                     name="kpp1%v_ao-"//ADJUSTL(cp_to_string(ispin)))
              END DO
        END IF
 
@@ -795,7 +795,7 @@ CONTAINS
     IF (.not.failure) THEN
        IF (my_s_struct_changed) THEN
           IF (ASSOCIATED(kpp1_env%v_ao)) THEN
-             CALL cp_dbcsr_deallocate_matrix_set(kpp1_env%v_ao,error=error)
+             CALL cp_dbcsr_deallocate_matrix_set(kpp1_env%v_ao)
           END IF
        END IF
        IF (my_s_struct_changed.or.my_psi0_changed) THEN
@@ -868,3 +868,4 @@ CONTAINS
   END SUBROUTINE print_densities
 
 END MODULE qs_kpp1_env_methods
+

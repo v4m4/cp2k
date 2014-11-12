@@ -965,10 +965,10 @@ CONTAINS
     ! make almo copy of S
     ! also copy S to S_blk (i.e. to S with the domain structure imposed)
     IF (almo_scf_env%orthogonal_basis) THEN
-       CALL cp_dbcsr_set(almo_scf_env%matrix_s(1),0.0_dp,error=error)
-       CALL cp_dbcsr_add_on_diag(almo_scf_env%matrix_s(1),1.0_dp,error=error)
-       CALL cp_dbcsr_set(almo_scf_env%matrix_s_blk(1),0.0_dp,error=error)
-       CALL cp_dbcsr_add_on_diag(almo_scf_env%matrix_s_blk(1),1.0_dp,error=error)
+       CALL cp_dbcsr_set(almo_scf_env%matrix_s(1),0.0_dp)
+       CALL cp_dbcsr_add_on_diag(almo_scf_env%matrix_s(1),1.0_dp)
+       CALL cp_dbcsr_set(almo_scf_env%matrix_s_blk(1),0.0_dp)
+       CALL cp_dbcsr_add_on_diag(almo_scf_env%matrix_s_blk(1),1.0_dp)
     ELSE
        CALL matrix_qs_to_almo(matrix_s,almo_scf_env%matrix_s(1),&
                               almo_scf_env,.FALSE.,error=error)
@@ -976,8 +976,8 @@ CONTAINS
                               almo_scf_env,.TRUE.,error=error)
     ENDIF
     
-    CALL cp_dbcsr_filter(almo_scf_env%matrix_s(1),almo_scf_env%eps_filter,error=error)
-    CALL cp_dbcsr_filter(almo_scf_env%matrix_s_blk(1),almo_scf_env%eps_filter,error=error)
+    CALL cp_dbcsr_filter(almo_scf_env%matrix_s(1),almo_scf_env%eps_filter)
+    CALL cp_dbcsr_filter(almo_scf_env%matrix_s_blk(1),almo_scf_env%eps_filter)
 
     IF (almo_scf_env%almo_update_algorithm.eq.almo_scf_diag) THEN
        CALL matrix_sqrt_Newton_Schulz(almo_scf_env%matrix_s_blk_sqrt(1),&
@@ -1059,7 +1059,7 @@ CONTAINS
     ! we might need a copy of the converged KS
     DO ispin=1,almo_scf_env%nspins
        CALL cp_dbcsr_copy(almo_scf_env%matrix_ks_almo_scf_converged(ispin),&
-                 almo_scf_env%matrix_ks(ispin),error=error)
+                 almo_scf_env%matrix_ks(ispin))
     ENDDO
 
     CALL timestop(handle)
@@ -1121,14 +1121,14 @@ CONTAINS
        ! it is a waste of memory but since matrices are distributed
        ! we can tolerate it for now
        ALLOCATE(no_quench(almo_scf_env%nspins))
-       CALL cp_dbcsr_init(no_quench(1),error=error)
+       CALL cp_dbcsr_init(no_quench(1))
        CALL cp_dbcsr_create(no_quench(1),&
                template=almo_scf_env%matrix_t(1),&
-               matrix_type=dbcsr_type_no_symmetry,error=error)
+               matrix_type=dbcsr_type_no_symmetry)
        mynode = dbcsr_mp_mynode(dbcsr_distribution_mp(&
           cp_dbcsr_distribution(no_quench(1))))
        CALL cp_dbcsr_work_create(no_quench(1),&
-               work_mutable=.TRUE., error=error)
+               work_mutable=.TRUE.)
        nblkrows_tot = cp_dbcsr_nblkrows_total(no_quench(1))
        nblkcols_tot = cp_dbcsr_nblkcols_total(no_quench(1))
        ! RZK-warning: is it a quadratic-scaling routine?
@@ -1151,14 +1151,14 @@ CONTAINS
              ENDIF
           ENDDO
        ENDDO
-       CALL cp_dbcsr_finalize(no_quench(1),error=error)
+       CALL cp_dbcsr_finalize(no_quench(1))
        IF (almo_scf_env%nspins.gt.1) THEN
           DO ispin=2,almo_scf_env%nspins
-             CALL cp_dbcsr_init(no_quench(ispin),error=error)
+             CALL cp_dbcsr_init(no_quench(ispin))
              CALL cp_dbcsr_create(no_quench(ispin),&
                      template=almo_scf_env%matrix_t(1),&
-                     matrix_type=dbcsr_type_no_symmetry,error=error)
-             CALL cp_dbcsr_copy(no_quench(ispin),no_quench(1),error=error)
+                     matrix_type=dbcsr_type_no_symmetry)
+             CALL cp_dbcsr_copy(no_quench(ispin),no_quench(1))
           ENDDO
        ENDIF
 
@@ -1169,7 +1169,7 @@ CONTAINS
 
        DO ispin=1,almo_scf_env%nspins
           CALL cp_dbcsr_copy(almo_scf_env%matrix_t(ispin),&
-                  almo_scf_env%matrix_t_blk(ispin),error=error)
+                  almo_scf_env%matrix_t_blk(ispin))
        ENDDO
 
     CASE (almo_deloc_x,almo_deloc_xk,almo_deloc_x_then_scf)
@@ -1185,7 +1185,7 @@ CONTAINS
        !!!      ! simply copy virtual orbitals from matrix_v_full_blk to matrix_v_blk
        !!!      DO ispin=1,almo_scf_env%nspins
        !!!         CALL cp_dbcsr_copy(almo_scf_env%matrix_v_blk(ispin),&
-       !!!                 almo_scf_env%matrix_v_full_blk(ispin),error=error)
+       !!!                 almo_scf_env%matrix_v_full_blk(ispin))
        !!!      ENDDO
        !!!   CASE (virt_number,virt_occ_size)
        !!!      CALL split_v_blk(almo_scf_env,error)
@@ -1215,7 +1215,7 @@ CONTAINS
           almo_scf_env%perturbative_delocalization=.TRUE.
           DO ispin=1,almo_scf_env%nspins
              CALL cp_dbcsr_copy(almo_scf_env%matrix_t(ispin),&
-                     almo_scf_env%matrix_t_blk(ispin),error=error)
+                     almo_scf_env%matrix_t_blk(ispin))
           ENDDO
           CALL almo_scf_xalmo_eigensolver(qs_env,almo_scf_env,&
                   arbitrary_optimizer,error)
@@ -1259,7 +1259,7 @@ CONTAINS
           almo_scf_env%perturbative_delocalization=.FALSE.
           DO ispin=1,almo_scf_env%nspins
              CALL cp_dbcsr_copy(almo_scf_env%matrix_t(ispin),&
-                     almo_scf_env%matrix_t_blk(ispin),error=error)
+                     almo_scf_env%matrix_t_blk(ispin))
           ENDDO
           CALL almo_scf_xalmo_eigensolver(qs_env,almo_scf_env,&
                   arbitrary_optimizer,error)
@@ -1283,7 +1283,7 @@ CONTAINS
              almo_scf_env%perturbative_delocalization=.TRUE.
              !DO ispin=1,almo_scf_env%nspins
              !   CALL cp_dbcsr_copy(almo_scf_env%matrix_t(ispin),&
-             !           almo_scf_env%matrix_t_blk(ispin),error=error)
+             !           almo_scf_env%matrix_t_blk(ispin))
              !ENDDO
              CALL almo_scf_xalmo_eigensolver(qs_env,almo_scf_env,&
                      arbitrary_optimizer,error)
@@ -1323,7 +1323,7 @@ CONTAINS
     SELECT CASE (almo_scf_env%deloc_method)
     CASE (almo_deloc_x,almo_deloc_scf,almo_deloc_x_then_scf)
        DO ispin=1, almo_scf_env%nspins
-          CALL cp_dbcsr_release(no_quench(ispin),error=error)
+          CALL cp_dbcsr_release(no_quench(ispin))
        ENDDO
        DEALLOCATE(no_quench)
     END SELECT
@@ -1512,14 +1512,14 @@ CONTAINS
             spin_key=ispin,&
             init_domains=.FALSE.,&
             error=error)
-       CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_sqrt(ispin),error=error)
-       CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_sqrt_inv(ispin),error=error)
+       CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_sqrt(ispin))
+       CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_sqrt_inv(ispin))
        CALL cp_dbcsr_create(almo_scf_env%matrix_sigma_sqrt(ispin),&
                             template=almo_scf_env%matrix_sigma(ispin),&
-                            matrix_type=dbcsr_type_no_symmetry, error=error)
+                            matrix_type=dbcsr_type_no_symmetry)
        CALL cp_dbcsr_create(almo_scf_env%matrix_sigma_sqrt_inv(ispin),&
                             template=almo_scf_env%matrix_sigma(ispin),&
-                            matrix_type=dbcsr_type_no_symmetry, error=error)
+                            matrix_type=dbcsr_type_no_symmetry)
     ENDDO
    
     ! create virtual orbitals if necessary
@@ -1642,14 +1642,14 @@ CONTAINS
                spin_key=ispin,&
                init_domains=.TRUE.,&
                error=error)
-          CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_vv_sqrt(ispin),error=error)
-          CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_vv_sqrt_inv(ispin),error=error)
+          CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_vv_sqrt(ispin))
+          CALL cp_dbcsr_init(almo_scf_env%matrix_sigma_vv_sqrt_inv(ispin))
           CALL cp_dbcsr_create(almo_scf_env%matrix_sigma_vv_sqrt(ispin),&
                   template=almo_scf_env%matrix_sigma_vv(ispin),&
-                  matrix_type=dbcsr_type_no_symmetry, error=error)
+                  matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_create(almo_scf_env%matrix_sigma_vv_sqrt_inv(ispin),&
                   template=almo_scf_env%matrix_sigma_vv(ispin),&
-                  matrix_type=dbcsr_type_no_symmetry, error=error)
+                  matrix_type=dbcsr_type_no_symmetry)
           
           IF (almo_scf_env%deloc_truncate_virt.ne.virt_full) THEN
              CALL matrix_almo_create(matrix_new=almo_scf_env%opt_k_t_rr(ispin),&
@@ -1791,21 +1791,20 @@ CONTAINS
     IF (almo_scf_env%need_previous_ks)&
        ALLOCATE(almo_scf_env%matrix_ks_almo_scf_converged(nspins))
     DO ispin=1,nspins
-       CALL cp_dbcsr_init(almo_scf_env%matrix_p(ispin),error=error)
+       CALL cp_dbcsr_init(almo_scf_env%matrix_p(ispin))
        ! RZK-warning copy with symmery but remember that this might cause problems 
        CALL cp_dbcsr_create(almo_scf_env%matrix_p(ispin),&
                             template=almo_scf_env%matrix_s(1),&
-                            matrix_type=dbcsr_type_symmetric, error=error)
-       CALL cp_dbcsr_init(almo_scf_env%matrix_ks(ispin),error=error)
+                            matrix_type=dbcsr_type_symmetric)
+       CALL cp_dbcsr_init(almo_scf_env%matrix_ks(ispin))
        CALL cp_dbcsr_create(almo_scf_env%matrix_ks(ispin),&
                             template=almo_scf_env%matrix_s(1),&
-                            matrix_type=dbcsr_type_symmetric, error=error)
+                            matrix_type=dbcsr_type_symmetric)
        IF (almo_scf_env%need_previous_ks) THEN
-          CALL cp_dbcsr_init(almo_scf_env%matrix_ks_almo_scf_converged(ispin),&
-                          error=error)
+          CALL cp_dbcsr_init(almo_scf_env%matrix_ks_almo_scf_converged(ispin))
           CALL cp_dbcsr_create(almo_scf_env%matrix_ks_almo_scf_converged(ispin),&
                             template=almo_scf_env%matrix_s(1),&
-                            matrix_type=dbcsr_type_symmetric, error=error)
+                            matrix_type=dbcsr_type_symmetric)
        ENDIF
        CALL matrix_almo_create(matrix_new=almo_scf_env%matrix_p_blk(ispin),&
             matrix_qs=matrix_s0,&
@@ -1863,65 +1862,64 @@ CONTAINS
     ENDIF
 
     ! release matrices
-    CALL cp_dbcsr_release(almo_scf_env%matrix_s(1),error=error)
-    CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk(1),error=error)
+    CALL cp_dbcsr_release(almo_scf_env%matrix_s(1))
+    CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk(1))
     IF (almo_scf_env%almo_update_algorithm.eq.almo_scf_diag) THEN
-       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_sqrt_inv(1),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_sqrt(1),error=error)
+       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_sqrt_inv(1))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_sqrt(1))
     ELSE IF (almo_scf_env%almo_update_algorithm.eq.almo_scf_dm_sign) THEN
-       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_inv(1),error=error)
+       CALL cp_dbcsr_release(almo_scf_env%matrix_s_blk_inv(1))
     ENDIF
     DO ispin=1,almo_scf_env%nspins
-       CALL cp_dbcsr_release(almo_scf_env%quench_t(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%quench_t_blk(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_t_blk(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_err_blk(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_err_xx(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_t_tr(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_blk(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_inv(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_t(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_sqrt(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_sqrt_inv(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_p(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_ks(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_p_blk(ispin),error=error)
-       CALL cp_dbcsr_release(almo_scf_env%matrix_ks_blk(ispin),error=error)
+       CALL cp_dbcsr_release(almo_scf_env%quench_t(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%quench_t_blk(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_t_blk(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_err_blk(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_err_xx(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_t_tr(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_blk(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_inv(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_t(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_sqrt(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_sqrt_inv(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_p(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_ks(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_p_blk(ispin))
+       CALL cp_dbcsr_release(almo_scf_env%matrix_ks_blk(ispin))
        IF (almo_scf_env%need_previous_ks) THEN
-          CALL cp_dbcsr_release(almo_scf_env%matrix_ks_almo_scf_converged(ispin),&
-                  error=error)
+          CALL cp_dbcsr_release(almo_scf_env%matrix_ks_almo_scf_converged(ispin))
        ENDIF
        IF (almo_scf_env%need_virtuals) THEN
-          CALL cp_dbcsr_release(almo_scf_env%matrix_v_blk(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_v_full_blk(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_v(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_vo(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_x(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_ov(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_ov_full(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_blk(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_sqrt(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_sqrt_inv(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_vv_full_blk(ispin),error=error)
+          CALL cp_dbcsr_release(almo_scf_env%matrix_v_blk(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_v_full_blk(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_v(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_vo(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_x(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_ov(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_ov_full(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_blk(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_sqrt(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_sigma_vv_sqrt_inv(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_vv_full_blk(ispin))
           IF (almo_scf_env%deloc_truncate_virt.ne.virt_full) THEN
-             CALL cp_dbcsr_release(almo_scf_env%matrix_k_tr(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_k_blk(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_k_blk_ones(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_v_disc(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_v_disc_blk(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_ov_disc(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_vv_disc_blk(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%matrix_vv_disc(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%opt_k_t_dd(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%opt_k_t_rr(ispin),error=error)
-             CALL cp_dbcsr_release(almo_scf_env%opt_k_denom(ispin),error=error)
+             CALL cp_dbcsr_release(almo_scf_env%matrix_k_tr(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_k_blk(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_k_blk_ones(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_v_disc(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_v_disc_blk(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_ov_disc(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_vv_disc_blk(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%matrix_vv_disc(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%opt_k_t_dd(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%opt_k_t_rr(ispin))
+             CALL cp_dbcsr_release(almo_scf_env%opt_k_denom(ispin))
           ENDIF
        ENDIF
        IF (almo_scf_env%need_orbital_energies) THEN
-          CALL cp_dbcsr_release(almo_scf_env%matrix_eoo(ispin),error=error)
-          CALL cp_dbcsr_release(almo_scf_env%matrix_evv_full(ispin),error=error)
+          CALL cp_dbcsr_release(almo_scf_env%matrix_eoo(ispin))
+          CALL cp_dbcsr_release(almo_scf_env%matrix_evv_full(ispin))
        ENDIF
     ENDDO
 
@@ -2035,4 +2033,5 @@ CONTAINS
   END SUBROUTINE almo_scf_clean_up
 
 END MODULE almo_scf
+
 

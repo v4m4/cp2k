@@ -121,7 +121,7 @@ CONTAINS
     ! Compute the difference (p_out - p_in)and check convergence
     delta = 0.0_dp
     DO ispin = 1,nspin
-       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp, error=error)
+       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp)
        CALL cp_sm_mix(m1=p_out(ispin)%matrix,m2=p_in(ispin)%matrix,&
             p_mix=1.0_dp,delta=tmp, para_env=para_env,&
             m3=matrix_q(ispin)%matrix,error=error)
@@ -209,7 +209,7 @@ CONTAINS
     ! Compute the difference (p_out - p_in)and check convergence
     delta = 0.0_dp
     DO ispin = 1,nspin
-       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp)
  !      CALL cp_sm_mix(m1=p_in(ispin)%matrix,m2=p_out(ispin)%matrix,&
        CALL cp_sm_mix(m1=p_out(ispin)%matrix,m2=p_in(ispin)%matrix,&
             p_mix=1.0_dp,delta=tmp, para_env=para_env,&
@@ -263,7 +263,7 @@ CONTAINS
 
        CALL pw_scale ( kerker_pot_rspace%pw, pw_grid%dvol, error=error)
 
-       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_q(ispin)%matrix, 0.0_dp)
        CALL integrate_v_rspace(v_rspace=kerker_pot_rspace, &
             h=matrix_q(ispin), qs_env=qs_env,&
             calculate_forces =.FALSE., gapw=gapw, error=error)
@@ -276,10 +276,10 @@ CONTAINS
        CALL cp_fm_trace(scf_env%s_minus_one,scf_env%scf_work2,trace,error=error)
        trace = -trace / REAL(nao,KIND=dp)
        CALL cp_dbcsr_add(matrix_a=matrix_q(ispin)%matrix,matrix_b=matrix_s(1)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=trace,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=trace)
     END IF
 
-       CALL cp_dbcsr_trace(p_in(ispin)%matrix,matrix_s(1)%matrix,trace,error=error)
+       CALL cp_dbcsr_trace(p_in(ispin)%matrix,matrix_s(1)%matrix,trace)
        t1 = trace
 
        CALL cp_dbcsr_sm_fm_multiply(matrix_q(ispin)%matrix,scf_env%s_minus_one,&
@@ -295,10 +295,10 @@ CONTAINS
        CALL copy_fm_to_dbcsr(scf_env%scf_work1(ispin)%matrix,&
             p_out(ispin)%matrix,a_mix,0.0_dp,keep_sparsity=.TRUE., error=error)
        CALL cp_dbcsr_add(p_out(ispin)%matrix,p_in(ispin)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
-       CALL cp_dbcsr_trace(p_out(ispin)%matrix,matrix_s(1)%matrix,trace, error=error)
+            alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
+       CALL cp_dbcsr_trace(p_out(ispin)%matrix,matrix_s(1)%matrix,trace)
        t2 =t1/ trace
-       CALL cp_dbcsr_scale(p_out(ispin)%matrix,t2,error=error)
+       CALL cp_dbcsr_scale(p_out(ispin)%matrix,t2)
 
     END DO  !ispin
     CALL pw_pool_give_back_pw(auxbas_pw_pool,rhog%pw,error=error)
@@ -1874,18 +1874,18 @@ CONTAINS
 
 !   *** allocate p_mix_new ***
     IF (.NOT.ASSOCIATED(scf_env%p_mix_new)) THEN
-       CALL cp_dbcsr_allocate_matrix_set(scf_env%p_mix_new,nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(scf_env%p_mix_new,nspins)
        DO i=1,nspins
           ALLOCATE(scf_env%p_mix_new(i)%matrix)
-          CALL cp_dbcsr_init(scf_env%p_mix_new(i)%matrix, error=error)
+          CALL cp_dbcsr_init(scf_env%p_mix_new(i)%matrix)
           CALL cp_dbcsr_create(matrix=scf_env%p_mix_new(i)%matrix, &
                name="SCF"//TRIM(ADJUSTL(cp_to_string(scf_env%id_nr)))//"DENSITY", &
                dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                row_blk_size=cp_dbcsr_row_block_sizes(refmatrix), &
                col_blk_size=cp_dbcsr_col_block_sizes(refmatrix), &
-               nblks=0, nze=0, error=error)
+               nblks=0, nze=0)
           CALL cp_dbcsr_alloc_block_from_nbl(scf_env%p_mix_new(i)%matrix,sab_orb,error=error)
-          CALL cp_dbcsr_set(scf_env%p_mix_new(i)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(scf_env%p_mix_new(i)%matrix,0.0_dp)
        ENDDO
     END IF
 
@@ -1894,19 +1894,19 @@ CONTAINS
        IF (.NOT.ASSOCIATED(scf_env%p_mix_kp)) THEN
           CALL get_qs_env(qs_env=qs_env, kpoints=kpoints, error=error)
           CALL get_kpoint_info(kpoint=kpoints, ncount=ncount, error=error)
-          CALL cp_dbcsr_allocate_matrix_set(scf_env%p_mix_kp,nspins,ncount,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(scf_env%p_mix_kp,nspins,ncount)
           DO i=1,nspins
              DO ic=1,ncount
                 ALLOCATE(scf_env%p_mix_kp(i,ic)%matrix)
-                CALL cp_dbcsr_init(scf_env%p_mix_kp(i,ic)%matrix, error=error)
+                CALL cp_dbcsr_init(scf_env%p_mix_kp(i,ic)%matrix)
                 CALL cp_dbcsr_create(matrix=scf_env%p_mix_kp(i,ic)%matrix, &
                      name="SCF"//TRIM(ADJUSTL(cp_to_string(scf_env%id_nr)))//"DENSITY", &
                      dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                      row_blk_size=cp_dbcsr_row_block_sizes(refmatrix), &
                      col_blk_size=cp_dbcsr_col_block_sizes(refmatrix), &
-                     nblks=0, nze=0, error=error)
+                     nblks=0, nze=0)
                 CALL cp_dbcsr_alloc_block_from_nbl(scf_env%p_mix_kp(i,ic)%matrix,sab_orb,error=error)
-                CALL cp_dbcsr_set(scf_env%p_mix_kp(i,ic)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(scf_env%p_mix_kp(i,ic)%matrix,0.0_dp)
              ENDDO
           ENDDO
        END IF
@@ -1915,18 +1915,18 @@ CONTAINS
 !   *** allocate p_delta ***
     IF (mixing_method>=gspace_mixing_nr) THEN
        IF(.NOT.ASSOCIATED(scf_env%p_delta)) THEN
-          CALL cp_dbcsr_allocate_matrix_set(scf_env%p_delta,nspins,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(scf_env%p_delta,nspins)
           DO i=1,nspins
              ALLOCATE(scf_env%p_delta(i)%matrix)
-             CALL cp_dbcsr_init(scf_env%p_delta(i)%matrix, error=error)
+             CALL cp_dbcsr_init(scf_env%p_delta(i)%matrix)
              CALL cp_dbcsr_create(matrix=scf_env%p_delta(i)%matrix, &
                   name="SCF"//TRIM(ADJUSTL(cp_to_string(scf_env%id_nr)))//"DENSITY", &
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                   row_blk_size=cp_dbcsr_row_block_sizes(refmatrix), &
                   col_blk_size=cp_dbcsr_col_block_sizes(refmatrix), &
-                  nblks=0, nze=0, error=error)
+                  nblks=0, nze=0)
              CALL cp_dbcsr_alloc_block_from_nbl(scf_env%p_delta(i)%matrix,sab_orb,error=error)
-             CALL cp_dbcsr_set(scf_env%p_delta(i)%matrix,0.0_dp,error=error)
+             CALL cp_dbcsr_set(scf_env%p_delta(i)%matrix,0.0_dp)
           ENDDO
        END IF
        CPPrecondition(ASSOCIATED(mixing_store),cp_failure_level,routineP,error,failure)
@@ -2365,3 +2365,4 @@ CONTAINS
 
 
 END MODULE qs_gspace_mixing
+

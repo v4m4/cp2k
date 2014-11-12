@@ -174,13 +174,13 @@ CONTAINS
     NULLIFY(tmp_re)
     ALLOCATE(tmp_re,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp_re,error=error)
-    CALL cp_dbcsr_create(tmp_re,template=propagator_matrix(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp_re)
+    CALL cp_dbcsr_create(tmp_re,template=propagator_matrix(1)%matrix,matrix_type="N")
     NULLIFY(tmp_im)
     ALLOCATE(tmp_im,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(tmp_im,error=error)
-    CALL cp_dbcsr_create(tmp_im,template=propagator_matrix(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp_im)
+    CALL cp_dbcsr_create(tmp_im,template=propagator_matrix(1)%matrix,matrix_type="N")
 
     DO i=1,SIZE(exp_H_new)/2
        re=2*i-1
@@ -194,8 +194,8 @@ CONTAINS
              CALL cp_complex_dbcsr_gemm_3("N","C",one,tmp_re,tmp_im,exp_H_old(re)%matrix,exp_H_old(im)%matrix,&
                   zero,rho_next(re)%matrix,rho_next(im)%matrix,filter_eps=rtp%filter_eps,error=error)
           ELSE
-             CALL cp_dbcsr_copy(rho_next(re)%matrix,rho_old(re)%matrix,error=error)
-             CALL cp_dbcsr_copy(rho_next(im)%matrix,rho_old(im)%matrix,error=error)
+             CALL cp_dbcsr_copy(rho_next(re)%matrix,rho_old(re)%matrix)
+             CALL cp_dbcsr_copy(rho_next(im)%matrix,rho_old(im)%matrix)
           ENDIF
        END IF
        CALL cp_complex_dbcsr_gemm_3("N","N",one,exp_H_new(re)%matrix,exp_H_new(im)%matrix,&
@@ -204,8 +204,8 @@ CONTAINS
             zero,rho_new(re)%matrix,rho_new(im)%matrix,filter_eps=rtp%filter_eps,error=error)
     END DO
 
-    CALL cp_dbcsr_deallocate_matrix(tmp_re,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmp_im,error=error)
+    CALL cp_dbcsr_deallocate_matrix(tmp_re)
+    CALL cp_dbcsr_deallocate_matrix(tmp_im)
 
     CALL timestop(handle)
 
@@ -327,25 +327,25 @@ CONTAINS
        IF(rtp%iter==1) THEN
           ! For EM I have to copy rho_old onto rho_next and for ETRS,
           ! this is the first term of the series of commutators that result in rho_next
-          CALL cp_dbcsr_copy(rho_next(re)%matrix,rho_old(re)%matrix,error=error)
-          CALL cp_dbcsr_copy(rho_next(im)%matrix,rho_old(im)%matrix,error=error)
+          CALL cp_dbcsr_copy(rho_next(re)%matrix,rho_old(re)%matrix)
+          CALL cp_dbcsr_copy(rho_next(im)%matrix,rho_old(im)%matrix)
           IF(rtp_control%propagator==do_etrs) THEN
              !since we never calculated the matrix exponential the old matrix exponential stores the unscalled propagator
              CALL get_rtp(rtp=rtp,exp_H_old=exp_H_old,dt=dt,error=error)
              prefac=-0.5_dp*dt
-             CALL cp_dbcsr_scale(exp_H_old(im)%matrix,prefac,error=error)
+             CALL cp_dbcsr_scale(exp_H_old(im)%matrix,prefac)
              IF(.NOT.rtp%do_hfx.AND.rtp_control%fixed_ions)THEN
                 CALL bch_expansion_imaginary_propagator(exp_H_old(im)%matrix,&
                      rho_next(re)%matrix,rho_next(im)%matrix,rtp%filter_eps,rtp%filter_eps_small,rtp_control%eps_exp,error=error)
              ELSE
-                CALL cp_dbcsr_scale(exp_H_old(re)%matrix,prefac,error=error)
+                CALL cp_dbcsr_scale(exp_H_old(re)%matrix,prefac)
                 CALL bch_expansion_complex_propagator(exp_H_old(re)%matrix,exp_H_old(im)%matrix,&
                      rho_next(re)%matrix,rho_next(im)%matrix,rtp%filter_eps,rtp%filter_eps_small,rtp_control%eps_exp,error=error)
              ENDIF
           END IF
        END IF
-       CALL cp_dbcsr_copy(rho_new(re)%matrix,rho_next(re)%matrix,error=error)
-       CALL cp_dbcsr_copy(rho_new(im)%matrix,rho_next(im)%matrix,error=error)
+       CALL cp_dbcsr_copy(rho_new(re)%matrix,rho_next(re)%matrix)
+       CALL cp_dbcsr_copy(rho_new(im)%matrix,rho_next(im)%matrix)
        IF(.NOT.rtp%do_hfx.AND.rtp_control%fixed_ions)THEN
           CALL bch_expansion_imaginary_propagator(propagator_matrix(im)%matrix,&
                rho_new(re)%matrix,rho_new(im)%matrix,rtp%filter_eps,rtp%filter_eps_small,rtp_control%eps_exp,error=error)
@@ -477,3 +477,4 @@ CONTAINS
 
 
 END MODULE rt_make_propagators
+

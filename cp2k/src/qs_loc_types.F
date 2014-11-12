@@ -258,7 +258,7 @@ CONTAINS
        IF(ASSOCIATED(qs_loc_env%op_sm_set)) THEN
           DO i=1,SIZE ( qs_loc_env % op_sm_set, 2 )
              DO j=1,SIZE ( qs_loc_env % op_sm_set, 1 )
-                CALL cp_dbcsr_deallocate_matrix(qs_loc_env%op_sm_set(j,i)%matrix,error=error)
+                CALL cp_dbcsr_deallocate_matrix(qs_loc_env%op_sm_set(j,i)%matrix)
              ENDDO
           END DO
           DEALLOCATE(qs_loc_env%op_sm_set,STAT=istat)
@@ -612,4 +612,5 @@ CONTAINS
 
 
 END MODULE qs_loc_types
+
 

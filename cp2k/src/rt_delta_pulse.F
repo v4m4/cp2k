@@ -350,10 +350,10 @@ CONTAINS
     kvec(:) = dft_control%rtp_control%delta_pulse_scale * kvec
 
     ALLOCATE(cosmat, sinmat)
-    CALL cp_dbcsr_init(cosmat, error=error)
-    CALL cp_dbcsr_init(sinmat, error=error)
-    CALL cp_dbcsr_copy(cosmat,matrix_s(1)%matrix,'COS MOM',error=error)
-    CALL cp_dbcsr_copy(sinmat,matrix_s(1)%matrix,'SIN MOM',error=error)
+    CALL cp_dbcsr_init(cosmat)
+    CALL cp_dbcsr_init(sinmat)
+    CALL cp_dbcsr_copy(cosmat,matrix_s(1)%matrix,'COS MOM')
+    CALL cp_dbcsr_copy(sinmat,matrix_s(1)%matrix,'SIN MOM')
     CALL build_berry_moment_matrix(qs_env,cosmat,sinmat,kvec,error)
 
     ! apply inv(S)*operator to C
@@ -422,13 +422,13 @@ CONTAINS
 
     CALL cp_fm_release(mat_S, error=error)
 
-    CALL cp_dbcsr_deallocate_matrix(cosmat, error)
-    CALL cp_dbcsr_deallocate_matrix(sinmat, error)
+    CALL cp_dbcsr_deallocate_matrix(cosmat)
+    CALL cp_dbcsr_deallocate_matrix(sinmat)
 
 !***************************************************************
 !remove later
     CALL copy_fm_to_dbcsr(S_inv_fm,S_inv,error=error)
-    CALL cp_dbcsr_filter(S_inv,rtp%filter_eps,error=error)
+    CALL cp_dbcsr_filter(S_inv,rtp%filter_eps)
     CALL cp_fm_release(S_inv_fm,error=error)
 !**************************************************************
 
@@ -437,3 +437,4 @@ CONTAINS
   END SUBROUTINE apply_delta_pulse
 
 END MODULE rt_delta_pulse
+

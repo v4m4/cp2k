@@ -600,7 +600,7 @@ CONTAINS
     !-----------------!
     IF (do_kernel) THEN
        DO spin=1, nspins
-          CALL cp_dbcsr_set(p_env%p1(spin)%matrix, 0.0_dp, error=error) ! optimize?
+          CALL cp_dbcsr_set(p_env%p1(spin)%matrix, 0.0_dp) ! optimize?
           CALL cp_dbcsr_plus_fm_fm_t(p_env%p1(spin)%matrix,&
                                   matrix_v=p_env%psi0d(spin)%matrix,&
                                   matrix_g=X(spin)%matrix,&
@@ -670,3 +670,4 @@ CONTAINS
   END SUBROUTINE allocate_krylov_vectors
 
 END MODULE qs_tddfpt_eigensolver
+

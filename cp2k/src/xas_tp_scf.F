@@ -315,8 +315,7 @@ CONTAINS
        !   *** mixing methods have the new density matrix in p_mix_new
        IF (xas_env%mixing_method > 0) THEN
           DO ispin=1,dft_control%nspins
-             CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,scf_env%p_mix_new(ispin)%matrix,&
-                  error=error)
+             CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,scf_env%p_mix_new(ispin)%matrix)
           END DO
        ENDIF
 
@@ -740,3 +739,4 @@ CONTAINS
   END SUBROUTINE xes_scf_once
 
 END MODULE xas_tp_scf
+

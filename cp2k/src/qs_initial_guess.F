@@ -606,11 +606,11 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
        ALLOCATE (first_sgf(natoms),last_sgf(natoms),STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
-       checksum = cp_dbcsr_checksum(s_sparse(1)%matrix, error=error)
+       checksum = cp_dbcsr_checksum(s_sparse(1)%matrix)
        i = cp_dbcsr_get_num_blocks (s_sparse(1)%matrix); CALL mp_sum(i,group)
        IF(output_unit>0)WRITE(output_unit,*) 'S nblks',i,' checksum',checksum
-       CALL cp_dbcsr_filter(s_sparse(1)%matrix, eps, error=error)
-       checksum = cp_dbcsr_checksum(s_sparse(1)%matrix, error=error)
+       CALL cp_dbcsr_filter(s_sparse(1)%matrix, eps)
+       checksum = cp_dbcsr_checksum(s_sparse(1)%matrix)
        i = cp_dbcsr_get_num_blocks (s_sparse(1)%matrix); CALL mp_sum(i,group)
        IF(output_unit>0)WRITE(output_unit,*) 'S nblks',i,' checksum',checksum
 
@@ -643,23 +643,23 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
           ENDDO
           CALL cp_dbcsr_iterator_stop(iter)
 
-          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix, error=error)
-          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix, error=error)
+          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix)
+          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix)
           occ = cp_dbcsr_get_occupation(p_rmpv(ispin)%matrix)
           IF(output_unit>0)WRITE(output_unit,*) 'P_init occ',occ,' checksum',checksum
           ! so far p needs to have the same sparsity as S
-          !CALL cp_dbcsr_filter(p_rmpv(ispin)%matrix, eps, error=error)
-          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix, error=error)
-          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix, error=error)
+          !CALL cp_dbcsr_filter(p_rmpv(ispin)%matrix, eps)
+          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix)
+          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix)
           occ = cp_dbcsr_get_occupation(p_rmpv(ispin)%matrix)
           IF(output_unit>0)WRITE(output_unit,*) 'P_init occ',occ,' checksum',checksum
 
-          CALL cp_dbcsr_trace(p_rmpv(ispin)%matrix, s_sparse(1)%matrix, trps1, error=error)
+          CALL cp_dbcsr_trace(p_rmpv(ispin)%matrix, s_sparse(1)%matrix, trps1)
           scale=REAL(nelectron,dp)/trps1
-          CALL cp_dbcsr_scale(p_rmpv(ispin)%matrix, scale, error=error)
+          CALL cp_dbcsr_scale(p_rmpv(ispin)%matrix, scale)
 
-          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix, error=error)
-          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix, error=error)
+          !CALL cp_dbcsr_verify_matrix(p_rmpv(ispin)%matrix)
+          checksum = cp_dbcsr_checksum(p_rmpv(ispin)%matrix)
           occ = cp_dbcsr_get_occupation(p_rmpv(ispin)%matrix)
           IF(output_unit>0)WRITE(output_unit,*) 'P occ',occ,' checksum',checksum
           !
@@ -769,20 +769,19 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
              CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp (cp_dbcsr_distribution( s_sparse(1)%matrix )),&
                   dbcsr_distribution_row_dist(cp_dbcsr_distribution( s_sparse(1)%matrix )), col_dist)
              !
-             CALL cp_dbcsr_init(mo_dbcsr, error=error)
+             CALL cp_dbcsr_init(mo_dbcsr)
              CALL cp_dbcsr_from_fm(mo_dbcsr, mo_coeff, 0.0_dp, dist,&
                                 row_blk_size=cp_dbcsr_row_block_sizes (s_sparse(1)%matrix),&
-                                col_blk_size=col_blk_size,&
-                                error=error)
-             !CALL cp_dbcsr_verify_matrix(mo_dbcsr, error=error)
-             checksum = cp_dbcsr_checksum(mo_dbcsr, error=error)
+                                col_blk_size=col_blk_size, error=error)
+             !CALL cp_dbcsr_verify_matrix(mo_dbcsr)
+             checksum = cp_dbcsr_checksum(mo_dbcsr)
 
              occ = cp_dbcsr_get_occupation(mo_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'C occ',occ,' checksum',checksum
-             CALL cp_dbcsr_filter(mo_dbcsr, eps, error=error)
-             !CALL cp_dbcsr_verify_matrix(mo_dbcsr, error=error)
+             CALL cp_dbcsr_filter(mo_dbcsr, eps)
+             !CALL cp_dbcsr_verify_matrix(mo_dbcsr)
              occ = cp_dbcsr_get_occupation(mo_dbcsr)
-             checksum = cp_dbcsr_checksum(mo_dbcsr, error=error)
+             checksum = cp_dbcsr_checksum(mo_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'C occ',occ,' checksum',checksum
              !
              ! multiply times PS
@@ -792,18 +791,18 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
              END IF
              !
              ! S*C
-             CALL cp_dbcsr_init(mo_tmp_dbcsr, error)
-             CALL cp_dbcsr_copy(mo_tmp_dbcsr, mo_dbcsr, name="mo_tmp", error=error)
+             CALL cp_dbcsr_init(mo_tmp_dbcsr)
+             CALL cp_dbcsr_copy(mo_tmp_dbcsr, mo_dbcsr, name="mo_tmp")
              CALL cp_dbcsr_multiply("N", "N", 1.0_dp, s_sparse(1)%matrix, mo_dbcsr,&
                   0.0_dp, mo_tmp_dbcsr,&
-                  retain_sparsity=.TRUE., error=error)
-             !CALL cp_dbcsr_verify_matrix(mo_tmp_dbcsr, error=error)
-             checksum = cp_dbcsr_checksum(mo_tmp_dbcsr, error=error)
+                  retain_sparsity=.TRUE.)
+             !CALL cp_dbcsr_verify_matrix(mo_tmp_dbcsr)
+             checksum = cp_dbcsr_checksum(mo_tmp_dbcsr)
              occ = cp_dbcsr_get_occupation(mo_tmp_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'S*C occ',occ,' checksum',checksum
-             CALL cp_dbcsr_filter(mo_tmp_dbcsr, eps, error=error)
-             !CALL cp_dbcsr_verify_matrix(mo_tmp_dbcsr, error=error)
-             checksum = cp_dbcsr_checksum(mo_tmp_dbcsr, error=error)
+             CALL cp_dbcsr_filter(mo_tmp_dbcsr, eps)
+             !CALL cp_dbcsr_verify_matrix(mo_tmp_dbcsr)
+             checksum = cp_dbcsr_checksum(mo_tmp_dbcsr)
              occ = cp_dbcsr_get_occupation(mo_tmp_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'S*C occ',occ,' checksum',checksum
              !
@@ -811,21 +810,21 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
              ! the destroy is needed for the moment to avoid memory leaks !
              ! This one is not needed because _destroy takes care of zeroing.
              CALL cp_dbcsr_multiply("N", "N", 1.0_dp, p_rmpv(ispin)%matrix,&
-                  mo_tmp_dbcsr, 0.0_dp, mo_dbcsr, error=error)
-             IF(.FALSE.)CALL cp_dbcsr_verify_matrix(mo_dbcsr, error=error)
-             checksum = cp_dbcsr_checksum(mo_dbcsr, error=error)
+                  mo_tmp_dbcsr, 0.0_dp, mo_dbcsr)
+             IF(.FALSE.)CALL cp_dbcsr_verify_matrix(mo_dbcsr)
+             checksum = cp_dbcsr_checksum(mo_dbcsr)
              occ = cp_dbcsr_get_occupation(mo_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'P*SC occ',occ,' checksum',checksum
-             CALL cp_dbcsr_filter(mo_dbcsr, eps, error=error)
-             !CALL cp_dbcsr_verify_matrix(mo_dbcsr, error=error)
-             checksum = cp_dbcsr_checksum(mo_dbcsr, error=error)
+             CALL cp_dbcsr_filter(mo_dbcsr, eps)
+             !CALL cp_dbcsr_verify_matrix(mo_dbcsr)
+             checksum = cp_dbcsr_checksum(mo_dbcsr)
              occ = cp_dbcsr_get_occupation(mo_dbcsr)
              IF(output_unit>0)WRITE(output_unit,*) 'P*SC occ',occ,' checksum',checksum
              !
              CALL copy_dbcsr_to_fm(mo_dbcsr, mo_coeff,error=error)
 
-             CALL cp_dbcsr_release(mo_dbcsr, error=error)
-             CALL cp_dbcsr_release(mo_tmp_dbcsr, error=error)
+             CALL cp_dbcsr_release(mo_dbcsr)
+             CALL cp_dbcsr_release(mo_tmp_dbcsr)
              CALL cp_dbcsr_distribution_release(dist)
              CALL array_release(col_blk_size)
 
@@ -970,9 +969,9 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
           denmat => rho%rho_ao_kp
           DO ispin=1, dft_control%nspins
              DO ic=1,SIZE(denmat,2)
-                CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp)
              END DO
-             CALL cp_dbcsr_copy(denmat(ispin,1)%matrix,p_rmpv(ispin)%matrix,error=error)
+             CALL cp_dbcsr_copy(denmat(ispin,1)%matrix,p_rmpv(ispin)%matrix)
           END DO
        END IF
     END IF
@@ -1039,7 +1038,7 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
       WRITE (UNIT=output_unit,FMT="(/,T2,A,I0)") "Spin ", ispin
     END IF
 
-    CALL cp_dbcsr_set(matrix_p,0.0_dp,error=error)
+    CALL cp_dbcsr_set(matrix_p,0.0_dp)
 
     natom = SIZE(particle_set)
 
@@ -1075,9 +1074,9 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
     ENDDO
     CALL cp_dbcsr_iterator_stop(iter)
 
-    CALL cp_dbcsr_trace(matrix_p, matrix_s, trps1, error=error)
+    CALL cp_dbcsr_trace(matrix_p, matrix_s, trps1)
     scale=REAL(nelectron_spin,dp)/trps1
-    CALL cp_dbcsr_scale(matrix_p, scale, error=error)
+    CALL cp_dbcsr_scale(matrix_p, scale)
 
     IF (output_unit > 0) THEN
       IF (nspin > 1) THEN
@@ -1187,7 +1186,7 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
     IF (has_unit_metric) THEN
        sdiag(:) = 1.0_dp
     ELSE
-       CALL cp_dbcsr_get_diag(matrix_s, sdiag, error=error)
+       CALL cp_dbcsr_get_diag(matrix_s, sdiag)
        CALL mp_sum(sdiag,group)
     END IF
 
@@ -1364,7 +1363,7 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
        END IF
     END IF
 
-    CALL cp_dbcsr_set_diag(matrix_p, pdiag, error=error)
+    CALL cp_dbcsr_set_diag(matrix_p, pdiag)
 
     DEALLOCATE (econf,STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
@@ -1383,3 +1382,4 @@ CALL copy_fm_to_dbcsr(mo_array(ispin)%mo_set%mo_coeff,mo_array(ispin)%mo_set%mo_
   END SUBROUTINE calculate_mopac_dm
 
 END MODULE qs_initial_guess
+

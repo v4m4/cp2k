@@ -261,38 +261,38 @@ MODULE mp2_ri_grad
 
     ! create matrix holding the back transformation (G_P_inu)
     ALLOCATE(matrix_P_inu%matrix)
-    CALL cp_dbcsr_init(matrix_P_inu%matrix,error=error_sub)
-    CALL cp_dbcsr_create(matrix_P_inu%matrix,template=mo_coeff_o,error=error_sub)
+    CALL cp_dbcsr_init(matrix_P_inu%matrix)
+    CALL cp_dbcsr_create(matrix_P_inu%matrix,template=mo_coeff_o)
 
     ! non symmetric matrix
     ALLOCATE(matrix_P_munu_nosym%matrix)
-    CALL cp_dbcsr_init(matrix_P_munu_nosym%matrix,error=error_sub)
+    CALL cp_dbcsr_init(matrix_P_munu_nosym%matrix)
     CALL cp_dbcsr_create(matrix_P_munu_nosym%matrix,template=mat_munu%matrix,&
-                         matrix_type=dbcsr_type_no_symmetry,error=error_sub)
-    ! CALL cp_dbcsr_create(matrix_P_munu_nosym%matrix,template=mat_munu%matrix,error=error_sub)
+                         matrix_type=dbcsr_type_no_symmetry)
+    ! CALL cp_dbcsr_create(matrix_P_munu_nosym%matrix,template=mat_munu%matrix)
     ! CALL cp_dbcsr_copy(matrix_P_munu_nosym%matrix,mat_munu%matrix,&
-    !                    name="matrix_P_munu_nosym",error=error_sub)
+    !                    name="matrix_P_munu_nosym")
     !XXXXXX
-    ! CALL cp_dbcsr_desymmetrize(mat_munu%matrix,matrix_P_munu_nosym%matrix,error=error_sub)
+    ! CALL cp_dbcsr_desymmetrize(mat_munu%matrix,matrix_P_munu_nosym%matrix)
 
     ! create Lagrangian matrices in mixed AO/MO formalism
     ALLOCATE(Lag_mu_i_1%matrix)
-    CALL cp_dbcsr_init(Lag_mu_i_1%matrix,error=error_sub)
-    CALL cp_dbcsr_create(Lag_mu_i_1%matrix,template=mo_coeff_o,error=error_sub)
-    CALL cp_dbcsr_set(Lag_mu_i_1%matrix,0.0_dp,error=error_sub)
+    CALL cp_dbcsr_init(Lag_mu_i_1%matrix)
+    CALL cp_dbcsr_create(Lag_mu_i_1%matrix,template=mo_coeff_o)
+    CALL cp_dbcsr_set(Lag_mu_i_1%matrix,0.0_dp)
 
     ALLOCATE(Lag_nu_a_2%matrix)
-    CALL cp_dbcsr_init(Lag_nu_a_2%matrix,error=error_sub)
-    CALL cp_dbcsr_create(Lag_nu_a_2%matrix,template=mo_coeff_v,error=error_sub)
-    CALL cp_dbcsr_set(Lag_nu_a_2%matrix,0.0_dp,error=error_sub)
+    CALL cp_dbcsr_init(Lag_nu_a_2%matrix)
+    CALL cp_dbcsr_create(Lag_nu_a_2%matrix,template=mo_coeff_v)
+    CALL cp_dbcsr_set(Lag_nu_a_2%matrix,0.0_dp)
 
     ALLOCATE(matrix_P_munu%matrix)
-    CALL cp_dbcsr_init(matrix_P_munu%matrix,error=error_sub)
+    CALL cp_dbcsr_init(matrix_P_munu%matrix)
     CALL cp_dbcsr_create(matrix_P_munu%matrix,template=mat_munu%matrix,&
-                         matrix_type=dbcsr_type_symmetric,error=error_sub)
-    ! CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+                         matrix_type=dbcsr_type_symmetric)
+    ! CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
     ! CALL cp_dbcsr_copy(matrix_P_munu%matrix,mat_munu%matrix,&
-    !                    name="matrix_P_munu",error=error_sub)   
+    !                    name="matrix_P_munu")
 
     ! wave function vector and supporting stuff
     ALLOCATE(wf_vector(dimen_RI),STAT=stat)
@@ -333,38 +333,37 @@ MODULE mp2_ri_grad
 
       ! first back-transformation a->nu
       CALL timeset(routineN//"_back_v",handle3)
-      CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp)
       CALL cp_dbcsr_multiply("N", "T", 1.0_dp, mo_coeff_v, G_P_ia(L_counter)%matrix, &
-                              0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter, error=error_sub)
+                              0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter)
       CALL timestop(handle3)
 
       ! second back-transformation i->mu
       CALL timeset(routineN//"_back_o",handle3)
-      CALL cp_dbcsr_set(matrix_P_munu_nosym%matrix,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(matrix_P_munu_nosym%matrix,0.0_dp)
       CALL cp_dbcsr_multiply("N", "T", 1.0_dp, matrix_P_inu%matrix, mo_coeff_o, &
-                              0.0_dp, matrix_P_munu_nosym%matrix, filter_eps=eps_filter, error=error_sub)
+                              0.0_dp, matrix_P_munu_nosym%matrix, filter_eps=eps_filter)
 
       ! ! first back-transformation a->nu
       ! CALL timeset(routineN//"_back_v",handle3)
-      ! CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp,error=error_sub)
+      ! CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp)
       ! CALL cp_dbcsr_multiply("N", "T", 1.0_dp, G_P_ia(L_counter)%matrix, mo_coeff_v, &
-      !                         0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter, error=error_sub)
+      !                         0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter)
       ! CALL timestop(handle3)
 
       ! ! second back-transformation i->mu
       ! CALL timeset(routineN//"_back_o",handle3)
-      ! CALL cp_dbcsr_set(matrix_P_munu_nosym%matrix,0.0_dp,error=error_sub)
+      ! CALL cp_dbcsr_set(matrix_P_munu_nosym%matrix,0.0_dp)
       ! CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mo_coeff_o, matrix_P_inu%matrix, &
-      !                         0.0_dp, matrix_P_munu_nosym%matrix, filter_eps=eps_filter, error=error_sub)
+      !                         0.0_dp, matrix_P_munu_nosym%matrix, filter_eps=eps_filter)
       ! symmetrize
-      CALL cp_dbcsr_set(matrix_P_munu%matrix,0.0_dp,error=error_sub)
-      CALL cp_dbcsr_transposed(matrix_P_munu%matrix,matrix_P_munu_nosym%matrix,&
-                               error=error_sub)
+      CALL cp_dbcsr_set(matrix_P_munu%matrix,0.0_dp)
+      CALL cp_dbcsr_transposed(matrix_P_munu%matrix,matrix_P_munu_nosym%matrix)
       CALL cp_dbcsr_add(matrix_P_munu%matrix,matrix_P_munu_nosym%matrix,&
-                        alpha_scalar=2.0_dp,beta_scalar=2.0_dp,error=error)
+                        alpha_scalar=2.0_dp,beta_scalar=2.0_dp)
       ! this is a trick to avoid that integrate_v_rspace starts to cry
-      CALL cp_dbcsr_copy_into_existing(mat_munu%matrix, matrix_P_munu%matrix, error)
-      CALL cp_dbcsr_copy(matrix_P_munu%matrix,mat_munu%matrix,error=error_sub)
+      CALL cp_dbcsr_copy_into_existing(mat_munu%matrix, matrix_P_munu%matrix)
+      CALL cp_dbcsr_copy(matrix_P_munu%matrix,mat_munu%matrix)
 
       CALL timestop(handle3)
 
@@ -545,7 +544,7 @@ MODULE mp2_ri_grad
       ! integrate the potential of the single gaussian and update 
       ! 3-center forces
       CALL timeset(routineN//"_int",handle3)
-      CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
       CALL integrate_v_rspace(rho_r, h=mat_munu,p=matrix_P_munu,&
                               qs_env=qs_env,calculate_forces=.TRUE.,compute_tau=.FALSE.,gapw=.FALSE.,&
                               basis_set_id=use_orb_basis_set, pw_env_external=pw_env_sub,&
@@ -557,20 +556,20 @@ MODULE mp2_ri_grad
       ! first contract mat_munu with the half back transformed Gamma_i_nu
       ! in order to update Lag_mu_i_1
       CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, matrix_P_inu%matrix, &
-                             1.0_dp, Lag_mu_i_1%matrix, filter_eps=eps_filter, error=error_sub)
+                             1.0_dp, Lag_mu_i_1%matrix, filter_eps=eps_filter)
 
       ! transform first index of mat_munu and store the result into matrix_P_inu
-      CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(matrix_P_inu%matrix,0.0_dp)
       CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, mo_coeff_o, &
-                             0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter, error=error_sub)
+                             0.0_dp, matrix_P_inu%matrix, filter_eps=eps_filter)
 
       ! contract the transformend matrix_P_inu with the untransformend Gamma_i_a
       ! in order to update Lag_nu_a_2
       CALL cp_dbcsr_multiply("N", "N", -1.0_dp, matrix_P_inu%matrix, G_P_ia(L_counter)%matrix, &
-                             1.0_dp, Lag_nu_a_2%matrix, filter_eps=eps_filter, error=error_sub)
+                             1.0_dp, Lag_nu_a_2%matrix, filter_eps=eps_filter)
 
       ! release the actual gamma_P_ia
-      CALL cp_dbcsr_release(G_P_ia(L_counter)%matrix,error=error_sub)
+      CALL cp_dbcsr_release(G_P_ia(L_counter)%matrix)
       DEALLOCATE(G_P_ia(L_counter)%matrix,STAT=stat)
       CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
       CALL timestop(handle3)
@@ -817,14 +816,14 @@ MODULE mp2_ri_grad
       END DO
     END IF
 
-    CALL cp_dbcsr_release(matrix_P_inu%matrix,error=error_sub)
+    CALL cp_dbcsr_release(matrix_P_inu%matrix)
     DEALLOCATE(matrix_P_inu%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_release(matrix_P_munu_nosym%matrix,error=error_sub)
+    CALL cp_dbcsr_release(matrix_P_munu_nosym%matrix)
     DEALLOCATE(matrix_P_munu_nosym%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
-    CALL cp_dbcsr_release(matrix_P_munu%matrix,error=error_sub)
+    CALL cp_dbcsr_release(matrix_P_munu%matrix)
     DEALLOCATE(matrix_P_munu%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
@@ -853,7 +852,7 @@ MODULE mp2_ri_grad
     CALL copy_dbcsr_to_fm(matrix=Lag_mu_i_1%matrix, fm=L1_mu_i, error=error_sub)
 
     ! release Lag_mu_i_1
-    CALL cp_dbcsr_release(Lag_mu_i_1%matrix,error=error_sub)
+    CALL cp_dbcsr_release(Lag_mu_i_1%matrix)
     DEALLOCATE(Lag_mu_i_1%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
@@ -866,7 +865,7 @@ MODULE mp2_ri_grad
     CALL copy_dbcsr_to_fm(matrix=Lag_nu_a_2%matrix, fm=L2_nu_a, error=error_sub)
 
     ! release Lag_nu_a_2
-    CALL cp_dbcsr_release(Lag_nu_a_2%matrix,error=error_sub)
+    CALL cp_dbcsr_release(Lag_nu_a_2%matrix)
     DEALLOCATE(Lag_nu_a_2%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
@@ -1846,3 +1845,4 @@ MODULE mp2_ri_grad
   END SUBROUTINE
 
 END MODULE mp2_ri_grad
+

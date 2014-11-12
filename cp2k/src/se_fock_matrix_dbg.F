@@ -59,7 +59,7 @@ CONTAINS
     ! Zero structures only for debugging purpose
     CALL init_qs_energy(energy)
     DO ispin = 1, nspins
-       CALL cp_dbcsr_set(ks_matrix(ispin)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(ks_matrix(ispin)%matrix,0.0_dp)
     END DO
 
     ! Evaluate Coulomb Long-Range
@@ -68,8 +68,7 @@ CONTAINS
 
     ! Compute the Hartree energy
     DO ispin=1,nspins
-       CALL cp_dbcsr_trace(ks_matrix(ispin)%matrix,matrix_p(ispin)%matrix,trace=ecoul,&
-            error=error)
+       CALL cp_dbcsr_trace(ks_matrix(ispin)%matrix,matrix_p(ispin)%matrix,trace=ecoul)
        energy%hartree = energy%hartree + ecoul
 
        WRITE(*,*)ispin,"ECOUL ",ecoul
@@ -83,3 +82,4 @@ CONTAINS
   END SUBROUTINE dbg_energy_coulomb_lr
 
 END MODULE se_fock_matrix_dbg
+

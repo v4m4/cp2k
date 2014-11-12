@@ -324,13 +324,12 @@ CONTAINS
        NULLIFY ( dh )
        h_duplicated = .TRUE.
        ALLOCATE(dh)
-       CALL cp_dbcsr_init(dh, error=error)
+       CALL cp_dbcsr_init(dh)
        CALL cp_dbcsr_create(dh, 'LocalH', &
             cp_dbcsr_distribution (h%matrix),&
             cp_dbcsr_get_matrix_type (h%matrix), cp_dbcsr_row_block_sizes(h%matrix),&
             cp_dbcsr_col_block_sizes(h%matrix), cp_dbcsr_get_num_blocks(h%matrix),&
-            cp_dbcsr_get_data_size(h%matrix),&
-            error=error)
+            cp_dbcsr_get_data_size(h%matrix))
 
     END IF
 
@@ -341,8 +340,8 @@ CONTAINS
           p_duplicated = .TRUE.
           NULLIFY ( deltap )
           ALLOCATE(deltap)
-          CALL cp_dbcsr_init(deltap, error=error)
-          CALL cp_dbcsr_copy(deltap,p%matrix,name="LocalP",error=error)
+          CALL cp_dbcsr_init(deltap)
+          CALL cp_dbcsr_copy(deltap,p%matrix,name="LocalP")
        END IF
     END IF
 
@@ -432,7 +431,7 @@ CONTAINS
     ! by a single thread for each grid level
     loop_gridlevels: DO igrid_level = 1, gridlevel_info%ngrid_levels
 
-    CALL cp_dbcsr_work_create(dh,work_mutable=.TRUE.,n=nthread,error=error)
+    CALL cp_dbcsr_work_create(dh,work_mutable=.TRUE.,n=nthread)
 !$  dist => dh%matrix%m%dist
 !$  CALL cp_assert (dbcsr_distribution_has_threads(dist), cp_fatal_level,&
 !$       cp_internal_error, routineN, "No thread distribution defined.",&
@@ -533,7 +532,7 @@ CONTAINS
           NULLIFY(h_block)
           CALL cp_dbcsr_get_block_p(dh,brow,bcol,h_block,found)
           IF (.NOT.ASSOCIATED(h_block)) THEN
-               CALL cp_dbcsr_add_block_node ( dh, brow, bcol, h_block ,error=error)
+               CALL cp_dbcsr_add_block_node ( dh, brow, bcol, h_block )
           END IF
 
           IF (pab_required) THEN
@@ -752,7 +751,7 @@ CONTAINS
     END DO loop_pairs
 !$omp end do
 
-    CALL cp_dbcsr_finalize(dh, error=error)
+    CALL cp_dbcsr_finalize(dh)
 
     END DO loop_gridlevels
 
@@ -767,14 +766,14 @@ CONTAINS
        scatter = .FALSE.
        CALL rs_distribute_matrix (rs_descs, dh, atom_pair_recv, atom_pair_send,&
             natom, scatter, error, h%matrix)
-       CALL cp_dbcsr_deallocate_matrix ( dh ,error=error)
+       CALL cp_dbcsr_deallocate_matrix ( dh )
 
     ELSE
        NULLIFY ( dh, ddv )
     END IF
 
     IF ( p_duplicated ) THEN
-       CALL cp_dbcsr_deallocate_matrix ( deltap ,error=error)
+       CALL cp_dbcsr_deallocate_matrix ( deltap )
     ELSE
        NULLIFY ( deltap )
     END IF
@@ -805,3 +804,4 @@ CONTAINS
   END SUBROUTINE integrate_v_rspace
 
 END MODULE qs_integrate_potential_product
+

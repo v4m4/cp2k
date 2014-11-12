@@ -271,7 +271,7 @@ CONTAINS
     mymat(1)%matrix=>matrix
     CALL cp_dbcsr_setup_arnoldi_data(arnoldi,mymat,max_iter=50,threshold=1.0E-4_dp,&
                                      selection_crit=1,nval_request=2)
-    CALL cp_dbcsr_arnoldi_ev(mymat,arnoldi,error)
+    CALL cp_dbcsr_arnoldi_ev(mymat,arnoldi)
     max_eV=REAL(get_selected_ritz_val(arnoldi,2),dp)
     min_eV=REAL(get_selected_ritz_val(arnoldi,1),dp)
     cond_num=max_eV/min_eV
@@ -302,17 +302,17 @@ CONTAINS
     CALL timeset(routineN,handle)
     IF(ASSOCIATED(fm_matrix))THEN
        IF(.NOT.ASSOCIATED(dbcsr_matrix)) THEN
-          CALL cp_dbcsr_init_p(dbcsr_matrix,error=error)
+          CALL cp_dbcsr_init_p(dbcsr_matrix)
           IF(mixed_precision) THEN
              CALL cp_dbcsr_create(dbcsr_matrix, "transfered_matrix", &
                   cp_dbcsr_distribution(template_mat), dbcsr_type_no_symmetry,&
                   cp_dbcsr_row_block_sizes(template_mat), cp_dbcsr_col_block_sizes(template_mat), &
-                  0, 0, dbcsr_type_real_4, error=error)
+                  0, 0, dbcsr_type_real_4)
           ELSE
              CALL cp_dbcsr_create(dbcsr_matrix, "preconditioner_env%dbcsr_matrix", &
                   cp_dbcsr_distribution(template_mat), dbcsr_type_no_symmetry,&
                   cp_dbcsr_row_block_sizes(template_mat), cp_dbcsr_col_block_sizes(template_mat), &
-                  0, 0, dbcsr_type_real_default, error=error)
+                  0, 0, dbcsr_type_real_default)
           ENDIF
        ENDIF
 !       CALL cp_fm_create(fm_tmp,matrix_struct=fm_matrix%matrix_struct,error=error)
@@ -365,7 +365,7 @@ CONTAINS
        CALL cp_fm_struct_release(fm_struct_tmp,error=error)
 
        CALL copy_dbcsr_to_fm(dbcsr_matrix,fm_matrix,error=error)
-       CALL cp_dbcsr_release(dbcsr_matrix,error)
+       CALL cp_dbcsr_release(dbcsr_matrix)
        DEALLOCATE(dbcsr_matrix)
     END IF
 
@@ -374,3 +374,4 @@ CONTAINS
   END SUBROUTINE transfer_dbcsr_to_fm
 
 END MODULE preconditioner_solvers
+

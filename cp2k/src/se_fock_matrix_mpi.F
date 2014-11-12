@@ -180,7 +180,7 @@ CONTAINS
 
        DO ispin=1,nspins
           ! Copy the core matrix into the fock matrix
-          CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix,error=error)
+          CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix)
        END DO
 
 !      WRITE ( *, * ) 'KS_ENV%s_mstruct_changed', ks_env%s_mstruct_changed
@@ -233,7 +233,7 @@ CONTAINS
        ! Compute the Hartree energy
        ! NOTE: If we are performing SCP-NDDO, ks_matrix contains coulomb piece from SCP.
        DO ispin=1,nspins
-          CALL cp_dbcsr_trace(ks_matrix(ispin)%matrix,matrix_p(ispin)%matrix,trace=ecoul,error=error)
+          CALL cp_dbcsr_trace(ks_matrix(ispin)%matrix,matrix_p(ispin)%matrix,trace=ecoul)
           energy%hartree = energy%hartree + ecoul
        END DO
 !      WRITE ( *, * ) 'AFTER Hartree',  ecoul, energy%hartree
@@ -245,10 +245,10 @@ CONTAINS
           DO ispin = 1, nspins
              ! If QM/MM sumup the 1el Hamiltonian
              CALL cp_dbcsr_add(ks_matrix(ispin)%matrix,qs_env%ks_qmmm_env%matrix_h(1)%matrix,&
-                  1.0_dp,1.0_dp,error=error)
+                  1.0_dp,1.0_dp)
              ! Compute QM/MM Energy
              CALL cp_dbcsr_trace(qs_env%ks_qmmm_env%matrix_h(1)%matrix,&
-                  matrix_p(ispin)%matrix,trace=qmmm_el,error=error)
+                  matrix_p(ispin)%matrix,trace=qmmm_el)
              energy%qmmm_el = energy%qmmm_el + qmmm_el
           END DO
        END IF
@@ -302,7 +302,7 @@ CONTAINS
              ENDIF
              CALL cp_dbcsr_get_info(mo_coeff,nfullcols_total=ncol_global)
              CALL cp_dbcsr_multiply('n','n',1.0_dp,ks_matrix(ispin)%matrix,mo_coeff,&
-                  0.0_dp,mo_derivs(ispin)%matrix, error=error)
+                  0.0_dp,mo_derivs(ispin)%matrix)
           ENDDO
        ENDIF
 
@@ -313,4 +313,5 @@ CONTAINS
   END SUBROUTINE build_se_fock_matrix_mpi
 
 END MODULE se_fock_matrix_mpi
+
 

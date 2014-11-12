@@ -389,15 +389,15 @@ CONTAINS
     ! allocate some work matrices
     ALLOCATE(rmatrix,cmatrix,tmpmat,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(rmatrix,error=error)
-    CALL cp_dbcsr_init(cmatrix,error=error)
-    CALL cp_dbcsr_init(tmpmat,error=error)
+    CALL cp_dbcsr_init(rmatrix)
+    CALL cp_dbcsr_init(cmatrix)
+    CALL cp_dbcsr_init(tmpmat)
     CALL cp_dbcsr_create(rmatrix,template=matrix_ks(1,1)%matrix,&
-         matrix_type=dbcsr_type_symmetric,error=error)
+         matrix_type=dbcsr_type_symmetric)
     CALL cp_dbcsr_create(cmatrix,template=matrix_ks(1,1)%matrix,&
-         matrix_type=dbcsr_type_antisymmetric,error=error)
+         matrix_type=dbcsr_type_antisymmetric)
     CALL cp_dbcsr_create(tmpmat,template=matrix_ks(1,1)%matrix,&
-         matrix_type=dbcsr_type_no_symmetry,error=error)
+         matrix_type=dbcsr_type_no_symmetry)
     CALL cp_dbcsr_alloc_block_from_nbl(rmatrix,sab_nl,error)
     CALL cp_dbcsr_alloc_block_from_nbl(cmatrix,sab_nl,error)
 
@@ -435,25 +435,25 @@ CONTAINS
                 ! FT of matrices KS and S, then transfer to FM type
                 CALL rskp_transform(rmatrix=rmatrix,rsmat=matrix_ks,ispin=ispin,&
                      xkp=xkp(1:3,ik),cell_to_index=cell_to_index,sab_nl=sab_nl,error=error)
-                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(1)%matrix,error=error)
                 CALL rskp_transform(rmatrix=rmatrix,rsmat=matrix_s,ispin=ispin,&
                      xkp=xkp(1:3,ik),cell_to_index=cell_to_index,sab_nl=sab_nl,error=error)
-                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(3)%matrix,error=error)
              ELSE
                 ! FT of matrices KS and S, then transfer to FM type
                 CALL rskp_transform(rmatrix=rmatrix,cmatrix=cmatrix,rsmat=matrix_ks,ispin=ispin,&
                      xkp=xkp(1:3,ik),cell_to_index=cell_to_index,sab_nl=sab_nl,error=error)
-                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(1)%matrix,error=error)
-                CALL cp_dbcsr_desymmetrize(cmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(cmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(2)%matrix,error=error)
                 CALL rskp_transform(rmatrix=rmatrix,cmatrix=cmatrix,rsmat=matrix_s,ispin=ispin,&
                      xkp=xkp(1:3,ik),cell_to_index=cell_to_index,sab_nl=sab_nl,error=error)
-                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(rmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(3)%matrix,error=error)
-                CALL cp_dbcsr_desymmetrize(cmatrix,tmpmat,error=error)
+                CALL cp_dbcsr_desymmetrize(cmatrix,tmpmat)
                 CALL copy_dbcsr_to_fm(tmpmat,fmwork(4)%matrix,error=error)
              END IF
              ! transfer to kpoint group
@@ -511,9 +511,9 @@ CONTAINS
     ! density matrices in real space
     CALL kpoint_density_transform(kpoints,scf_env%p_mix_kp,fmwork,error)
 
-    CALL cp_dbcsr_deallocate_matrix(rmatrix,error=error)
-    CALL cp_dbcsr_deallocate_matrix(cmatrix,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmpmat,error=error)
+    CALL cp_dbcsr_deallocate_matrix(rmatrix)
+    CALL cp_dbcsr_deallocate_matrix(cmatrix)
+    CALL cp_dbcsr_deallocate_matrix(tmpmat)
 
     IF(use_real_wfn) THEN
        CALL cp_fm_release(rksmat,error=error)
@@ -614,8 +614,8 @@ CONTAINS
     END DO
 
     DO ispin=1,nspin
-       CALL cp_dbcsr_copy(subspace_env%p_matrix_store(ispin)%matrix, rho%rho_ao(ispin)%matrix,error=error )
-       CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix, scf_env%p_mix_new(ispin)%matrix,error=error )
+       CALL cp_dbcsr_copy(subspace_env%p_matrix_store(ispin)%matrix, rho%rho_ao(ispin)%matrix )
+       CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix, scf_env%p_mix_new(ispin)%matrix )
     END DO
 
     subspace_env%p_matrix_mix => scf_env%p_mix_new
@@ -712,7 +712,7 @@ CONTAINS
       END IF
 
       DO ispin=1,nspin
-         CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix,subspace_env%p_matrix_mix(ispin)%matrix ,error=error )
+         CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix,subspace_env%p_matrix_mix(ispin)%matrix  )
       END DO
       ! update of density
       CALL qs_rho_update_rho(rho, qs_env=qs_env, error=error)
@@ -741,8 +741,8 @@ CONTAINS
 
     NULLIFY (subspace_env%p_matrix_mix)
     DO ispin=1,nspin
-        CALL cp_dbcsr_copy( scf_env%p_mix_new(ispin)%matrix,rho%rho_ao(ispin)%matrix,error=error )
-        CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix,  subspace_env%p_matrix_store(ispin)%matrix ,error=error )
+        CALL cp_dbcsr_copy( scf_env%p_mix_new(ispin)%matrix,rho%rho_ao(ispin)%matrix )
+        CALL cp_dbcsr_copy( rho%rho_ao(ispin)%matrix,  subspace_env%p_matrix_store(ispin)%matrix  )
 
         DEALLOCATE(eval_first(ispin)%array,occ_first(ispin)%array)
     END DO
@@ -793,20 +793,20 @@ SUBROUTINE diag_subspace_allocate(subspace_env,qs_env,mos,error)
     nspin = SIZE(mos)
 !   *** allocate p_atrix_store ***
     IF (.NOT.ASSOCIATED(subspace_env%p_matrix_store)) THEN
-       CALL cp_dbcsr_allocate_matrix_set(subspace_env%p_matrix_store,nspin,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(subspace_env%p_matrix_store,nspin)
 
        DO i=1,nspin
           ALLOCATE(subspace_env%p_matrix_store(i)%matrix)
-          CALL cp_dbcsr_init(subspace_env%p_matrix_store(i)%matrix,error=error)
+          CALL cp_dbcsr_init(subspace_env%p_matrix_store(i)%matrix)
           CALL cp_dbcsr_create(matrix=subspace_env%p_matrix_store(i)%matrix, &
                name="DENSITY_STORE", &
                dist=cp_dbcsr_distribution(matrix_s(1)%matrix), matrix_type=dbcsr_type_symmetric,&
                row_blk_size=cp_dbcsr_row_block_sizes(matrix_s(1)%matrix), &
                col_blk_size=cp_dbcsr_col_block_sizes(matrix_s(1)%matrix), &
-               nblks=0, nze=0, error=error)
+               nblks=0, nze=0)
           CALL cp_dbcsr_alloc_block_from_nbl(subspace_env%p_matrix_store(i)%matrix,&
                sab_orb, error=error)
-          CALL cp_dbcsr_set(subspace_env%p_matrix_store(i)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(subspace_env%p_matrix_store(i)%matrix,0.0_dp)
        ENDDO
 
     END IF
@@ -1683,3 +1683,4 @@ END SUBROUTINE diag_subspace_allocate
   END SUBROUTINE  do_block_davidson_diag
 
 END MODULE qs_scf_diagonalization
+

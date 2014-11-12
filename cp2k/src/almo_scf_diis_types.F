@@ -125,12 +125,12 @@ CONTAINS
 
     ! create matrices
     DO im=1,diis_env%max_buffer_length
-       CALL cp_dbcsr_init(diis_env%m_err(im),error=error)
+       CALL cp_dbcsr_init(diis_env%m_err(im))
        CALL cp_dbcsr_create(diis_env%m_err(im),&
-               template=sample_err,error=error)
-       CALL cp_dbcsr_init(diis_env%m_var(im),error=error)
+               template=sample_err)
+       CALL cp_dbcsr_init(diis_env%m_var(im))
        CALL cp_dbcsr_create(diis_env%m_var(im),&
-               template=sample_var,error=error)
+               template=sample_var)
     ENDDO
     
     ! current B matrices are only 1-by-1, they will be expanded on-the-fly
@@ -270,8 +270,8 @@ CONTAINS
 
     ! store a var-error pair
     IF (diis_env%diis_env_type.eq.diis_env_dbcsr) THEN
-       CALL cp_dbcsr_copy(diis_env%m_var(in_point),var,error=error) 
-       CALL cp_dbcsr_copy(diis_env%m_err(in_point),err,error=error) 
+       CALL cp_dbcsr_copy(diis_env%m_var(in_point),var) 
+       CALL cp_dbcsr_copy(diis_env%m_err(in_point),err) 
     ELSE IF (diis_env%diis_env_type.eq.diis_env_domain) THEN
        CALL copy_submatrices(d_var,diis_env%d_var(in_point,:),copy_data=.TRUE.,error=error) 
        CALL copy_submatrices(d_err,diis_env%d_err(in_point,:),copy_data=.TRUE.,error=error) 
@@ -459,10 +459,10 @@ CONTAINS
           ! extrapolate the variable
           checksum=0.0_dp
           IF (diis_env%diis_env_type.eq.diis_env_dbcsr) THEN
-             CALL cp_dbcsr_set(extr_var,0.0_dp,error=error)
+             CALL cp_dbcsr_set(extr_var,0.0_dp)
              DO im=1,diis_env%buffer_length
                 CALL cp_dbcsr_add(extr_var,diis_env%m_var(im),&
-                        1.0_dp,coeff(im+1),error=error)
+                        1.0_dp,coeff(im+1))
                 checksum=checksum+coeff(im+1)
              ENDDO
           ELSE IF (diis_env%diis_env_type.eq.diis_env_domain) THEN
@@ -541,7 +541,7 @@ CONTAINS
     SELECT CASE(diis_env%error_type)
     CASE (diis_error_orthogonal)
        IF (diis_env%diis_env_type.eq.diis_env_dbcsr) THEN
-          CALL cp_dbcsr_trace(A, B, trace, 'T', 'N', error=error)
+          CALL cp_dbcsr_trace(A, B, trace, 'T', 'N')
        ELSE IF (diis_env%diis_env_type.eq.diis_env_domain) THEN
           CPPrecondition(SIZE(d_A%mdata,1).eq.SIZE(d_B%mdata,1),cp_failure_level,routineP,error,failure)
           CPPrecondition(SIZE(d_A%mdata,2).eq.SIZE(d_B%mdata,2),cp_failure_level,routineP,error,failure)
@@ -583,8 +583,8 @@ CONTAINS
     ! release matrices
     DO im=1,diis_env%max_buffer_length
        IF (diis_env%diis_env_type.eq.diis_env_dbcsr) THEN
-          CALL cp_dbcsr_release(diis_env%m_err(im),error=error)
-          CALL cp_dbcsr_release(diis_env%m_var(im),error=error)
+          CALL cp_dbcsr_release(diis_env%m_err(im))
+          CALL cp_dbcsr_release(diis_env%m_var(im))
        ELSE IF (diis_env%diis_env_type.eq.diis_env_domain) THEN
           CALL release_submatrices(diis_env%d_var(im,:),error=error)
           CALL release_submatrices(diis_env%d_err(im,:),error=error)
@@ -606,4 +606,5 @@ CONTAINS
   END SUBROUTINE almo_scf_diis_release
 
 END MODULE almo_scf_diis_types
+
 

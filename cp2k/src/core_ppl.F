@@ -154,9 +154,9 @@ CONTAINS
     IF (calculate_forces) THEN
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp)
        END IF
     END IF
 
@@ -482,9 +482,9 @@ CONTAINS
        ! *** from the total density (1) and the spin density (2)     ***
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp,error=error)
+                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp)
        END IF
     END IF
 
@@ -495,3 +495,4 @@ CONTAINS
 !==========================================================================================================
 
 END MODULE core_ppl
+

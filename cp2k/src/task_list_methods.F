@@ -2512,7 +2512,7 @@ SUBROUTINE rs_distribute_matrix( rs_descs, pmat, atom_pair_send, atom_pair_recv,
     ! We will insert new blocks into P, so create mutable work matrices
     CALL cp_dbcsr_work_create(pmat,work_mutable=.TRUE.,&
       nblks_guess=SIZE(atom_pair_recv)/nthread,sizedata_guess=SIZE(recv_buf_r)/nthread,&
-      n=nthread,error=error)
+      n=nthread)
   END IF
 
 ! wait for comm and setup to finish
@@ -2575,7 +2575,7 @@ SUBROUTINE rs_distribute_matrix( rs_descs, pmat, atom_pair_send, atom_pair_recv,
 
   IF (scatter) THEN
     ! Blocks were added to P
-    CALL cp_dbcsr_finalize(pmat, error=error)
+    CALL cp_dbcsr_finalize(pmat)
   END IF
 !$omp end parallel
 
@@ -2846,3 +2846,4 @@ END SUBROUTINE rs_distribute_matrix
   END FUNCTION decode_level
 
 END MODULE task_list_methods
+

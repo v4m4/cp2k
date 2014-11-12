@@ -175,15 +175,15 @@ CONTAINS
          max_multipole=do_multipole_none, pc_coulomb_int=.FALSE.)
 
     ! Allocate the core Hamiltonian matrix
-    CALL cp_dbcsr_allocate_matrix_set(ks_qmmm_env_loc%matrix_h,1,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(ks_qmmm_env_loc%matrix_h,1)
     ALLOCATE(ks_qmmm_env_loc%matrix_h(1)%matrix, STAT=stat)
     CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
 
-    CALL cp_dbcsr_init(ks_qmmm_env_loc%matrix_h(1)%matrix,error)
+    CALL cp_dbcsr_init(ks_qmmm_env_loc%matrix_h(1)%matrix)
 
     CALL cp_dbcsr_copy(ks_qmmm_env_loc%matrix_h(1)%matrix,matrix_s(1)%matrix,&
-                    name="QMMM HAMILTONIAN MATRIX",error=error)
-    CALL cp_dbcsr_set(ks_qmmm_env_loc%matrix_h(1)%matrix,0.0_dp,error)
+                    name="QMMM HAMILTONIAN MATRIX")
+    CALL cp_dbcsr_set(ks_qmmm_env_loc%matrix_h(1)%matrix,0.0_dp)
 
     SELECT CASE(qmmm_env%qmmm_coupl_type)
     CASE(do_qmmm_coulomb,do_qmmm_gauss,do_qmmm_swave,do_qmmm_pcharge)
@@ -259,7 +259,7 @@ CONTAINS
        CALL semi_empirical_release(se_kind_mm,error)
     CASE(do_qmmm_none)
        ! Zero Matrix
-       CALL cp_dbcsr_set(ks_qmmm_env_loc%matrix_h(1)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(ks_qmmm_env_loc%matrix_h(1)%matrix,0.0_dp)
     END SELECT
     IF (BTEST(cp_print_key_should_output(logger%iter_info,&
          qs_env%input,"QMMM%PRINT%QMMM_MATRIX",error=error),cp_p_file)) THEN
@@ -382,3 +382,4 @@ CONTAINS
   END SUBROUTINE build_se_qmmm_matrix_low
 
 END MODULE qmmm_se_energy
+

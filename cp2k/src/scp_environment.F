@@ -189,13 +189,12 @@ CONTAINS
     CALL array_new (col_blk_sizes, cbs, gift=.TRUE.)
 
     ALLOCATE(pscp)
-    CALL cp_dbcsr_init(pscp,error=error)
+    CALL cp_dbcsr_init(pscp)
     CALL cp_dbcsr_create(matrix=pscp, &
          name="PSCP", &
          dist=dbcsr_dist, matrix_type=dbcsr_type_symmetric,&
          row_blk_size=row_blk_sizes, col_blk_size=col_blk_sizes, &
-         nblks=0, nze=0, mutable_work=.TRUE., replication_type=dbcsr_repl_full, &
-         error=error)
+         nblks=0, nze=0, mutable_work=.TRUE., replication_type=dbcsr_repl_full)
 
     CALL array_release (row_blk_sizes)
     CALL array_release (col_blk_sizes)
@@ -223,7 +222,7 @@ CONTAINS
           CALL cp_dbcsr_add_block_node(matrix=pscp,&
                                     block_row=iatom,&
                                     block_col=iatom,&
-                                    BLOCK=BLOCK,error=error)
+                                    BLOCK=BLOCK)
           DO ii=1,SIZE(block,1)
              DO jj=1,SIZE(block,2)
                 block(ii,jj) = a_scp (ii,jj)
@@ -232,22 +231,22 @@ CONTAINS
        END DO ! ilist
     END DO ! ikind
 
-    CALL cp_dbcsr_finalize(pscp,error=error)
+    CALL cp_dbcsr_finalize(pscp)
 
     CALL cp_dbcsr_get_info ( pscp, nfullrows_total=nrow )
 
     ALLOCATE (ascp_diag(nrow),STAT=stat)
     ALLOCATE (tmp(nrow),STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_get_diag( pscp, tmp, error=error )
+    CALL cp_dbcsr_get_diag( pscp, tmp )
     ascp_diag=tmp
     CALL set_scp_env ( scp_env=scp_env, ascp_diag=ascp_diag, error = error )
 
 
-    CALL cp_dbcsr_set(pscp,0.0_dp,error=error)
+    CALL cp_dbcsr_set(pscp,0.0_dp)
     ALLOCATE(ks_scp)
-    CALL cp_dbcsr_init(ks_scp, error=error)
-    CALL cp_dbcsr_copy(ks_scp,pscp,'KS_SCP',error=error)
+    CALL cp_dbcsr_init(ks_scp)
+    CALL cp_dbcsr_copy(ks_scp,pscp,'KS_SCP')
 
     ! Store integral environment
     NULLIFY ( se_store_int_env )
@@ -270,4 +269,5 @@ CONTAINS
   END SUBROUTINE scp_nddo_init
 
 END MODULE scp_environment
+
 

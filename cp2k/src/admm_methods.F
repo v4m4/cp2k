@@ -381,17 +381,16 @@ MODULE admm_methods
       ELSE
          NULLIFY(matrix_s_tilde)
          ALLOCATE(matrix_s_tilde)
-         CALL cp_dbcsr_init (matrix_s_tilde, error)
+         CALL cp_dbcsr_init (matrix_s_tilde)
          CALL cp_dbcsr_create(matrix_s_tilde, 'MATRIX s_tilde', &
               cp_dbcsr_distribution(matrix_s_aux_fit(1)%matrix), dbcsr_type_symmetric, &
               cp_dbcsr_row_block_sizes(matrix_s_aux_fit(1)%matrix),&
               cp_dbcsr_col_block_sizes(matrix_s_aux_fit(1)%matrix), &
               cp_dbcsr_get_num_blocks(matrix_s_aux_fit(1)%matrix), &
               cp_dbcsr_get_data_size(matrix_s_aux_fit(1)%matrix),&
-              cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix), &
-              error=error)
+              cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix))
 
-         CALL cp_dbcsr_copy(matrix_s_tilde, matrix_s_aux_fit(1)%matrix, error=error)
+         CALL cp_dbcsr_copy(matrix_s_tilde, matrix_s_aux_fit(1)%matrix)
 
          CALL cp_dbcsr_iterator_start(iter, matrix_s_tilde)
          DO WHILE (cp_dbcsr_iterator_blocks_left (iter))
@@ -402,7 +401,7 @@ MODULE admm_methods
          END DO
          CALL cp_dbcsr_iterator_stop(iter)
          CALL copy_dbcsr_to_fm(matrix_s_tilde,admm_env%S_inv,error)
-         CALL cp_dbcsr_deallocate_matrix(matrix_s_tilde,error)
+         CALL cp_dbcsr_deallocate_matrix(matrix_s_tilde)
       ENDIF
 
       CALL cp_fm_upper_to_full(admm_env%S_inv,admm_env%work_aux_aux,error=error)
@@ -754,7 +753,7 @@ MODULE admm_methods
     CALL copy_fm_to_dbcsr(admm_env%work_aux_aux3, density_matrix,keep_sparsity=.TRUE., error=error)
 
     IF( nspins == 1 ) THEN
-      CALL cp_dbcsr_scale(density_matrix, 2.0_dp, error=error)
+      CALL cp_dbcsr_scale(density_matrix, 2.0_dp)
     END IF
 
     CALL timestop(handle)
@@ -895,7 +894,7 @@ MODULE admm_methods
 
        NULLIFY(matrix_k_tilde)
        ALLOCATE(matrix_k_tilde)
-       CALL cp_dbcsr_init (matrix_k_tilde, error)
+       CALL cp_dbcsr_init (matrix_k_tilde)
        CALL cp_dbcsr_create(matrix_k_tilde, 'MATRIX K_tilde', &
             cp_dbcsr_distribution(matrix_ks(ispin)%matrix), &
             dbcsr_type_symmetric,&
@@ -903,12 +902,12 @@ MODULE admm_methods
             cp_dbcsr_col_block_sizes(matrix_ks(ispin)%matrix),&
             cp_dbcsr_get_num_blocks(matrix_ks(ispin)%matrix),&
             cp_dbcsr_get_data_size( matrix_ks(ispin)%matrix),&
-            cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix), error=error)
+            cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix))
 
        CALL cp_fm_to_fm(admm_env%work_orb_orb, admm_env%ks_to_be_merged(ispin)%matrix, error=error)
 
-       CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix, error=error)
-       CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp, error)
+       CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix)
+       CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp)
        CALL copy_fm_to_dbcsr(admm_env%work_orb_orb, matrix_k_tilde, keep_sparsity=.TRUE., error=error)
 
        IF(admm_env%block_dm) THEN
@@ -923,9 +922,9 @@ MODULE admm_methods
           CALL cp_dbcsr_iterator_stop(iter)
        ENDIF
 
-       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp, error)
+       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp)
 
-       CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde,error)
+       CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde)
 
     END DO !spin-loop
 
@@ -1056,7 +1055,7 @@ MODULE admm_methods
 
        NULLIFY(matrix_k_tilde)
        ALLOCATE(matrix_k_tilde)
-       CALL cp_dbcsr_init (matrix_k_tilde, error)
+       CALL cp_dbcsr_init (matrix_k_tilde)
        CALL cp_dbcsr_create(matrix_k_tilde, 'MATRIX K_tilde', &
             cp_dbcsr_distribution(matrix_ks(ispin)%matrix),&
             dbcsr_type_symmetric,&
@@ -1064,12 +1063,12 @@ MODULE admm_methods
             cp_dbcsr_col_block_sizes(matrix_ks(ispin)%matrix), &
             cp_dbcsr_get_num_blocks(matrix_ks(ispin)%matrix), &
             cp_dbcsr_get_data_size(matrix_ks(ispin)%matrix),&
-            cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix), error=error)
+            cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix))
 
        CALL cp_fm_to_fm(admm_env%work_orb_orb, admm_env%ks_to_be_merged(ispin)%matrix, error=error)
 
-       CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix, error=error)
-       CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp, error)
+       CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix)
+       CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp)
        CALL copy_fm_to_dbcsr(admm_env%work_orb_orb, matrix_k_tilde, keep_sparsity=.TRUE.,&
             error=error)
 
@@ -1077,9 +1076,9 @@ MODULE admm_methods
                        1.0_dp,admm_env%work_orb_orb,mo_coeff,0.0_dp,&
                        admm_env%mo_derivs_tmp(ispin)%matrix,error)
 
-       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp, error)
+       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp)
 
-       CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde,error)
+       CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde)
 
     ENDDO !spin loop
     CALL timestop(handle)
@@ -1296,7 +1295,7 @@ MODULE admm_methods
             END IF
           END DO
           CALL cp_dbcsr_iterator_stop(iter)
-          CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_ks_aux_fit(ispin)%matrix, 1.0_dp, 1.0_dp, error)
+          CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_ks_aux_fit(ispin)%matrix, 1.0_dp, 1.0_dp)
 
        ELSE
 
@@ -1318,17 +1317,17 @@ MODULE admm_methods
 
           NULLIFY(matrix_k_tilde)
           ALLOCATE(matrix_k_tilde)
-          CALL cp_dbcsr_init (matrix_k_tilde, error)
+          CALL cp_dbcsr_init (matrix_k_tilde)
           CALL cp_dbcsr_create(matrix_k_tilde,template=matrix_ks(ispin)%matrix,&
-                               name='MATRIX K_tilde', matrix_type='S', error=error)
-          CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp, error)
+                               name='MATRIX K_tilde', matrix_type='S')
+          CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix)
+          CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp)
           CALL copy_fm_to_dbcsr(admm_env%work_orb_orb, matrix_k_tilde, keep_sparsity=.TRUE.,&
                error=error)
 
-          CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp, error)
+          CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp)
 
-          CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde,error)
+          CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde)
        ENDIF
     ENDDO !spin loop
     CALL timestop(handle)
@@ -1578,21 +1577,20 @@ MODULE admm_methods
     ! *** Create sparse work matrices
 
     ALLOCATE(matrix_w_s)
-    CALL cp_dbcsr_init (matrix_w_s, error)
+    CALL cp_dbcsr_init (matrix_w_s)
     CALL cp_dbcsr_create(matrix_w_s, 'W MATRIX AUX S', &
          cp_dbcsr_distribution(matrix_s_aux_fit(1)%matrix), dbcsr_type_no_symmetry, &
          cp_dbcsr_row_block_sizes(matrix_s_aux_fit(1)%matrix),&
          cp_dbcsr_col_block_sizes(matrix_s_aux_fit(1)%matrix), &
          cp_dbcsr_get_num_blocks(matrix_s_aux_fit(1)%matrix), &
          cp_dbcsr_get_data_size(matrix_s_aux_fit(1)%matrix),&
-         cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix), &
-         error=error)
+         cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix))
     CALL cp_dbcsr_alloc_block_from_nbl(matrix_w_s,sab_aux_fit_asymm,error=error)
 
     ALLOCATE(matrix_w_q)
-    CALL cp_dbcsr_init(matrix_w_q, error=error)
+    CALL cp_dbcsr_init(matrix_w_q)
     CALL cp_dbcsr_copy(matrix_w_q,matrix_s_aux_fit_vs_orb(1)%matrix,&
-                    "W MATRIX AUX Q",error=error)
+                    "W MATRIX AUX Q")
 
     DO ispin=1, dft_control%nspins
         nmo = admm_env%nmo(ispin)
@@ -1709,8 +1707,8 @@ MODULE admm_methods
     ENDDO !spin loop
 
     ! *** Deallocated weighted density matrices
-    CALL cp_dbcsr_deallocate_matrix(matrix_w_s,error)
-    CALL cp_dbcsr_deallocate_matrix(matrix_w_q,error)
+    CALL cp_dbcsr_deallocate_matrix(matrix_w_s)
+    CALL cp_dbcsr_deallocate_matrix(matrix_w_q)
 
     CALL timestop(handle)
 
@@ -1741,7 +1739,7 @@ MODULE admm_methods
     CALL timeset(routineN,handle)
 
 
-    CALL cp_dbcsr_set(density_matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(density_matrix,0.0_dp)
     nao_aux_fit = admm_env%nao_aux_fit
     nmo = admm_env%nmo(ispin)
     CALL cp_fm_to_fm(admm_env%C_hat(ispin)%matrix, admm_env%work_aux_nmo(ispin)%matrix, error=error)
@@ -1801,7 +1799,7 @@ MODULE admm_methods
     CALL timeset(routineN,handle)
 
    ! ** set blocked density matrix to 0
-   CALL cp_dbcsr_set(density_matrix_aux, 0.0_dp, error)
+   CALL cp_dbcsr_set(density_matrix_aux, 0.0_dp)
 
    ! ** now loop through the list and copy corresponding blocks
    CALL cp_dbcsr_iterator_start(iter, density_matrix)
@@ -1860,3 +1858,4 @@ MODULE admm_methods
   END FUNCTION Heaviside
 
 END MODULE admm_methods
+

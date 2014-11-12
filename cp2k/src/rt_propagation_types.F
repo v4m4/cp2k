@@ -182,22 +182,22 @@ CONTAINS
        ALLOCATE(rtp%rho,stat=stat)
        CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
        NULLIFY(rtp%rho%old)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%old,2*nspin,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%old,2*nspin)
        NULLIFY(rtp%rho%next)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%next,2*nspin,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%next,2*nspin)
        NULLIFY(rtp%rho%new)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%new,2*nspin,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%new,2*nspin)
        NULLIFY(rtp%rho%last_iter)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%last_iter,2*nspin,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%rho%last_iter,2*nspin)
        DO i=1,2*nspin
-          CALL cp_dbcsr_init_p(rtp%rho%old(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%rho%old(i)%matrix,template=template,matrix_type="N",error=error)
-          CALL cp_dbcsr_init_p(rtp%rho%next(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%rho%next(i)%matrix,template=template,matrix_type="N",error=error)
-          CALL cp_dbcsr_init_p(rtp%rho%new(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%rho%new(i)%matrix,template=template,matrix_type="N",error=error)
-          CALL cp_dbcsr_init_p(rtp%rho%last_iter(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%rho%last_iter(i)%matrix,template=template,matrix_type="N",error=error)
+          CALL cp_dbcsr_init_p(rtp%rho%old(i)%matrix)
+          CALL cp_dbcsr_create(rtp%rho%old(i)%matrix,template=template,matrix_type="N")
+          CALL cp_dbcsr_init_p(rtp%rho%next(i)%matrix)
+          CALL cp_dbcsr_create(rtp%rho%next(i)%matrix,template=template,matrix_type="N")
+          CALL cp_dbcsr_init_p(rtp%rho%new(i)%matrix)
+          CALL cp_dbcsr_create(rtp%rho%new(i)%matrix,template=template,matrix_type="N")
+          CALL cp_dbcsr_init_p(rtp%rho%last_iter(i)%matrix)
+          CALL cp_dbcsr_create(rtp%rho%last_iter(i)%matrix,template=template,matrix_type="N")
       END DO
     ELSE
        CALL mpools_get(mpools, ao_mo_fm_pools=ao_mo_fm_pools,&
@@ -264,32 +264,32 @@ CONTAINS
     NULLIFY(rtp%exp_H_old)
     NULLIFY(rtp%exp_H_new)
     NULLIFY(rtp%propagator_matrix)
-    CALL cp_dbcsr_allocate_matrix_set(rtp%exp_H_old,2*nspin,error=error)
-    CALL cp_dbcsr_allocate_matrix_set(rtp%exp_H_new,2*nspin,error=error)
-    CALL cp_dbcsr_allocate_matrix_set(rtp%propagator_matrix,2*nspin,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(rtp%exp_H_old,2*nspin)
+    CALL cp_dbcsr_allocate_matrix_set(rtp%exp_H_new,2*nspin)
+    CALL cp_dbcsr_allocate_matrix_set(rtp%propagator_matrix,2*nspin)
     DO i=1,2*nspin
-       CALL cp_dbcsr_init_p(rtp%exp_H_old(i)%matrix,error=error)
-       CALL cp_dbcsr_create(rtp%exp_H_old(i)%matrix,template=template,matrix_type="N",error=error)
-       CALL cp_dbcsr_init_p(rtp%exp_H_new(i)%matrix,error=error)
-       CALL cp_dbcsr_create(rtp%exp_H_new(i)%matrix,template=template,matrix_type="N",error=error)
-       CALL cp_dbcsr_init_p(rtp%propagator_matrix(i)%matrix,error=error)
-       CALL cp_dbcsr_create(rtp%propagator_matrix(i)%matrix,template=template,matrix_type="N",error=error)
+       CALL cp_dbcsr_init_p(rtp%exp_H_old(i)%matrix)
+       CALL cp_dbcsr_create(rtp%exp_H_old(i)%matrix,template=template,matrix_type="N")
+       CALL cp_dbcsr_init_p(rtp%exp_H_new(i)%matrix)
+       CALL cp_dbcsr_create(rtp%exp_H_new(i)%matrix,template=template,matrix_type="N")
+       CALL cp_dbcsr_init_p(rtp%propagator_matrix(i)%matrix)
+       CALL cp_dbcsr_create(rtp%propagator_matrix(i)%matrix,template=template,matrix_type="N")
     END DO
     NULLIFY(rtp%S_inv)
     ALLOCATE(rtp%S_inv,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(rtp%S_inv,error=error)
-    CALL cp_dbcsr_create(rtp%S_inv,template=template,matrix_type="S",error=error)
+    CALL cp_dbcsr_init(rtp%S_inv)
+    CALL cp_dbcsr_create(rtp%S_inv,template=template,matrix_type="S")
     NULLIFY(rtp%S_half)
     ALLOCATE(rtp%S_half,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(rtp%S_half,error=error)
-    CALL cp_dbcsr_create(rtp%S_half,template=template,matrix_type="S",error=error)
+    CALL cp_dbcsr_init(rtp%S_half)
+    CALL cp_dbcsr_create(rtp%S_half,template=template,matrix_type="S")
     NULLIFY(rtp%S_minus_half)
     ALLOCATE(rtp%S_minus_half,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(rtp%S_minus_half,error=error)
-    CALL cp_dbcsr_create(rtp%S_minus_half,template=template,matrix_type="S",error=error)
+    CALL cp_dbcsr_init(rtp%S_minus_half)
+    CALL cp_dbcsr_create(rtp%S_minus_half,template=template,matrix_type="S")
     NULLIFY(rtp%B_mat)
     NULLIFY(rtp%C_mat)
     NULLIFY(rtp%S_der)
@@ -298,25 +298,25 @@ CONTAINS
     IF(.NOT.rtp_control%fixed_ions)THEN
        ALLOCATE(rtp%B_mat,stat=stat)
        CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-       CALL cp_dbcsr_init(rtp%B_mat,error=error)
-       CALL cp_dbcsr_create(rtp%B_mat,template=template,matrix_type="N",error=error)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%C_mat,3,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%S_der,9,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%SinvH,nspin,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(rtp%SinvB,nspin,error=error)
+       CALL cp_dbcsr_init(rtp%B_mat)
+       CALL cp_dbcsr_create(rtp%B_mat,template=template,matrix_type="N")
+       CALL cp_dbcsr_allocate_matrix_set(rtp%C_mat,3)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%S_der,9)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%SinvH,nspin)
+       CALL cp_dbcsr_allocate_matrix_set(rtp%SinvB,nspin)
        DO i=1,nspin 
-          CALL cp_dbcsr_init_p(rtp%SinvH(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%SinvH(i)%matrix,template=template,matrix_type="N",error=error)
-          CALL cp_dbcsr_init_p(rtp%SinvB(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%SinvB(i)%matrix,template=template,matrix_type="N",error=error)
+          CALL cp_dbcsr_init_p(rtp%SinvH(i)%matrix)
+          CALL cp_dbcsr_create(rtp%SinvH(i)%matrix,template=template,matrix_type="N")
+          CALL cp_dbcsr_init_p(rtp%SinvB(i)%matrix)
+          CALL cp_dbcsr_create(rtp%SinvB(i)%matrix,template=template,matrix_type="N")
        END DO
        DO i=1,3
-          CALL cp_dbcsr_init_p(rtp%C_mat(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%C_mat(i)%matrix,template=template,matrix_type="N",error=error)
+          CALL cp_dbcsr_init_p(rtp%C_mat(i)%matrix)
+          CALL cp_dbcsr_create(rtp%C_mat(i)%matrix,template=template,matrix_type="N")
        END DO
        DO i=1,9
-          CALL cp_dbcsr_init_p(rtp%S_der(i)%matrix,error=error)
-          CALL cp_dbcsr_create(rtp%S_der(i)%matrix,template=template,matrix_type="N",error=error)
+          CALL cp_dbcsr_init_p(rtp%S_der(i)%matrix)
+          CALL cp_dbcsr_create(rtp%S_der(i)%matrix,template=template,matrix_type="N")
        END DO
     END IF
     ALLOCATE(rtp%orders(2,nspin),stat=stat)
@@ -447,18 +447,18 @@ CONTAINS
     failure=.FALSE.
 
 
-    CALL cp_dbcsr_deallocate_matrix_set(rtp%exp_H_old,error)
-    CALL cp_dbcsr_deallocate_matrix_set(rtp%exp_H_new,error)
-    CALL cp_dbcsr_deallocate_matrix_set(rtp%propagator_matrix,error)
+    CALL cp_dbcsr_deallocate_matrix_set(rtp%exp_H_old)
+    CALL cp_dbcsr_deallocate_matrix_set(rtp%exp_H_new)
+    CALL cp_dbcsr_deallocate_matrix_set(rtp%propagator_matrix)
     IF(ASSOCIATED(rtp%rho)) THEN
        IF(ASSOCIATED(rtp%rho%old))&
-            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%old,error)
+            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%old)
        IF(ASSOCIATED(rtp%rho%next))&
-            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%next,error)
+            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%next)
        IF(ASSOCIATED(rtp%rho%new))&
-            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%new,error)
+            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%new)
        IF(ASSOCIATED(rtp%rho%last_iter))&
-            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%last_iter,error)
+            CALL cp_dbcsr_deallocate_matrix_set(rtp%rho%last_iter)
        DEALLOCATE(rtp%rho,stat=stat)
        CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     ENDIF
@@ -476,19 +476,19 @@ CONTAINS
       DEALLOCATE(rtp%mos,stat=stat)
       CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     END IF
-    CALL cp_dbcsr_deallocate_matrix(rtp%S_inv,error)
-    CALL cp_dbcsr_deallocate_matrix(rtp%S_half,error)
-    CALL cp_dbcsr_deallocate_matrix(rtp%S_minus_half,error)
+    CALL cp_dbcsr_deallocate_matrix(rtp%S_inv)
+    CALL cp_dbcsr_deallocate_matrix(rtp%S_half)
+    CALL cp_dbcsr_deallocate_matrix(rtp%S_minus_half)
     IF(ASSOCIATED(rtp%B_mat))&
-         CALL cp_dbcsr_deallocate_matrix(rtp%B_mat,error)
+         CALL cp_dbcsr_deallocate_matrix(rtp%B_mat)
     IF(ASSOCIATED(rtp%C_mat))&
-         CALL cp_dbcsr_deallocate_matrix_set(rtp%C_mat,error)
+         CALL cp_dbcsr_deallocate_matrix_set(rtp%C_mat)
     IF(ASSOCIATED(rtp%S_der))&
-         CALL cp_dbcsr_deallocate_matrix_set(rtp%S_der,error)
+         CALL cp_dbcsr_deallocate_matrix_set(rtp%S_der)
     IF(ASSOCIATED(rtp%SinvH))&
-         CALL cp_dbcsr_deallocate_matrix_set(rtp%SinvH,error)
+         CALL cp_dbcsr_deallocate_matrix_set(rtp%SinvH)
     IF(ASSOCIATED(rtp%SinvB))&
-         CALL cp_dbcsr_deallocate_matrix_set(rtp%SinvB,error)
+         CALL cp_dbcsr_deallocate_matrix_set(rtp%SinvB)
     IF(ASSOCIATED(rtp%history))&
          CALL rtp_history_release(rtp,error)
     DEALLOCATE(rtp%orders,stat=stat)
@@ -525,13 +525,13 @@ CONTAINS
     IF(aspc_order.GT.0)THEN
        IF(rtp%linear_scaling)THEN
           nmat=SIZE(rtp%rho%new)
-          CALL cp_dbcsr_allocate_matrix_set(history%rho_history,nmat,aspc_order,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(history%rho_history,nmat,aspc_order)
           DO i=1,nmat
              DO j=1,aspc_order
-                CALL cp_dbcsr_init_p(history%rho_history(i,j)%matrix,error=error)
+                CALL cp_dbcsr_init_p(history%rho_history(i,j)%matrix)
                 CALL cp_dbcsr_create(history%rho_history(i,j)%matrix,&
                      name="rho_hist"//TRIM(ADJUSTL(cp_to_string(i))),&
-                     template=rtp%rho%new(1)%matrix,error=error)
+                     template=rtp%rho%new(1)%matrix)
              END DO
           END DO
        ELSE
@@ -577,7 +577,7 @@ CONTAINS
     failure=.FALSE.
 
     IF (ASSOCIATED(rtp%history%rho_history)) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(rtp%history%rho_history,error)
+       CALL cp_dbcsr_deallocate_matrix_set(rtp%history%rho_history)
     END IF
 
     IF (ASSOCIATED(rtp%history%mo_history)) THEN
@@ -592,7 +592,7 @@ CONTAINS
     IF (ASSOCIATED(rtp%history%s_history)) THEN
        DO i=1,SIZE(rtp%history%s_history)
           IF (ASSOCIATED(rtp%history%s_history(i)%matrix))&
-             CALL cp_dbcsr_deallocate_matrix(rtp%history%s_history(i)%matrix,error=error)
+             CALL cp_dbcsr_deallocate_matrix(rtp%history%s_history(i)%matrix)
           END DO
           DEALLOCATE(rtp%history%s_history,stat=stat)
           CPPostcondition(stat==0,cp_warning_level,routineP,error,failure)
@@ -605,3 +605,4 @@ CONTAINS
 
 
 END MODULE rt_propagation_types
+

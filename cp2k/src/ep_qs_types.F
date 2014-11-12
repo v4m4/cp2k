@@ -101,8 +101,8 @@ SUBROUTINE ep_qs_release(ep_qs_env,error)
      CPPrecondition(ep_qs_env%ref_count>0,cp_failure_level,routineP,error,failure)
      ep_qs_env%ref_count=ep_qs_env%ref_count-1
      IF(ep_qs_env%ref_count==0) THEN
-        CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dH_coeffs,error=error)
-        CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dS_coeffs,error=error)
+        CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dH_coeffs)
+        CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dS_coeffs)
         DEALLOCATE(ep_qs_env,stat=stat)
         CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
      END IF
@@ -146,7 +146,7 @@ SUBROUTINE ep_qs_set(ep_qs_env, dH_coeffs_ptr, dS_coeffs_ptr, error)
               DO i=1,MIN(SIZE(dH_coeffs_ptr),SIZE(dS_coeffs_ptr))
               END DO
            END IF
-           CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dH_coeffs,error=error)
+           CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dH_coeffs)
         END IF
         ep_qs_env%dH_coeffs => dH_coeffs_ptr
      END IF
@@ -157,7 +157,7 @@ SUBROUTINE ep_qs_set(ep_qs_env, dH_coeffs_ptr, dS_coeffs_ptr, error)
               DO i=1,MIN(SIZE(dS_coeffs_ptr),SIZE(dS_coeffs_ptr))
               END DO
            END IF
-           CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dS_coeffs,error=error)
+           CALL cp_dbcsr_deallocate_matrix_set(ep_qs_env%dS_coeffs)
         END IF
         ep_qs_env%dS_coeffs => dS_coeffs_ptr
      END IF
@@ -166,3 +166,4 @@ SUBROUTINE ep_qs_set(ep_qs_env, dH_coeffs_ptr, dS_coeffs_ptr, error)
 END SUBROUTINE ep_qs_set
 
 END MODULE ep_qs_types
+

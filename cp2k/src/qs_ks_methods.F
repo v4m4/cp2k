@@ -624,7 +624,7 @@ CONTAINS
              ! Initialize the Kohn-Sham matrix with the core Hamiltonian matrix
              DO ispin=1,nspins
                 CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix,&
-                                   name=cp_dbcsr_name(ks_matrix(ispin)%matrix),error=error)
+                                   name=cp_dbcsr_name(ks_matrix(ispin)%matrix))
              END DO
           END IF
 
@@ -690,8 +690,7 @@ CONTAINS
        DO ispin=1,nspins
           IF(.FALSE.)WRITE(*,*) 'before',cp_dbcsr_get_occupation(ks_matrix(ispin)%matrix)
           CALL cp_dbcsr_filter(ks_matrix(ispin)%matrix,&
-               dft_control%qs_control%eps_filter_matrix,&
-               error=error)
+               dft_control%qs_control%eps_filter_matrix)
           IF(.FALSE.)WRITE(*,*) 'after',cp_dbcsr_get_occupation(ks_matrix(ispin)%matrix)
        ENDDO
 
@@ -899,7 +898,7 @@ CONTAINS
              ! Initialize the Kohn-Sham matrix with the core Hamiltonian matrix
              DO ispin=1,nspins
                 CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix,&
-                                   name=cp_dbcsr_name(ks_matrix(ispin)%matrix),error=error)
+                                   name=cp_dbcsr_name(ks_matrix(ispin)%matrix))
              END DO
        END IF
 
@@ -1098,7 +1097,7 @@ CONTAINS
        CALL get_mo_set(mo_set=mo_array(ispin)%mo_set,mo_coeff=mo_coeff,&
             mo_coeff_b=mo_coeff_b, occupation_numbers=occupation_numbers )
        CALL cp_dbcsr_multiply('n','n',1.0_dp,ks_matrix(ispin)%matrix,mo_coeff_b,&
-             0.0_dp,mo_derivs(ispin)%matrix, error=error)
+             0.0_dp,mo_derivs(ispin)%matrix)
 
        IF(dft_control%do_admm_mo) THEN
          CALL get_qs_env(qs_env,&
@@ -1132,7 +1131,7 @@ CONTAINS
 
            CALL get_mo_set(mo_set=mo_array(2)%mo_set,mo_coeff_b=mo_coeff_b)
            CALL cp_dbcsr_multiply('n','n',1.0_dp,ks_matrix(2)%matrix,mo_coeff_b,&
-                      1.0_dp, mo_derivs(1)%matrix, error=error)
+                      1.0_dp, mo_derivs(1)%matrix)
        ENDIF
 
     ENDDO
@@ -1450,7 +1449,7 @@ CONTAINS
     failure=.FALSE.
     NULLIFY(weighted_vectors)
 
-    CALL cp_dbcsr_set(w_matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(w_matrix,0.0_dp)
     CALL cp_fm_create(weighted_vectors,mo_set%mo_coeff%matrix_struct,"weighted_vectors",error=error)
     CALL cp_fm_to_fm(mo_set%mo_coeff,weighted_vectors,error=error)
 
@@ -1553,7 +1552,7 @@ CONTAINS
     CALL cp_gemm('N','N',nrow_global,ncol_global,ncol_global,1.0_dp, &
                     mo_set%mo_coeff,h_block,0.0_dp,weighted_vectors,error=error)
 
-    CALL cp_dbcsr_set(w_matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(w_matrix,0.0_dp)
     CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=w_matrix,&
                             matrix_v=mo_set%mo_coeff,&
                             matrix_g=weighted_vectors,&
@@ -1632,7 +1631,7 @@ CONTAINS
     CALL cp_fm_upper_to_full(p,work,error)
     CALL cp_fm_symm("L","U",nao,nao,1.0_dp,ks,p,0.0_dp,work,error=error)
     CALL cp_gemm("T","N",nao,nao,nao,1.0_dp,p,work,0.0_dp,ks,error=error)
-    CALL cp_dbcsr_set(matrix_w,0.0_dp,error=error)
+    CALL cp_dbcsr_set(matrix_w,0.0_dp)
     CALL copy_fm_to_dbcsr(ks,matrix_w,keep_sparsity=.TRUE., error=error)
 
     CALL cp_fm_release(work,error=error)
@@ -1694,20 +1693,20 @@ CONTAINS
           headline="KOHN-SHAM MATRIX"
           CALL get_kpoint_info(kpoint=kpoints,index_to_cell=index_to_cell,error=error)
           ncount = SIZE(index_to_cell,2)
-          CALL cp_dbcsr_allocate_matrix_set(matrixkp_ks, dft_control%nspins, ncount, error)
+          CALL cp_dbcsr_allocate_matrix_set(matrixkp_ks, dft_control%nspins, ncount)
           refmatrix => matrix_s(1)%matrix
           DO ispin=1,dft_control%nspins
              DO ic=1,ncount
                 ALLOCATE(matrixkp_ks(ispin,ic)%matrix)
-                CALL cp_dbcsr_init(matrixkp_ks(ispin,ic)%matrix,error=error)
+                CALL cp_dbcsr_init(matrixkp_ks(ispin,ic)%matrix)
                 CALL cp_dbcsr_create(matrix=matrixkp_ks(ispin,ic)%matrix,&
                   name=TRIM(headline),&
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                   row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
                   col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                  nblks=0, nze=0, error=error)
+                  nblks=0, nze=0)
                 CALL cp_dbcsr_alloc_block_from_nbl(matrixkp_ks(ispin,ic)%matrix,sab_orb,error=error)
-                CALL cp_dbcsr_set(matrixkp_ks(ispin,ic)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(matrixkp_ks(ispin,ic)%matrix,0.0_dp)
              ENDDO
           ENDDO
           CALL set_kpoint_info(kpoints,matrix_ks=matrixkp_ks,error=error)
@@ -1718,11 +1717,11 @@ CONTAINS
        NULLIFY(matrix_ks)
        CALL get_qs_env(qs_env=qs_env,matrix_ks=matrix_ks,error=error)
        IF (.NOT.ASSOCIATED(matrix_ks)) THEN
-          CALL cp_dbcsr_allocate_matrix_set(matrix_ks, dft_control%nspins, error)
+          CALL cp_dbcsr_allocate_matrix_set(matrix_ks, dft_control%nspins)
           refmatrix => matrix_s(1)%matrix
           DO ispin=1,dft_control%nspins
              ALLOCATE(matrix_ks(ispin)%matrix)
-             CALL cp_dbcsr_init(matrix_ks(ispin)%matrix,error=error)
+             CALL cp_dbcsr_init(matrix_ks(ispin)%matrix)
              IF (dft_control%nspins > 1) THEN
                 IF (ispin == 1) THEN
                    headline="KOHN-SHAM MATRIX FOR ALPHA SPIN"
@@ -1737,9 +1736,9 @@ CONTAINS
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                   row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
                   col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                  nblks=0, nze=0, error=error)
+                  nblks=0, nze=0)
              CALL cp_dbcsr_alloc_block_from_nbl(matrix_ks(ispin)%matrix,sab_orb,error=error)
-             CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp,error=error)
+             CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp)
           ENDDO
           CALL set_ks_env(ks_env,matrix_ks=matrix_ks,error=error)
        END IF
@@ -1755,19 +1754,19 @@ CONTAINS
                        error=error)
        IF (.NOT.ASSOCIATED(matrix_ks_aux_fit)) THEN
           refmatrix => matrix_s_aux_fit(1)%matrix
-          CALL cp_dbcsr_allocate_matrix_set(matrix_ks_aux_fit, dft_control%nspins, error)
+          CALL cp_dbcsr_allocate_matrix_set(matrix_ks_aux_fit, dft_control%nspins)
           DO ispin=1,dft_control%nspins
              ALLOCATE(matrix_ks_aux_fit(ispin)%matrix)
-             CALL cp_dbcsr_init(matrix_ks_aux_fit(ispin)%matrix,error=error)
+             CALL cp_dbcsr_init(matrix_ks_aux_fit(ispin)%matrix)
              CALL cp_dbcsr_create(matrix=matrix_ks_aux_fit(ispin)%matrix, &
                   name="KOHN-SHAM_MATRIX for ADMM", &
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric, &
                   row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
                   col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                  nblks=0, nze=0, error=error)
+                  nblks=0, nze=0)
              CALL cp_dbcsr_alloc_block_from_nbl(matrix_ks_aux_fit(ispin)%matrix,sab_aux_fit,&
                   error=error)
-             CALL cp_dbcsr_set(matrix_ks_aux_fit(ispin)%matrix,0.0_dp,error=error)
+             CALL cp_dbcsr_set(matrix_ks_aux_fit(ispin)%matrix,0.0_dp)
           ENDDO
           CALL set_ks_env(ks_env,matrix_ks_aux_fit=matrix_ks_aux_fit,error=error)
        END IF
@@ -1776,3 +1775,4 @@ CONTAINS
   END SUBROUTINE qs_ks_allocate_basics
 
 END MODULE qs_ks_methods
+

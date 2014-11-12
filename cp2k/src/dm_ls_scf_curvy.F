@@ -84,15 +84,15 @@ CONTAINS
         IF(ls_scf_env%curvy_data%line_search_type==ls_scf_line_search_3point_2d)THEN
            DO i=1,ls_scf_env%nspins
               CALL cp_dbcsr_copy(ls_scf_env%curvy_data%matrix_psave(i,1),&
-                                 ls_scf_env%matrix_p(i),error=error)
+                                 ls_scf_env%matrix_p(i))
            END DO
         END IF
-        IF(ls_scf_env%nspins==1)CALL cp_dbcsr_scale(ls_scf_env%matrix_p(1),0.5_dp,error=error) 
+        IF(ls_scf_env%nspins==1)CALL cp_dbcsr_scale(ls_scf_env%matrix_p(1),0.5_dp) 
         CALL transform_matrix_orth(ls_scf_env%matrix_p,ls_scf_env%matrix_s_sqrt,&
                                    ls_scf_env%eps_filter,error)
         CALL purify_mcweeny(ls_scf_env%matrix_p,ls_scf_env%eps_filter,3,error)
         DO i=1,ls_scf_env%nspins
-           CALL cp_dbcsr_copy(ls_scf_env%curvy_data%matrix_p(i),ls_scf_env%matrix_p(i),error=error)
+           CALL cp_dbcsr_copy(ls_scf_env%curvy_data%matrix_p(i),ls_scf_env%matrix_p(i))
         END DO
     END IF
         
@@ -127,13 +127,13 @@ CONTAINS
 
     CALL transform_matrix_orth(ls_scf_env%matrix_p,ls_scf_env%matrix_s_sqrt_inv,&
                                ls_scf_env%eps_filter,error)
-    IF(ls_scf_env%nspins==1)CALL cp_dbcsr_scale(ls_scf_env%matrix_p(1),2.0_dp,error=error)
+    IF(ls_scf_env%nspins==1)CALL cp_dbcsr_scale(ls_scf_env%matrix_p(1),2.0_dp)
 
 ! P-matrices only need to be stored in case of 2D line search
     IF(lsstep.le.3.AND.ls_scf_env%curvy_data%line_search_type==ls_scf_line_search_3point_2d)THEN
        DO i=1,ls_scf_env%nspins
            CALL cp_dbcsr_copy(ls_scf_env%curvy_data%matrix_psave(i,lsstep),&
-                              ls_scf_env%matrix_p(i),error=error)
+                              ls_scf_env%matrix_p(i))
        END DO
     END IF
     check_conv=lsstep==1   
@@ -209,7 +209,7 @@ CONTAINS
     curvy_data%line_search_step=MOD(curvy_data%line_search_step,curvy_data%line_search_type)+1
     IF(curvy_data%line_search_step==1)THEN
        DO ispin=1,SIZE(curvy_data%matrix_p)
-          CALL cp_dbcsr_copy(curvy_data%matrix_p(ispin),ls_scf_env%matrix_p(ispin),error=error)
+          CALL cp_dbcsr_copy(curvy_data%matrix_p(ispin),ls_scf_env%matrix_p(ispin))
        END DO
     END IF
     CALL timestop(handle)
@@ -379,43 +379,43 @@ CONTAINS
     CALL timeset(routineN,handle)
     nspin=SIZE(matrix_p)
 
-    CALL cp_dbcsr_init(matrix_PKs,error=error)
-    CALL cp_dbcsr_create(matrix_PKs,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_Ax,error=error)
-    CALL cp_dbcsr_create(matrix_Ax,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_create(matrix_tmp,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_tmp1,error=error)
-    CALL cp_dbcsr_create(matrix_tmp1,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_res,error=error)
-    CALL cp_dbcsr_create(matrix_res,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_cg,error=error)
-    CALL cp_dbcsr_create(matrix_cg,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_b,error=error)
-    CALL cp_dbcsr_create(matrix_b,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_dp_old,error=error)
-    CALL cp_dbcsr_create(matrix_dp_old,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(matrix_PKs)
+    CALL cp_dbcsr_create(matrix_PKs,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_Ax)
+    CALL cp_dbcsr_create(matrix_Ax,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_tmp1)
+    CALL cp_dbcsr_create(matrix_tmp1,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_res)
+    CALL cp_dbcsr_create(matrix_res,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_cg)
+    CALL cp_dbcsr_create(matrix_cg,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_b)
+    CALL cp_dbcsr_create(matrix_b,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_dp_old)
+    CALL cp_dbcsr_create(matrix_dp_old,template=matrix_dp(1),matrix_type=dbcsr_type_no_symmetry)
 
     DO ispin=1,nspin
-       CALL cp_dbcsr_copy(matrix_dp_old,matrix_dp(ispin),error=error)
+       CALL cp_dbcsr_copy(matrix_dp_old,matrix_dp(ispin))
 
 ! Precompute some matrices to save work during iterations 
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_p(ispin), matrix_ks(ispin),&
-                               0.0_dp, matrix_PKs, filter_eps=eps_filter,error=error)
-       CALL cp_dbcsr_transposed(matrix_b,matrix_PKs,error=error)
-       CALL cp_dbcsr_copy(matrix_cg,matrix_b,error=error)
+                               0.0_dp, matrix_PKs, filter_eps=eps_filter)
+       CALL cp_dbcsr_transposed(matrix_b,matrix_PKs)
+       CALL cp_dbcsr_copy(matrix_cg,matrix_b)
 
 ! Starting CG with guess 0-matrix gives -2*gradient=[Ks*P-(Ks*P)T] for cg_matrix in second step
-       CALL cp_dbcsr_add(matrix_cg,matrix_PKs,2.0_dp,-2.0_dp,error=error)
+       CALL cp_dbcsr_add(matrix_cg,matrix_PKs,2.0_dp,-2.0_dp)
 
 ! Residual matrix in first step=cg matrix. Keep Pks for later use in CG!
-       CALL cp_dbcsr_copy(matrix_res,matrix_cg,error=error)
+       CALL cp_dbcsr_copy(matrix_res,matrix_cg)
 
 ! Precompute -FP-[FP]T which will be used throughout the CG iterations
-       CALL cp_dbcsr_add(matrix_b,matrix_PKs, -1.0_dp,-1.0_dp,error=error)
+       CALL cp_dbcsr_add(matrix_b,matrix_PKs, -1.0_dp,-1.0_dp)
 
 ! Setup some values to check convergence and safty checks for eigenvalue shifting
-      CALL cp_dbcsr_norm(matrix_res,which_norm=2,norm_scalar=old_conv,error=error)
+      CALL cp_dbcsr_norm(matrix_res,which_norm=2,norm_scalar=old_conv)
       old_conv=cp_dbcsr_frobenius_norm(matrix_res)
       shift=MIN(10.0_dp,MAX(min_shift,0.05_dp*old_conv))
       conv_val=MAX(0.010_dp*old_conv,100.0_dp*eps_filter)
@@ -426,7 +426,7 @@ CONTAINS
       END IF
 
 ! Begin the real optimization loop
-      CALL cp_dbcsr_set(matrix_dp(ispin),0.0_dp,error=error)
+      CALL cp_dbcsr_set(matrix_dp(ispin),0.0_dp)
       ncyc=10
       DO i=1,ncyc
 
@@ -435,16 +435,16 @@ CONTAINS
 
 ! Compute the missing bits 2*(FDP+PDF) (again use symmetry to compute as a commutator)
          CALL cp_dbcsr_multiply("N", "N",1.0_dp, matrix_cg,matrix_p(ispin), &
-              0.0_dp, matrix_tmp, filter_eps=eps_filter,error=error)
+              0.0_dp, matrix_tmp, filter_eps=eps_filter)
          CALL commutator_symm(matrix_ks(ispin),matrix_tmp,matrix_tmp1,eps_filter,2.0_dp,error)
-         CALL cp_dbcsr_add(matrix_Ax,matrix_tmp1,1.0_dp,1.0_dp,error=error)
+         CALL cp_dbcsr_add(matrix_Ax,matrix_tmp1,1.0_dp,1.0_dp)
 
 ! Apply the shift and hope it's enough to stabilize the CG iterations
-         CALL cp_dbcsr_add(matrix_Ax,matrix_cg,1.0_dp,shift,error=error)
+         CALL cp_dbcsr_add(matrix_Ax,matrix_cg,1.0_dp,shift)
               
          CALL compute_cg_matrices(matrix_Ax,matrix_res,matrix_cg,matrix_dp(ispin),&
               matrix_tmp,eps_filter,at_limit,unit_nr,error)
-         CALL cp_dbcsr_filter(matrix_cg,eps_filter,error=error)
+         CALL cp_dbcsr_filter(matrix_cg,eps_filter)
 
 ! check for convergence of the newton step
          maxel=cp_dbcsr_frobenius_norm(matrix_res) 
@@ -462,29 +462,29 @@ CONTAINS
        END DO
 
 ! Refine the Newton like search direction with a preconditioned cg update
-       CALL cp_dbcsr_transposed(matrix_b,matrix_PKs, error=error)
+       CALL cp_dbcsr_transposed(matrix_b,matrix_PKs)
        !compute b= -2*KsP+2*PKs=-(2*gradient)
-       CALL cp_dbcsr_copy(matrix_cg,matrix_b,error=error)
-       CALL cp_dbcsr_add(matrix_cg,matrix_PKs,1.0_dp,-1.0_dp,error=error)
+       CALL cp_dbcsr_copy(matrix_cg,matrix_b)
+       CALL cp_dbcsr_add(matrix_cg,matrix_PKs,1.0_dp,-1.0_dp)
        cg_denom(ispin)=cg_numer(ispin)
-       CALL cp_dbcsr_trace(matrix_cg,matrix_dp(ispin),cg_numer(ispin),error=error)
+       CALL cp_dbcsr_trace(matrix_cg,matrix_dp(ispin),cg_numer(ispin))
        beta=cg_numer(ispin)/MAX(cg_denom(ispin),1.0E-6_dp)
        IF(beta.lt.1.0_dp)THEN
           beta=MAX(0.0_dp,beta)
-          CALL cp_dbcsr_add(matrix_dp(ispin),matrix_dp_old,1.0_dp,beta,error=error)  
+          CALL cp_dbcsr_add(matrix_dp(ispin),matrix_dp_old,1.0_dp,beta)  
        END IF
        IF(unit_nr.gt.0)WRITE(unit_nr,"(A)")" "
     END DO
 
-    CALL cp_dbcsr_release(matrix_PKs,error)
-    CALL cp_dbcsr_release(matrix_dp_old,error)
-    CALL cp_dbcsr_release(matrix_b,error)
-    CALL cp_dbcsr_release(matrix_Ax,error)
-    CALL cp_dbcsr_release(matrix_tmp,error)
-    CALL cp_dbcsr_release(matrix_tmp1,error)
-    CALL cp_dbcsr_release(matrix_b,error)
-    CALL cp_dbcsr_release(matrix_res,error)
-    CALL cp_dbcsr_release(matrix_cg,error)
+    CALL cp_dbcsr_release(matrix_PKs)
+    CALL cp_dbcsr_release(matrix_dp_old)
+    CALL cp_dbcsr_release(matrix_b)
+    CALL cp_dbcsr_release(matrix_Ax)
+    CALL cp_dbcsr_release(matrix_tmp)
+    CALL cp_dbcsr_release(matrix_tmp1)
+    CALL cp_dbcsr_release(matrix_b)
+    CALL cp_dbcsr_release(matrix_res)
+    CALL cp_dbcsr_release(matrix_cg)
 
     IF (unit_nr.gt.0) CALL m_flush(unit_nr)
     CALL timestop(handle)
@@ -525,15 +525,15 @@ CONTAINS
                                                 norm_cA, norm_rr, vec(3)
 
      at_limit=.FALSE.
-     CALL cp_dbcsr_trace(res,res,norm_rr,error=error)
-     CALL cp_dbcsr_trace(cg,Ax,norm_cA,error=error)
+     CALL cp_dbcsr_trace(res,res,norm_rr)
+     CALL cp_dbcsr_trace(cg,Ax,norm_cA)
      lin_eq=0.0_dp
      fac=norm_rr/norm_cA
      fac1=fac
 ! Use a 3point line serach and a fit to a quadratic function to determine optimal step size
      DO i=1,3
-        CALL cp_dbcsr_copy(tmp,res,error=error)
-        CALL cp_dbcsr_add(tmp,Ax,1.0_dp,-fac,error=error)
+        CALL cp_dbcsr_copy(tmp,res)
+        CALL cp_dbcsr_add(tmp,Ax,1.0_dp,-fac)
         devi(i)=cp_dbcsr_frobenius_norm(tmp)
         lin_eq(i,:)=(/fac**2,fac,1.0_dp/)
         fac=fac1+fac1*((-1)**i)*0.5_dp
@@ -543,23 +543,23 @@ CONTAINS
      alpha=-vec(2)/(2.0_dp*vec(1))
      fac=SQRT(norm_rr/(norm_cA*alpha))
 !scale the previous matrices to match the step size
-     CALL cp_dbcsr_scale(Ax,fac,error=error)
-     CALL cp_dbcsr_scale(cg,fac,error=error)
+     CALL cp_dbcsr_scale(Ax,fac)
+     CALL cp_dbcsr_scale(cg,fac)
      norm_cA=norm_cA*fac**2
 
 ! USe CG to get the new matrices
      alpha=norm_rr/norm_cA
-     CALL cp_dbcsr_add(res,Ax,1.0_dp,-alpha,error=error)
-     CALL cp_dbcsr_trace(res,res,new_norm,error=error)
+     CALL cp_dbcsr_add(res,Ax,1.0_dp,-alpha)
+     CALL cp_dbcsr_trace(res,res,new_norm)
      IF(norm_rr.lt.eps_filter*0.001_dp.OR.new_norm.lt.eps_filter*0.001_dp)THEN
         beta=0.0_dp
         at_limit=.TRUE.
      ELSE
         beta=new_norm/norm_rr
-        CALL cp_dbcsr_add(deltp,cg,1.0_dp,alpha,error=error)
+        CALL cp_dbcsr_add(deltp,cg,1.0_dp,alpha)
      END IF
      beta=new_norm/norm_rr
-     CALL cp_dbcsr_add(cg,res,beta,1.0_dp,error=error)
+     CALL cp_dbcsr_add(cg,res,beta,1.0_dp)
      
   END SUBROUTINE compute_cg_matrices
 
@@ -586,25 +586,25 @@ CONTAINS
 
      SELECT CASE(lsstep)
      CASE(3)
-       CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,1),error=error)  
+       CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,1))  
        IF(DOUBLE)THEN
-          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,2),error=error)  
+          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,2))  
        ELSE
-          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,3),error=error)  
+          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,3))  
        END IF   
      CASE(4)
        IF(DOUBLE)THEN
-          CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,2),error=error) 
+          CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,2)) 
        ELSE
-          CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,3),error=error)  
+          CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,3))  
        END IF
-       CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,1),error=error)  
+       CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,1))  
      CASE(5)
-       CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,1),error=error)  
+       CALL cp_dbcsr_copy(matrix_p(1),matrix_psave(1,1))  
        IF(DOUBLE)THEN
-          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,3),error=error)  
+          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,3))  
        ELSE
-          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,2),error=error)  
+          CALL cp_dbcsr_copy(matrix_p(2),matrix_psave(2,2))  
        END IF
      END SELECT
    
@@ -636,14 +636,14 @@ CONTAINS
 
      CALL timeset(routineN,handle)
 
-     CALL cp_dbcsr_init(work,error=error)
-     CALL cp_dbcsr_create(work,template=a,matrix_type=dbcsr_type_no_symmetry,error=error)
+     CALL cp_dbcsr_init(work)
+     CALL cp_dbcsr_create(work,template=a,matrix_type=dbcsr_type_no_symmetry)
 
-     CALL cp_dbcsr_multiply("N", "N", prefac, a, b,0.0_dp, res, filter_eps=eps_filter,error=error)
-     CALL cp_dbcsr_transposed(work,res,error=error)
-     CALL cp_dbcsr_add(res,work,1.0_dp,-1.0_dp,error=error)
+     CALL cp_dbcsr_multiply("N", "N", prefac, a, b,0.0_dp, res, filter_eps=eps_filter)
+     CALL cp_dbcsr_transposed(work,res)
+     CALL cp_dbcsr_add(res,work,1.0_dp,-1.0_dp)
    
-     CALL cp_dbcsr_release(work,error)
+     CALL cp_dbcsr_release(work)
    
      CALL timestop(handle)
   END SUBROUTINE commutator_symm
@@ -694,10 +694,10 @@ CONTAINS
       unit_nr=-1
     ENDIF
 
-    CALL cp_dbcsr_init(matrix,error=error)
-    CALL cp_dbcsr_create(matrix,template=matrix_p_in(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p_in(1),matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(matrix)
+    CALL cp_dbcsr_create(matrix,template=matrix_p_in(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p_in(1),matrix_type=dbcsr_type_no_symmetry)
     nspin=SIZE(matrix_p_in)
        
     DO ispin=1,nspin
@@ -705,15 +705,15 @@ CONTAINS
        frob_norm=1.0_dp
        nsave=0       
  
-       CALL cp_dbcsr_copy(matrix_tmp,matrix_p_in(ispin),error=error)
-       CALL cp_dbcsr_copy(matrix_p_out(ispin),matrix_p_in(ispin),error=error)
+       CALL cp_dbcsr_copy(matrix_tmp,matrix_p_in(ispin))
+       CALL cp_dbcsr_copy(matrix_p_out(ispin),matrix_p_in(ispin))
 ! If a BCH history is used make good use of it and do a few steps as a copy and scale update of P
 ! else BCH_saved will be 0 and loop is skipped
        DO i=1,BCH_saved(ispin)
           step_fac=step_fac*step_size(ispin)
-          CALL cp_dbcsr_copy(matrix_tmp,matrix_p_out(ispin),error=error)
-          CALL cp_dbcsr_add(matrix_p_out(ispin),matrix_BCH(ispin,i),1.0_dp,ifac(i)*step_fac,error=error)
-          CALL cp_dbcsr_add(matrix_tmp,matrix_p_out(ispin),1.0_dp,-1.0_dp,error=error)
+          CALL cp_dbcsr_copy(matrix_tmp,matrix_p_out(ispin))
+          CALL cp_dbcsr_add(matrix_p_out(ispin),matrix_BCH(ispin,i),1.0_dp,ifac(i)*step_fac)
+          CALL cp_dbcsr_add(matrix_tmp,matrix_p_out(ispin),1.0_dp,-1.0_dp)
           frob_norm=cp_dbcsr_frobenius_norm(matrix_tmp)
           IF(unit_nr.gt.0)WRITE(unit_nr,"(t3,a,i3,a,f16.8)")"BCH: step",i," Norm of P_old-Pnew:",frob_norm
           IF(frob_norm.lt.threshold) EXIT
@@ -727,22 +727,22 @@ CONTAINS
           !allow for a bit of matrix magic here by exploiting matrix and matrix_tmp
           !matrix_tmp is alway the previous order of the BCH series
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_tmp, matrix_dp(ispin),&
-               0.0_dp, matrix, filter_eps=threshold, error=error)
+               0.0_dp, matrix, filter_eps=threshold)
 
           !(anti)symmetry allows to sum the transposed instead of the full commutator, matrix becomes the latest result
 
-          CALL cp_dbcsr_transposed(matrix_tmp,matrix,error=error)
-          CALL cp_dbcsr_add(matrix,matrix_tmp,1.0_dp,1.0_dp,error=error)
+          CALL cp_dbcsr_transposed(matrix_tmp,matrix)
+          CALL cp_dbcsr_add(matrix,matrix_tmp,1.0_dp,1.0_dp)
 
           !Finally, add the new BCH order to P, but store the previous one for a convergence check
-          CALL cp_dbcsr_copy(matrix_tmp,matrix_p_out(ispin),error=error)
-          CALL cp_dbcsr_add(matrix_p_out(ispin),matrix,1.0_dp,ifac(i)*step_fac,error=error)
+          CALL cp_dbcsr_copy(matrix_tmp,matrix_p_out(ispin))
+          CALL cp_dbcsr_add(matrix_p_out(ispin),matrix,1.0_dp,ifac(i)*step_fac)
           IF(save_BCH.AND.i.le.n_bch_hist)THEN
-             CALL cp_dbcsr_copy(matrix_BCH(ispin,i),matrix,error=error)
+             CALL cp_dbcsr_copy(matrix_BCH(ispin,i),matrix)
              nsave=i
           END IF
 
-          CALL cp_dbcsr_add(matrix_tmp,matrix_p_out(ispin),1.0_dp,-1.0_dp,error=error)
+          CALL cp_dbcsr_add(matrix_tmp,matrix_p_out(ispin),1.0_dp,-1.0_dp)
 
           !Stop the BCH-series if two successive P's differ by less the threshold
           frob_norm=cp_dbcsr_frobenius_norm(matrix_tmp)
@@ -750,8 +750,8 @@ CONTAINS
           IF(frob_norm.lt.threshold) EXIT
 
           !Copy the latest BCH-matrix on matrix tmp, so we can cycle with all matrices in place
-          CALL cp_dbcsr_copy(matrix_tmp,matrix,error=error)
-          CALL cp_dbcsr_filter(matrix_tmp,threshold,error=error)
+          CALL cp_dbcsr_copy(matrix_tmp,matrix)
+          CALL cp_dbcsr_filter(matrix_tmp,threshold)
        END DO
        BCH_saved(ispin)=nsave
        IF(unit_nr.gt.0)WRITE(unit_nr,"(A)")" "
@@ -759,8 +759,8 @@ CONTAINS
 
     CALL purify_mcweeny(matrix_p_out,threshold,1,error)
     IF (unit_nr.gt.0) CALL m_flush(unit_nr)
-    CALL cp_dbcsr_release (matrix_tmp,error)
-    CALL cp_dbcsr_release (matrix,error)
+    CALL cp_dbcsr_release (matrix_tmp)
+    CALL cp_dbcsr_release (matrix)
     CALL timestop(handle)
   END SUBROUTINE update_p_exp
 
@@ -790,24 +790,24 @@ CONTAINS
 
     CALL timeset(routineN,handle)
 
-    CALL cp_dbcsr_init(matrix_work,error=error)
-    CALL cp_dbcsr_create(matrix_work,template=matrix(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_create(matrix_tmp,template=matrix(1),matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(matrix_work)
+    CALL cp_dbcsr_create(matrix_work,template=matrix(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp,template=matrix(1),matrix_type=dbcsr_type_no_symmetry)
 
     DO ispin=1,SIZE(matrix)
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix(ispin), matrix_trafo,&
-            0.0_dp, matrix_work, filter_eps=eps_filter, error=error)
+            0.0_dp, matrix_work, filter_eps=eps_filter)
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_trafo, matrix_work,&
-            0.0_dp, matrix_tmp,filter_eps=eps_filter, error=error)
+            0.0_dp, matrix_tmp,filter_eps=eps_filter)
        ! symmetrize results (this is again needed to make sure everything is stable)
-       CALL cp_dbcsr_transposed(matrix_work,matrix_tmp,error=error)
-       CALL cp_dbcsr_add(matrix_tmp,matrix_work,0.5_dp,0.5_dp,error=error)
-       CALL cp_dbcsr_copy(matrix(ispin),matrix_tmp,error=error)   
+       CALL cp_dbcsr_transposed(matrix_work,matrix_tmp)
+       CALL cp_dbcsr_add(matrix_tmp,matrix_work,0.5_dp,0.5_dp)
+       CALL cp_dbcsr_copy(matrix(ispin),matrix_tmp)   
     END DO
 
-    CALL cp_dbcsr_release(matrix_tmp,error=error)
-    CALL cp_dbcsr_release(matrix_work,error=error)
+    CALL cp_dbcsr_release(matrix_tmp)
+    CALL cp_dbcsr_release(matrix_work)
     CALL timestop(handle)
 
   END SUBROUTINE
@@ -832,7 +832,7 @@ CONTAINS
     IF(ALLOCATED(curvy_data%matrix_psave))THEN
        DO i=1,SIZE(curvy_data%matrix_psave,1)
           DO j=1,3
-             CALL cp_dbcsr_release(curvy_data%matrix_psave(i,j),error)  
+             CALL cp_dbcsr_release(curvy_data%matrix_psave(i,j))  
           END DO
        END DO
        DEALLOCATE(curvy_data%matrix_psave)
@@ -840,7 +840,7 @@ CONTAINS
     IF(ALLOCATED(curvy_data%matrix_BCH))THEN
        DO i=1,SIZE(curvy_data%matrix_BCH,1)
           DO j=1,7
-             CALL cp_dbcsr_release(curvy_data%matrix_BCH(i,j),error)  
+             CALL cp_dbcsr_release(curvy_data%matrix_BCH(i,j))  
           END DO
        END DO
        DEALLOCATE(curvy_data%matrix_BCH)  
@@ -864,7 +864,7 @@ CONTAINS
 
     IF(ALLOCATED(matrix))THEN
        DO i=1,SIZE(matrix)
-          CALL cp_dbcsr_release(matrix(i),error)
+          CALL cp_dbcsr_release(matrix(i))
        END DO
        DEALLOCATE(matrix)
     END IF
@@ -893,13 +893,13 @@ CONTAINS
     ALLOCATE (curvy_data%matrix_dp(nspins))
     ALLOCATE (curvy_data%matrix_p(nspins))
     DO ispin=1,nspins
-       CALL cp_dbcsr_init(curvy_data%matrix_dp(ispin),error=error)
+       CALL cp_dbcsr_init(curvy_data%matrix_dp(ispin))
        CALL cp_dbcsr_create(curvy_data%matrix_dp(ispin),template=matrix_s,&
-            matrix_type=dbcsr_type_no_symmetry,error=error)
-       CALL cp_dbcsr_set(curvy_data%matrix_dp(ispin),0.0_dp,error=error)
-       CALL cp_dbcsr_init(curvy_data%matrix_p(ispin),error=error)
+            matrix_type=dbcsr_type_no_symmetry)
+       CALL cp_dbcsr_set(curvy_data%matrix_dp(ispin),0.0_dp)
+       CALL cp_dbcsr_init(curvy_data%matrix_p(ispin))
        CALL cp_dbcsr_create(curvy_data%matrix_p(ispin),template=matrix_s,&
-            matrix_type=dbcsr_type_no_symmetry,error=error)
+            matrix_type=dbcsr_type_no_symmetry)
        curvy_data%fix_shift=.FALSE.
        curvy_data%double_step_size=.TRUE.
        curvy_data%shift=1.0_dp
@@ -912,9 +912,9 @@ CONTAINS
        ALLOCATE (curvy_data%matrix_psave(nspins,3))
        DO ispin=1,nspins
           DO j=1,3
-             CALL cp_dbcsr_init(curvy_data%matrix_psave(ispin,j),error=error)
+             CALL cp_dbcsr_init(curvy_data%matrix_psave(ispin,j))
              CALL cp_dbcsr_create(curvy_data%matrix_psave(ispin,j),template=matrix_s,&
-                                  matrix_type=dbcsr_type_no_symmetry,error=error)
+                                  matrix_type=dbcsr_type_no_symmetry)
           END DO
        END DO
     END IF
@@ -922,9 +922,9 @@ CONTAINS
        ALLOCATE (curvy_data%matrix_BCH(nspins,curvy_data%n_bch_hist))
        DO ispin=1,nspins
           DO j=1,curvy_data%n_bch_hist
-             CALL cp_dbcsr_init(curvy_data%matrix_BCH(ispin,j),error=error)
+             CALL cp_dbcsr_init(curvy_data%matrix_BCH(ispin,j))
              CALL cp_dbcsr_create(curvy_data%matrix_BCH(ispin,j),template=matrix_s,&
-                                  matrix_type=dbcsr_type_no_symmetry,error=error)
+                                  matrix_type=dbcsr_type_no_symmetry)
           END DO
         END DO
      END IF
@@ -933,3 +933,4 @@ CONTAINS
   END SUBROUTINE init_curvy
 
 END MODULE dm_ls_scf_curvy
+

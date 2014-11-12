@@ -183,11 +183,11 @@ CONTAINS
      CALL get_neighbor_list_set_p(neighbor_list_sets=sab_nl,symmetric=do_symmetric)
 
      IF(dokp) THEN
-        CALL cp_dbcsr_allocate_matrix_set(matrixkp_t,1,ncount,error=error)
+        CALL cp_dbcsr_allocate_matrix_set(matrixkp_t,1,ncount)
         CALL create_sab_matrix(ks_env, matrixkp_t, matrix_name, basis_set_id, basis_set_id, &
                                sab_nl, do_symmetric, error)
      ELSE
-        CALL cp_dbcsr_allocate_matrix_set(matrix_t,1,error=error)
+        CALL cp_dbcsr_allocate_matrix_set(matrix_t,1)
         CALL create_sab_matrix(ks_env, matrix_t, matrix_name, basis_set_id, basis_set_id, &
                                sab_nl, do_symmetric, error)
      END IF
@@ -349,15 +349,15 @@ CONTAINS
 
      IF(dokp) THEN
         DO ic=1,ncount
-           CALL cp_dbcsr_finalize(matrixkp_t(1,ic)%matrix, error=error)
+           CALL cp_dbcsr_finalize(matrixkp_t(1,ic)%matrix)
            IF (PRESENT(eps_filter)) THEN
-              CALL cp_dbcsr_filter(matrixkp_t(1,ic)%matrix, eps_filter, error=error)
+              CALL cp_dbcsr_filter(matrixkp_t(1,ic)%matrix, eps_filter)
            END IF
         END DO
      ELSE
-        CALL cp_dbcsr_finalize(matrix_t(1)%matrix, error=error)
+        CALL cp_dbcsr_finalize(matrix_t(1)%matrix)
         IF (PRESENT(eps_filter)) THEN
-           CALL cp_dbcsr_filter(matrix_t(1)%matrix, eps_filter, error=error)
+           CALL cp_dbcsr_filter(matrix_t(1)%matrix, eps_filter)
         END IF
      END IF
 
@@ -378,4 +378,5 @@ CONTAINS
   END SUBROUTINE build_kinetic_matrix
 
 END MODULE qs_kinetic
+
 

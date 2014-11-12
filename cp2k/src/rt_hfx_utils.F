@@ -116,41 +116,41 @@ CONTAINS
     INTEGER                                  :: i
 
     IF (ASSOCIATED(matrix_p)) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(matrix_p,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(matrix_p)
     END IF
     ! Create a new density matrix set
-    CALL cp_dbcsr_allocate_matrix_set(matrix_p,nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_p,nspins)
     DO i=1,nspins
        headline = "Imaginary density matrix"
        ALLOCATE(matrix_p(i)%matrix)
-       CALL cp_dbcsr_init(matrix_p(i)%matrix, error=error)
+       CALL cp_dbcsr_init(matrix_p(i)%matrix)
        CALL cp_dbcsr_create(matrix=matrix_p(i)%matrix,&
             name=TRIM(headline),&
             dist=cp_dbcsr_distribution(matrix_s(1)%matrix), matrix_type=dbcsr_type_antisymmetric,&
             row_blk_size=cp_dbcsr_row_block_sizes(matrix_s(1)%matrix),&
             col_blk_size=cp_dbcsr_col_block_sizes(matrix_s(1)%matrix),&
-            nblks=0, nze=0, error=error)
+            nblks=0, nze=0)
        CALL cp_dbcsr_alloc_block_from_nbl(matrix_p(i)%matrix,sab_orb,error=error)
-       CALL cp_dbcsr_set(matrix_p(i)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_p(i)%matrix,0.0_dp)
     END DO
 
     IF (ASSOCIATED(matrix_ks)) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(matrix_ks,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(matrix_ks)
     END IF
     ! Create a new density matrix set
-    CALL cp_dbcsr_allocate_matrix_set(matrix_ks,nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_ks,nspins)
     DO i=1,nspins
        headline = "Imaginary Kohn-Sham matrix"
        ALLOCATE(matrix_ks(i)%matrix)
-       CALL cp_dbcsr_init(matrix_ks(i)%matrix, error=error)
+       CALL cp_dbcsr_init(matrix_ks(i)%matrix)
        CALL cp_dbcsr_create(matrix=matrix_ks(i)%matrix,&
             name=TRIM(headline),&
             dist=cp_dbcsr_distribution(matrix_s(1)%matrix), matrix_type=dbcsr_type_antisymmetric,&
             row_blk_size=cp_dbcsr_row_block_sizes(matrix_s(1)%matrix),&
             col_blk_size=cp_dbcsr_col_block_sizes(matrix_s(1)%matrix),&
-            nblks=0, nze=0, error=error)
+            nblks=0, nze=0)
        CALL cp_dbcsr_alloc_block_from_nbl(matrix_ks(i)%matrix,sab_orb,error=error)
-       CALL cp_dbcsr_set(matrix_ks(i)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_ks(i)%matrix,0.0_dp)
     END DO
 
 
@@ -158,3 +158,4 @@ CONTAINS
    END SUBROUTINE rebuild_matrices
 
 END MODULE rt_hfx_utils
+

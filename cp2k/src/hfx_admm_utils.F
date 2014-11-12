@@ -290,11 +290,11 @@ CONTAINS
     ! *** Initialize the auxiliary ks matrix to zero if required
     IF( dft_control%do_admm ) THEN
       DO ispin = 1,nspins
-         CALL cp_dbcsr_set(matrix_ks_aux_fit(ispin)%matrix,0.0_dp,error=error)
+         CALL cp_dbcsr_set(matrix_ks_aux_fit(ispin)%matrix,0.0_dp)
       END DO
     END IF
     DO ispin = 1,nspins
-       CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp)
     END DO
 
     CALL section_vals_get(hfx_sections,n_repetition=n_rep_hf,error=error)
@@ -360,12 +360,12 @@ CONTAINS
 
              CALL get_qs_env(qs_env=qs_env,rtp=rtp,error=error)
              DO ispin = 1,nspins
-                CALL cp_dbcsr_set(matrix_ks_im(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(matrix_ks_im(ispin)%matrix,0.0_dp)
              END DO
              IF( dft_control%do_admm ) THEN
                 matrix_ks_orb => matrix_ks_aux_fit_im
                 DO ispin = 1,nspins
-                   CALL cp_dbcsr_set(matrix_ks_aux_fit_im(ispin)%matrix,0.0_dp,error=error)
+                   CALL cp_dbcsr_set(matrix_ks_aux_fit_im(ispin)%matrix,0.0_dp)
                 END DO
              ELSE
                 matrix_ks_orb => matrix_ks_im
@@ -398,7 +398,7 @@ CONTAINS
     ! *** Add Core-Hamiltonian-Matrix ***
     DO ispin=1,nspins
          CALL cp_dbcsr_add(matrix_ks(ispin)%matrix,matrix_h(1)%matrix,&
-              1.0_dp,1.0_dp,error=error)
+              1.0_dp,1.0_dp)
     END DO
     IF (use_virial .AND. calculate_forces) THEN
          virial%pv_virial = virial%pv_virial - virial%pv_fock_4c
@@ -882,3 +882,4 @@ CONTAINS
   END SUBROUTINE create_admm_xc_section
 
 END MODULE hfx_admm_utils
+

@@ -134,8 +134,7 @@ CONTAINS
                 CALL cp_dbcsr_add(matrix_a=p_mix_new(ispin)%matrix,&
                      alpha_scalar=1.0_dp/my_p_mix,&
                      matrix_b=rho_ao(ispin)%matrix,&
-                     beta_scalar=(my_p_mix-1.0_dp)/my_p_mix,&
-                     error=error)
+                     beta_scalar=(my_p_mix-1.0_dp)/my_p_mix)
              END IF
           ELSE
              CALL cp_sm_mix(m1=p_mix_new(ispin)%matrix,&
@@ -213,8 +212,7 @@ CONTAINS
                    CALL cp_dbcsr_add(matrix_a=p_mix_new(ispin,ic)%matrix,&
                         alpha_scalar=1.0_dp/my_p_mix,&
                         matrix_b=rho_ao(ispin,ic)%matrix,&
-                        beta_scalar=(my_p_mix-1.0_dp)/my_p_mix,&
-                        error=error)
+                        beta_scalar=(my_p_mix-1.0_dp)/my_p_mix)
                 END IF
              ELSE
                 CALL cp_sm_mix(m1=p_mix_new(ispin,ic)%matrix,&
@@ -354,9 +352,9 @@ CONTAINS
                     mo_coeff=mo_coeff)
 
 !    Reduce KS matrix
-      CALL cp_dbcsr_desymmetrize(matrix_ks,ksbuf2,error=error)
-      CALL cp_dbcsr_multiply('N','N',1.0_dp,ksbuf2,ortho_dbcsr,0.0_dp,ksbuf1,error=error)
-      CALL cp_dbcsr_multiply('T','N',1.0_dp,ortho_dbcsr,ksbuf1,0.0_dp,ksbuf2,error=error)
+      CALL cp_dbcsr_desymmetrize(matrix_ks,ksbuf2)
+      CALL cp_dbcsr_multiply('N','N',1.0_dp,ksbuf2,ortho_dbcsr,0.0_dp,ksbuf1)
+      CALL cp_dbcsr_multiply('T','N',1.0_dp,ortho_dbcsr,ksbuf1,0.0_dp,ksbuf2)
 
 !    Solve the eigenvalue problem
       CALL copy_dbcsr_to_fm(ksbuf2, matrix_ks_fm, error=error)
@@ -842,3 +840,4 @@ CONTAINS
   END SUBROUTINE combine_ks_matrices_2
 
 END MODULE qs_scf_methods
+

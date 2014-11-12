@@ -430,7 +430,7 @@ CONTAINS
          END IF
 
          IF(ASSOCIATED(xas_env%ostrength_sm)) THEN
-            CALL cp_dbcsr_deallocate_matrix_set(xas_env%ostrength_sm,error=error)
+            CALL cp_dbcsr_deallocate_matrix_set(xas_env%ostrength_sm)
          END IF
          IF(ASSOCIATED(xas_env%qs_loc_env)) THEN
             CALL qs_loc_env_release(xas_env%qs_loc_env, error=error)
@@ -498,4 +498,5 @@ CONTAINS
   END SUBROUTINE xas_env_retain
 
 END MODULE xas_env_types
+
 

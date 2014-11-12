@@ -276,27 +276,25 @@ CONTAINS
       CALL array_new (row_blk_sizes, rbs, gift=.TRUE.)
 
 
-      CALL cp_dbcsr_allocate_matrix_set(gamma_matrix,nmat,error=error)
+      CALL cp_dbcsr_allocate_matrix_set(gamma_matrix,nmat)
       ALLOCATE(gamma_matrix(1)%matrix)
-      CALL cp_dbcsr_init(gamma_matrix(1)%matrix, error=error)
+      CALL cp_dbcsr_init(gamma_matrix(1)%matrix)
 
       CALL cp_dbcsr_create(matrix=gamma_matrix(1)%matrix, &
            name="GAMMA MATRIX", &
            dist=dbcsr_dist, matrix_type=dbcsr_type_symmetric,&
            row_blk_size=row_blk_sizes, col_blk_size=row_blk_sizes, &
-           nblks=0, nze=0, mutable_work=.TRUE., &
-           error=error)
+           nblks=0, nze=0, mutable_work=.TRUE.)
 
       DO i=2,nmat
          ALLOCATE(gamma_matrix(i)%matrix)
-         CALL cp_dbcsr_init(gamma_matrix(i)%matrix, error=error)
+         CALL cp_dbcsr_init(gamma_matrix(i)%matrix)
 
          CALL cp_dbcsr_create(matrix=gamma_matrix(i)%matrix, &
               name="DERIVATIVE GAMMA MATRIX", &
               dist=dbcsr_dist, matrix_type=dbcsr_type_antisymmetric,&
               row_blk_size=row_blk_sizes, col_blk_size=row_blk_sizes, &
-              nblks=0, nze=0, mutable_work=.TRUE., &
-              error=error)
+              nblks=0, nze=0, mutable_work=.TRUE.)
       END DO
 
       CALL array_release (row_blk_sizes)
@@ -316,9 +314,9 @@ CONTAINS
 
       IF (SIZE(matrix_p) == 2) THEN
          CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-              alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+              alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
          CALL cp_dbcsr_add(matrix_w(1)%matrix,matrix_w(2)%matrix,&
-              alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+              alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
       END IF
       natom = SIZE (particle_set)
       ALLOCATE (atom_of_kind(natom),STAT=istat)
@@ -400,18 +398,18 @@ CONTAINS
            CALL cp_dbcsr_add_block_node(matrix=matrix_s(1)%matrix,&
                             block_row=irow,&
                             block_col=icol,&
-                            BLOCK=sblock,error=error)
+                            BLOCK=sblock)
            NULLIFY (fblock)
            CALL cp_dbcsr_add_block_node(matrix=matrix_h(1)%matrix,&
                             block_row=irow,&
                             block_col=icol,&
-                            BLOCK=fblock,error=error)
+                            BLOCK=fblock)
            IF ( dftb_control%self_consistent ) THEN
              NULLIFY (gblock)
              CALL cp_dbcsr_add_block_node(matrix=gamma_matrix(1)%matrix,&
                             block_row=irow,&
                             block_col=icol,&
-                            BLOCK=gblock,error=error)
+                            BLOCK=gblock)
            END IF
            IF (calculate_forces) THEN
              NULLIFY (pblock)
@@ -428,12 +426,12 @@ CONTAINS
                   CALL cp_dbcsr_add_block_node(matrix=matrix_s(i)%matrix,&
                              block_row=irow,&
                              block_col=icol,&
-                             BLOCK=dsblocks(i)%block,error=error)
+                             BLOCK=dsblocks(i)%block)
                  NULLIFY (dgblocks(i)%block)
                  CALL cp_dbcsr_add_block_node(matrix=gamma_matrix(i)%matrix,&
                             block_row=irow,&
                             block_col=icol,&
-                            BLOCK=dgblocks(i)%block,error=error)
+                            BLOCK=dgblocks(i)%block)
                END DO
              END IF
            END IF
@@ -579,15 +577,15 @@ CONTAINS
 
      IF ( dftb_control%self_consistent ) THEN
         DO i=1,SIZE(gamma_matrix)
-           CALL cp_dbcsr_finalize(gamma_matrix(i)%matrix,error=error)
+           CALL cp_dbcsr_finalize(gamma_matrix(i)%matrix)
         ENDDO
         CALL set_ks_env(ks_env,gamma_matrix=gamma_matrix,error=error)
      ENDIF
      DO i=1,SIZE(matrix_s)
-        CALL cp_dbcsr_finalize(matrix_s(i)%matrix,error=error)
+        CALL cp_dbcsr_finalize(matrix_s(i)%matrix)
      ENDDO
      DO i=1,SIZE(matrix_h)
-        CALL cp_dbcsr_finalize(matrix_h(i)%matrix,error=error)
+        CALL cp_dbcsr_finalize(matrix_h(i)%matrix)
      ENDDO
 
      ! set repulsive energy
@@ -635,7 +633,7 @@ CONTAINS
      IF(calculate_forces) THEN
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,alpha_scalar=1.0_dp,&
-               beta_scalar=-1.0_dp,error=error)
+               beta_scalar=-1.0_dp)
        END IF
        DEALLOCATE(atom_of_kind,STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
@@ -718,7 +716,7 @@ CONTAINS
 
     DO ispin=1,nspins
       ! copy the core matrix into the fock matrix
-       CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix,error=error)
+       CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix)
     END DO
 
     IF ( dft_control%qs_control%dftb_control%self_consistent ) THEN
@@ -760,11 +758,11 @@ CONTAINS
        DO ispin = 1, nspins
           ! If QM/MM sumup the 1el Hamiltonian
           CALL cp_dbcsr_add(ks_matrix(ispin)%matrix,qs_env%ks_qmmm_env%matrix_h(1)%matrix,&
-               1.0_dp,1.0_dp,error=error)
+               1.0_dp,1.0_dp)
           matrix_p => rho%rho_ao
           ! Compute QM/MM Energy
           CALL cp_dbcsr_trace(qs_env%ks_qmmm_env%matrix_h(1)%matrix,&
-               matrix_p(ispin)%matrix,trace=qmmm_el,error=error)
+               matrix_p(ispin)%matrix,trace=qmmm_el)
           energy%qmmm_el = energy%qmmm_el + qmmm_el
        END DO
        pc_ener = qs_env%ks_qmmm_env%pc_ener
@@ -803,7 +801,7 @@ CONTAINS
              CPPrecondition(.FALSE.,cp_failure_level,routineP,error,failure)
           ENDIF
           CALL cp_dbcsr_multiply('n','n',1.0_dp,ks_matrix(ispin)%matrix,mo_coeff,&
-               0.0_dp,mo_derivs(ispin)%matrix, error=error)
+               0.0_dp,mo_derivs(ispin)%matrix)
        ENDDO
     ENDIF
 
@@ -944,14 +942,14 @@ CONTAINS
            CALL cp_dbcsr_add_block_node(matrix=matrix_s(1)%matrix,&
                             block_row=irow,&
                             block_col=icol,&
-                            BLOCK=sblock,error=error)
+                            BLOCK=sblock)
            IF (nderivative.gt.0) THEN
              DO i=2,SIZE(matrix_s)
                 NULLIFY(dsblocks(i)%block)
                 CALL cp_dbcsr_add_block_node(matrix=matrix_s(i)%matrix,&
                            block_row=irow,&
                            block_col=icol,&
-                           BLOCK=dsblocks(i)%block,error=error)
+                           BLOCK=dsblocks(i)%block)
              END DO
            END IF
          END IF
@@ -1026,7 +1024,7 @@ CONTAINS
      CALL neighbor_list_iterator_release(nl_iterator)
 
      DO i=1,SIZE(matrix_s)
-        CALL cp_dbcsr_finalize(matrix_s(i)%matrix,error=error)
+        CALL cp_dbcsr_finalize(matrix_s(i)%matrix)
      ENDDO
 
     CALL timestop(handle)
@@ -1134,13 +1132,13 @@ CONTAINS
     ! Allocate the core Hamiltonian matrix
     CALL get_qs_env(qs_env=qs_env,ks_qmmm_env=ks_qmmm_env_loc,error=error)
     matrix_h => ks_qmmm_env_loc%matrix_h
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
     ALLOCATE(matrix_h(1)%matrix,STAT=istat)
     CPPrecondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_h(1)%matrix,error)
+    CALL cp_dbcsr_init(matrix_h(1)%matrix)
     CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_s(1)%matrix,&
-                       name="QMMM HAMILTONIAN MATRIX",error=error)
-    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp,error)
+                       name="QMMM HAMILTONIAN MATRIX")
+    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp)
 
     CALL cp_dbcsr_iterator_start(iter, matrix_s(1)%matrix)
     DO WHILE (cp_dbcsr_iterator_blocks_left(iter))
@@ -1159,7 +1157,7 @@ CONTAINS
     DEALLOCATE(qpot,STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
-    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s, error=error )
+    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s )
 
     CALL timestop(handle)
 
@@ -1200,16 +1198,16 @@ CONTAINS
     ! Allocate the core Hamiltonian matrix
     CALL get_qs_env(qs_env=qs_env,ks_qmmm_env=ks_qmmm_env_loc,error=error)
     matrix_h => ks_qmmm_env_loc%matrix_h
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
     ALLOCATE(matrix_h(1)%matrix,STAT=istat)
     CPPrecondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_h(1)%matrix,error)
+    CALL cp_dbcsr_init(matrix_h(1)%matrix)
     CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_s(1)%matrix,&
-                       name="QMMM HAMILTONIAN MATRIX",error=error)
-    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp,error)
+                       name="QMMM HAMILTONIAN MATRIX")
+    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp)
     ks_qmmm_env_loc%matrix_h => matrix_h
 
-    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s, error=error )
+    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s )
 
     CALL timestop(handle)
 
@@ -1439,13 +1437,13 @@ CONTAINS
     ! Allocate the core Hamiltonian matrix
     CALL get_qs_env(qs_env=qs_env,ks_qmmm_env=ks_qmmm_env_loc,error=error)
     matrix_h => ks_qmmm_env_loc%matrix_h 
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
     ALLOCATE(matrix_h(1)%matrix,STAT=istat)
     CPPrecondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_h(1)%matrix,error)
+    CALL cp_dbcsr_init(matrix_h(1)%matrix)
     CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_s(1)%matrix,&
-                       name="QMMM HAMILTONIAN MATRIX",error=error)
-    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp,error)
+                       name="QMMM HAMILTONIAN MATRIX")
+    CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp)
 
     CALL cp_dbcsr_iterator_start(iter, matrix_s(1)%matrix)
     DO WHILE (cp_dbcsr_iterator_blocks_left(iter))
@@ -1468,7 +1466,7 @@ CONTAINS
     CALL ewald_env_release(ewald_env,error=error)
     CALL ewald_pw_release(ewald_pw,error=error)
 
-    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s, error=error )
+    CALL cp_dbcsr_deallocate_matrix_set ( matrix_s )
 
     CALL timestop(handle)
 
@@ -1630,7 +1628,7 @@ CONTAINS
        Forces_QM = 0.0_dp
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-               alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+               alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
        END IF
        !
        CALL cp_dbcsr_iterator_start(iter, matrix_s(1)%matrix)
@@ -1658,7 +1656,7 @@ CONTAINS
        !
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
        END IF
        !
        ! Transfer QM gradients to the QM particles..
@@ -1682,7 +1680,7 @@ CONTAINS
        DEALLOCATE(qpot,STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
-       CALL cp_dbcsr_deallocate_matrix_set ( matrix_s, error=error )
+       CALL cp_dbcsr_deallocate_matrix_set ( matrix_s )
 
     END IF
     CALL timestop(handle)
@@ -2020,7 +2018,7 @@ CONTAINS
        Forces_QM = 0.0_dp
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-               alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+               alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
        END IF
        !
        CALL cp_dbcsr_iterator_start(iter, matrix_s(1)%matrix)
@@ -2048,7 +2046,7 @@ CONTAINS
        !
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
        END IF
        !
        ! Transfer QM gradients to the QM particles..
@@ -2076,7 +2074,7 @@ CONTAINS
        CALL ewald_env_release(ewald_env,error=error)
        CALL ewald_pw_release(ewald_pw,error=error)
 
-       CALL cp_dbcsr_deallocate_matrix_set ( matrix_s, error=error )
+       CALL cp_dbcsr_deallocate_matrix_set ( matrix_s )
 
     END IF
     CALL timestop(handle)
@@ -2386,7 +2384,7 @@ CONTAINS
     CALL array_nullify (row_blk_sizes)
     CALL array_new (row_blk_sizes, rbs, gift=.TRUE.)
 
-    CALL cp_dbcsr_allocate_matrix_set(matrices,nmat,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrices,nmat)
 
     ! Up to 2nd derivative take care to get the symmetries correct
     DO i=1,nmat
@@ -2399,13 +2397,12 @@ CONTAINS
           matnames=TRIM(mnames)//" MATRIX DFTB"
        END IF
        ALLOCATE(matrices(i)%matrix)
-       CALL cp_dbcsr_init(matrices(i)%matrix, error=error)
+       CALL cp_dbcsr_init(matrices(i)%matrix)
        CALL cp_dbcsr_create(matrix=matrices(i)%matrix, &
             name=TRIM(matnames), &
             dist=dbcsr_dist, matrix_type=symmetry_type,&
             row_blk_size=row_blk_sizes, col_blk_size=row_blk_sizes, &
-            nblks=0, nze=0, mutable_work=.TRUE., &
-            error=error)
+            nblks=0, nze=0, mutable_work=.TRUE.)
     END DO
 
     DEALLOCATE (first_sgf,STAT=istat)
@@ -3184,4 +3181,5 @@ CONTAINS
   END FUNCTION gamma_rab_sr
 
 END MODULE qs_dftb_matrices
+
 

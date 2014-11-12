@@ -677,7 +677,7 @@ CONTAINS
              DO ic=1,nc
                 DO ispin=1,dft_control%nspins
                    CALL cp_dbcsr_copy(rho%rho_ao_kp(ispin,ic)%matrix,scf_env%p_mix_kp(ispin,ic)%matrix,&
-                                      name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)),error=error)
+                                      name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)))
                 END DO
              END DO
            CASE(gspace_mixing_nr,pulay_mixing_nr,broyden_mixing_nr,&
@@ -688,7 +688,7 @@ CONTAINS
              DO ic=1,nc
                 DO ispin=1,dft_control%nspins
                    CALL cp_dbcsr_copy(rho%rho_ao_kp(ispin,ic)%matrix,scf_env%p_mix_kp(ispin,ic)%matrix,&
-                                   name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)),error=error)
+                                   name=TRIM(cp_dbcsr_name(rho%rho_ao_kp(ispin,ic)%matrix)))
                 END DO
              END DO
            END SELECT
@@ -701,13 +701,13 @@ CONTAINS
                                          invert=.TRUE.,error=error)
              DO ispin=1,dft_control%nspins
                 CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,scf_env%p_mix_new(ispin)%matrix,&
-                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)),error=error)
+                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)))
              END DO
            CASE(gspace_mixing_nr,pulay_mixing_nr,broyden_mixing_nr,&
                 broyden_mixing_new_nr,multisecant_mixing_nr)
              DO ispin=1,dft_control%nspins
                 CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,scf_env%p_mix_new(ispin)%matrix,&
-                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)),error=error)
+                                   name=TRIM(cp_dbcsr_name(rho%rho_ao(ispin)%matrix)))
              END DO
            END SELECT
         END IF
@@ -858,3 +858,4 @@ CONTAINS
   END SUBROUTINE cleanup_scf_loop
 
 END MODULE qs_scf_loop_utils 
+

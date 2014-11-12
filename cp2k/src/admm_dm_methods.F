@@ -123,7 +123,7 @@ MODULE admm_dm_methods
     END SELECT
 
     IF(admm_dm%purify)&
-       CALL cp_dbcsr_deallocate_matrix_set(matrix_ks_merge,error)
+       CALL cp_dbcsr_deallocate_matrix_set(matrix_ks_merge)
 
     CALL timestop(handle)
 
@@ -165,30 +165,30 @@ MODULE admm_dm_methods
 
     IF(s_mstruct_changed) THEN
         ! Calculate A = S_aux^(-1) * S_mixed
-        CALL cp_dbcsr_init(matrix_s_aux_inv, error=error)
-        CALL cp_dbcsr_create(matrix_s_aux_inv, template=matrix_s_aux(1)%matrix, matrix_type="N", error=error)
+        CALL cp_dbcsr_init(matrix_s_aux_inv)
+        CALL cp_dbcsr_create(matrix_s_aux_inv, template=matrix_s_aux(1)%matrix, matrix_type="N")
         CALL invert_Hotelling(matrix_s_aux_inv, matrix_s_aux(1)%matrix, admm_dm%eps_filter, error=error)
 
         IF(.NOT. ASSOCIATED(admm_dm%matrix_A)) THEN
            ALLOCATE(admm_dm%matrix_A)
-           CALL cp_dbcsr_init(admm_dm%matrix_A, error=error)
-           CALL cp_dbcsr_create(admm_dm%matrix_A, template=matrix_s_mixed(1)%matrix, matrix_type="N", error=error)
+           CALL cp_dbcsr_init(admm_dm%matrix_A)
+           CALL cp_dbcsr_create(admm_dm%matrix_A, template=matrix_s_mixed(1)%matrix, matrix_type="N")
         ENDIF
         CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_s_aux_inv, matrix_s_mixed(1)%matrix, &
-                               0.0_dp, admm_dm%matrix_A, error=error)
-        CALL cp_dbcsr_release(matrix_s_aux_inv, error)
+                               0.0_dp, admm_dm%matrix_A)
+        CALL cp_dbcsr_release(matrix_s_aux_inv)
     ENDIF
 
     ! Calculate P_aux = A * P * A^T
-    CALL cp_dbcsr_init(matrix_tmp, error=error)
-    CALL cp_dbcsr_create(matrix_tmp, template=admm_dm%matrix_A, error=error)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp, template=admm_dm%matrix_A)
     DO ispin=1, dft_control%nspins
         CALL cp_dbcsr_multiply("N", "N", 1.0_dp, admm_dm%matrix_A, rho%rho_ao(ispin)%matrix,&
-                           0.0_dp, matrix_tmp, error=error)
+                           0.0_dp, matrix_tmp)
         CALL cp_dbcsr_multiply("N", "T", 1.0_dp, matrix_tmp, admm_dm%matrix_A, &
-                           0.0_dp, rho_aux%rho_ao(ispin)%matrix, error=error)
+                           0.0_dp, rho_aux%rho_ao(ispin)%matrix)
     END DO
-    CALL cp_dbcsr_release(matrix_tmp, error)
+    CALL cp_dbcsr_release(matrix_tmp)
 
  END SUBROUTINE map_dm_projection
 
@@ -221,7 +221,7 @@ MODULE admm_dm_methods
 
     ! ** set blocked density matrix to 0
     DO ispin=1, dft_control%nspins
-       CALL cp_dbcsr_set(rho_aux%rho_ao(ispin)%matrix, 0.0_dp, error)
+       CALL cp_dbcsr_set(rho_aux%rho_ao(ispin)%matrix, 0.0_dp)
        ! ** now loop through the list and copy corresponding blocks
        CALL cp_dbcsr_iterator_start(iter, rho%rho_ao(ispin)%matrix)
        DO WHILE (cp_dbcsr_iterator_blocks_left(iter))
@@ -306,17 +306,17 @@ MODULE admm_dm_methods
                     error=error)
 
     ! Calculate K += A^T * K_aux * A
-    CALL cp_dbcsr_init(matrix_tmp, error=error)
-    CALL cp_dbcsr_create(matrix_tmp, template=admm_dm%matrix_A, matrix_type="N", error=error)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp, template=admm_dm%matrix_A, matrix_type="N")
 
     DO ispin=1, dft_control%nspins
         CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_ks_merge(ispin)%matrix, admm_dm%matrix_A, &
-                           0.0_dp, matrix_tmp, error=error)
+                           0.0_dp, matrix_tmp)
         CALL cp_dbcsr_multiply("T", "N", 1.0_dp, admm_dm%matrix_A, matrix_tmp, &
-                           1.0_dp, matrix_ks(ispin)%matrix, error=error)
+                           1.0_dp, matrix_ks(ispin)%matrix)
     END DO
 
-    CALL cp_dbcsr_release(matrix_tmp, error)
+    CALL cp_dbcsr_release(matrix_tmp)
 
   END SUBROUTINE merge_dm_projection
 
@@ -357,7 +357,7 @@ MODULE admm_dm_methods
             sparse_block = 0.0_dp
        END DO
        CALL cp_dbcsr_iterator_stop(iter)
-       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_ks_merge(ispin)%matrix, 1.0_dp, 1.0_dp, error)
+       CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_ks_merge(ispin)%matrix, 1.0_dp, 1.0_dp)
     ENDDO
 
   END SUBROUTINE merge_dm_blocked
@@ -399,12 +399,12 @@ MODULE admm_dm_methods
                     error=error)
 
     matrix_p => rho_aux_fit%rho_ao(1)%matrix
-    CALL cp_dbcsr_init(matrix_PS,error=error)
-    CALL cp_dbcsr_create(matrix_PS,template=matrix_p,matrix_type="N",error=error)
-    CALL cp_dbcsr_init(matrix_PSP,error=error)
-    CALL cp_dbcsr_create(matrix_PSP,template=matrix_p,matrix_type="S",error=error)
-    CALL cp_dbcsr_init(matrix_test,error=error)
-    CALL cp_dbcsr_create(matrix_test,template=matrix_p,matrix_type="S",error=error)
+    CALL cp_dbcsr_init(matrix_PS)
+    CALL cp_dbcsr_create(matrix_PS,template=matrix_p,matrix_type="N")
+    CALL cp_dbcsr_init(matrix_PSP)
+    CALL cp_dbcsr_create(matrix_PSP,template=matrix_p,matrix_type="S")
+    CALL cp_dbcsr_init(matrix_test)
+    CALL cp_dbcsr_create(matrix_test,template=matrix_p,matrix_type="S")
 
     nspins = dft_control%nspins
     DO ispin=1, nspins
@@ -412,7 +412,7 @@ MODULE admm_dm_methods
        matrix_s => matrix_s_aux_fit(1)%matrix
        history => admm_dm%mcweeny_history(ispin)%p
        IF(ASSOCIATED(history)) STOP "purify_dm_mcweeny: history already associated"
-       IF(nspins==1) CALL cp_dbcsr_scale(matrix_p,0.5_dp,error=error)
+       IF(nspins==1) CALL cp_dbcsr_scale(matrix_p,0.5_dp)
 
        DO istep=1, admm_dm%mcweeny_max_steps
           ! allocate new element in linked list
@@ -421,38 +421,38 @@ MODULE admm_dm_methods
            history => new_hist_entry
            history%count = istep
            NULLIFY(new_hist_entry)
-           CALL cp_dbcsr_init(history%m, error=error)
-           CALL cp_dbcsr_create(history%m, template=matrix_p ,matrix_type="N",error=error)
-           CALL cp_dbcsr_copy(history%m, matrix_p, name="P from McWeeny", error=error)
+           CALL cp_dbcsr_init(history%m)
+           CALL cp_dbcsr_create(history%m, template=matrix_p ,matrix_type="N")
+           CALL cp_dbcsr_copy(history%m, matrix_p, name="P from McWeeny")
 
            ! calc PS and PSP
            CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_p, matrix_s,&
-                0.0_dp, matrix_ps, error=error)
+                0.0_dp, matrix_ps)
 
            CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_ps, matrix_p,&
-                0.0_dp, matrix_psp, error=error)
+                0.0_dp, matrix_psp)
 
            !test convergence
-           CALL cp_dbcsr_copy(matrix_test, matrix_psp, error=error)
-           CALL cp_dbcsr_add(matrix_test, matrix_p, 1.0_dp,-1.0_dp,error=error)
+           CALL cp_dbcsr_copy(matrix_test, matrix_psp)
+           CALL cp_dbcsr_add(matrix_test, matrix_p, 1.0_dp,-1.0_dp)
            frob_norm=cp_dbcsr_frobenius_norm(matrix_test)
            IF(unit_nr>0) WRITE(unit_nr,'(t3,a,i5,a,f16.8)')"McWeeny-Step",istep,&
                                ": Deviation of idempotency", frob_norm
            IF(frob_norm < 1000_dp*admm_dm%eps_filter .AND. istep>1) EXIT
 
            ! build next P matrix
-           CALL cp_dbcsr_copy(matrix_p, matrix_PSP, name="P from McWeeny", error=error)
+           CALL cp_dbcsr_copy(matrix_p, matrix_PSP, name="P from McWeeny")
            CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_PS, matrix_PSP,&
-                3.0_dp, matrix_p, error=error)
+                3.0_dp, matrix_p)
        END DO
        admm_dm%mcweeny_history(ispin)%p => history
-       IF(nspins==1) CALL cp_dbcsr_scale(matrix_p,2.0_dp,error=error)
+       IF(nspins==1) CALL cp_dbcsr_scale(matrix_p,2.0_dp)
     END DO
 
     ! clean up
-    CALL cp_dbcsr_release(matrix_PS,error)
-    CALL cp_dbcsr_release(matrix_PSP,error)
-    CALL cp_dbcsr_release(matrix_test,error)
+    CALL cp_dbcsr_release(matrix_PS)
+    CALL cp_dbcsr_release(matrix_PSP)
+    CALL cp_dbcsr_release(matrix_test)
     CALL timestop(handle)
   END SUBROUTINE purify_mcweeny
 
@@ -503,8 +503,8 @@ MODULE admm_dm_methods
     DO ispin=1, nspins
        ALLOCATE(matrix_ks_merge(ispin)%matrix)
        matrix_k => matrix_ks_merge(ispin)%matrix
-       CALL cp_dbcsr_init(matrix_k, error=error)
-       CALL cp_dbcsr_copy(matrix_k, matrix_ks_aux_fit(ispin)%matrix, name="K", error=error)
+       CALL cp_dbcsr_init(matrix_k)
+       CALL cp_dbcsr_copy(matrix_k, matrix_ks_aux_fit(ispin)%matrix, name="K")
        history_curr => admm_dm%mcweeny_history(ispin)%p
        NULLIFY(admm_dm%mcweeny_history(ispin)%p)
 
@@ -515,7 +515,7 @@ MODULE admm_dm_methods
                                     matrix_s=matrix_s_aux_fit(1)%matrix,&
                                     matrix_p=history_curr%m,&
                                     error=error)
-          CALL cp_dbcsr_release(history_curr%m,error)
+          CALL cp_dbcsr_release(history_curr%m)
           history_next => history_curr%next
           DEALLOCATE(history_curr)
           history_curr => history_next
@@ -549,49 +549,50 @@ MODULE admm_dm_methods
                                                 matrix_sum, matrix_tmp
 
     CALL timeset(routineN,handle)
-    CALL cp_dbcsr_init(matrix_ps,error=error)
-    CALL cp_dbcsr_create(matrix_ps,template=matrix_p,matrix_type="N",error=error)
-    CALL cp_dbcsr_init(matrix_sp,error=error)
-    CALL cp_dbcsr_create(matrix_sp,template=matrix_p,matrix_type="N",error=error)
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p,matrix_type="N",error=error)
-    CALL cp_dbcsr_init(matrix_sum,error=error)
-    CALL cp_dbcsr_create(matrix_sum,template=matrix_p,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(matrix_ps)
+    CALL cp_dbcsr_create(matrix_ps,template=matrix_p,matrix_type="N")
+    CALL cp_dbcsr_init(matrix_sp)
+    CALL cp_dbcsr_create(matrix_sp,template=matrix_p,matrix_type="N")
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p,matrix_type="N")
+    CALL cp_dbcsr_init(matrix_sum)
+    CALL cp_dbcsr_create(matrix_sum,template=matrix_p,matrix_type="N")
 
     CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_p, matrix_s,&
-             0.0_dp, matrix_ps, error=error)
+             0.0_dp, matrix_ps)
     CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_s, matrix_p,&
-             0.0_dp, matrix_sp, error=error)
+             0.0_dp, matrix_sp)
 
     !TODO: can we exploid more symmetry?
     CALL cp_dbcsr_multiply("N", "N", 3.0_dp, matrix_k, matrix_ps,&
-             0.0_dp, matrix_sum, error=error)
+             0.0_dp, matrix_sum)
     CALL cp_dbcsr_multiply("N", "N", 3.0_dp, matrix_sp, matrix_k,&
-             1.0_dp, matrix_sum, error=error)
+             1.0_dp, matrix_sum)
 
     !matrix_tmp = KPS
     CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_k, matrix_ps,&
-             0.0_dp, matrix_tmp, error=error)
+             0.0_dp, matrix_tmp)
     CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_tmp, matrix_ps,&
-            1.0_dp, matrix_sum, error=error)
+            1.0_dp, matrix_sum)
     CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_sp, matrix_tmp,&
-            1.0_dp, matrix_sum, error=error)
+            1.0_dp, matrix_sum)
 
     !matrix_tmp = SPK
     CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_sp, matrix_k,&
-             0.0_dp, matrix_tmp, error=error)
+             0.0_dp, matrix_tmp)
     CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_sp, matrix_tmp,&
-            1.0_dp, matrix_sum, error=error)
+            1.0_dp, matrix_sum)
 
     ! overwrite matrix_k
-    CALL cp_dbcsr_copy(matrix_k, matrix_sum, name="K from reverse McWeeny", error=error)
+    CALL cp_dbcsr_copy(matrix_k, matrix_sum, name="K from reverse McWeeny")
 
     ! clean up
-    CALL cp_dbcsr_release(matrix_sum,error)
-    CALL cp_dbcsr_release(matrix_tmp,error)
-    CALL cp_dbcsr_release(matrix_ps,error)
-    CALL cp_dbcsr_release(matrix_sp,error)
+    CALL cp_dbcsr_release(matrix_sum)
+    CALL cp_dbcsr_release(matrix_tmp)
+    CALL cp_dbcsr_release(matrix_ps)
+    CALL cp_dbcsr_release(matrix_sp)
     CALL timestop(handle)
   END SUBROUTINE reverse_mcweeny_step
 
 END MODULE admm_dm_methods
+

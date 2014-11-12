@@ -1390,7 +1390,7 @@ CONTAINS
 
           IF (ASSOCIATED(qs_env%mo_derivs)) THEN
              DO I=1,SIZE(qs_env%mo_derivs)
-                CALL cp_dbcsr_release_p(qs_env%mo_derivs(I)%matrix, error=error)
+                CALL cp_dbcsr_release_p(qs_env%mo_derivs(I)%matrix)
              ENDDO
              DEALLOCATE(qs_env%mo_derivs, stat=stat)
              CPPostconditionNoFail(stat==0,cp_warning_level,routineP,error)
@@ -1549,3 +1549,4 @@ CONTAINS
   END SUBROUTINE qs_env_release
 
 END MODULE qs_environment_types
+

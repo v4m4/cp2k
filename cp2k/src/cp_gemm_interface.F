@@ -140,12 +140,12 @@ CONTAINS
        CALL copy_fm_to_dbcsr_bc(matrix_b,b_db,error=error)
        CALL copy_fm_to_dbcsr_bc(matrix_c,c_db,error=error)
    
-       CALL cp_dbcsr_multiply(transa,transb,alpha, a_db, b_db, beta, c_db, last_k=k, error=error)
+       CALL cp_dbcsr_multiply(transa,transb,alpha, a_db, b_db, beta, c_db, last_k=k)
    
        CALL copy_dbcsr_to_fm_bc(c_db, matrix_c, error)
-       CALL cp_dbcsr_release (a_db, error=error)
-       CALL cp_dbcsr_release (b_db, error=error)
-       CALL cp_dbcsr_release (c_db, error=error)
+       CALL cp_dbcsr_release (a_db)
+       CALL cp_dbcsr_release (b_db)
+       CALL cp_dbcsr_release (c_db)
        CALL timestop(handle1)
     END SELECT
     CALL timestop(handle)
@@ -153,3 +153,4 @@ CONTAINS
   END SUBROUTINE cp_gemm
 
 END MODULE cp_gemm_interface
+

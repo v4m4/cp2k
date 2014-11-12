@@ -289,7 +289,7 @@ CONTAINS
 
     ENDIF
 
-    CALL cp_dbcsr_deallocate_matrix_set(qs_env%et_coupling%rest_mat,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(qs_env%et_coupling%rest_mat)
 
     CALL cp_print_key_finished_output(iw,logger,et_coupling_section,&
                "PROGRAM_RUN_INFO", error=error)
@@ -772,4 +772,5 @@ CONTAINS
   END SUBROUTINE becke_force
 
 END MODULE et_coupling
+
 

@@ -265,29 +265,27 @@ CONTAINS
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
        !
        ! rebuild the linear momentum matrices
-       CALL cp_dbcsr_allocate_matrix_set(op_p_ao,3,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(op_p_ao,3)
        ALLOCATE(op_p_ao(1)%matrix)
-       CALL cp_dbcsr_init(op_p_ao(1)%matrix,error=error)
+       CALL cp_dbcsr_init(op_p_ao(1)%matrix)
        CALL cp_dbcsr_create(matrix=op_p_ao(1)%matrix, &
             name="OP_P", &
             dist=dbcsr_dist, matrix_type=dbcsr_type_antisymmetric,&
             row_blk_size=row_blk_sizes, col_blk_size=row_blk_sizes, &
-            nblks=0, nze=0, mutable_work=.TRUE., &
-            error=error)
+            nblks=0, nze=0, mutable_work=.TRUE.)
        CALL cp_dbcsr_alloc_block_from_nbl(op_p_ao(1)%matrix,sab_orb,error=error)
        !
        !
        CALL array_release (row_blk_sizes)
        !
        !
-       CALL cp_dbcsr_set(op_p_ao(1)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(op_p_ao(1)%matrix,0.0_dp)
        DO idir = 2,3
           ALLOCATE(op_p_ao(idir)%matrix)
-          CALL cp_dbcsr_init(op_p_ao(idir)%matrix,error=error)
+          CALL cp_dbcsr_init(op_p_ao(idir)%matrix)
           CALL cp_dbcsr_copy(op_p_ao(idir)%matrix,op_p_ao(1)%matrix,&
-               "current_env%op_p_ao"//"-"//TRIM(ADJUSTL(cp_to_string(idir))),&
-               error=error)
-          CALL cp_dbcsr_set(op_p_ao(idir)%matrix,0.0_dp,error=error)
+               "current_env%op_p_ao"//"-"//TRIM(ADJUSTL(cp_to_string(idir))))
+          CALL cp_dbcsr_set(op_p_ao(idir)%matrix,0.0_dp)
        ENDDO
        !
        !CALL p_xyz_ao(op_p_ao,qs_env,minimum_image=.FALSE.,error=error)
@@ -589,7 +587,7 @@ CONTAINS
     !
     ! clean up
     IF(current_env%full) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(op_p_ao,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(op_p_ao)
        DO ispin = 1,nspins
           CALL cp_fm_release(psi1(ispin)%matrix,error=error)
           CALL cp_fm_release(h1_psi0(ispin)%matrix,error=error)
@@ -1594,3 +1592,4 @@ CONTAINS
   END SUBROUTINE current_env_cleanup
 
 END MODULE qs_linres_current_utils
+

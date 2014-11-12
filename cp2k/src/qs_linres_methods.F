@@ -736,7 +736,7 @@ CONTAINS
 
        chksum = 0.0_dp
        DO ispin = 1,nspins
-          chksum = chksum + cp_dbcsr_checksum(p_env%p1(ispin)%matrix,error=error)
+          chksum = chksum + cp_dbcsr_checksum(p_env%p1(ispin)%matrix)
        ENDDO
 
        !
@@ -746,7 +746,7 @@ CONTAINS
           CALL p_env_check_i_alloc(p_env,qs_env,error)
 
           DO ispin = 1,nspins
-             CALL cp_dbcsr_copy(p_env%rho1%rho_ao(ispin)%matrix,p_env%p1(ispin)%matrix,error=error)
+             CALL cp_dbcsr_copy(p_env%rho1%rho_ao(ispin)%matrix,p_env%p1(ispin)%matrix)
           ENDDO
 
              CALL qs_rho_update_rho(rho_struct=p_env%rho1,local_rho_set=p_env%local_rho_set,&
@@ -814,7 +814,7 @@ CONTAINS
     nspins = SIZE(dm,1)
 
     DO ispin = 1,nspins
-       CALL cp_dbcsr_set(dm(ispin)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(dm(ispin)%matrix,0.0_dp)
        CALL cp_fm_get_info(c0(ispin)%matrix,ncol_global=ncol,error=error)
        CALL cp_dbcsr_plus_fm_fm_t(dm(ispin)%matrix,&
                                matrix_v=c0(ispin)%matrix,&
@@ -1144,7 +1144,7 @@ CONTAINS
 
                 END IF
                 ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-                CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp)
                 CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                      p=rho%rho_ao(ispin),&
                      h=p_env%kpp1_env%v_ao(ispin),&
@@ -1165,7 +1165,7 @@ CONTAINS
                 END IF
              ELSE
                 ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-                CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp)
                 CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                      p=rho%rho_ao(ispin),&
                      h=p_env%kpp1_env%v_ao(ispin),&
@@ -1214,7 +1214,7 @@ CONTAINS
              END IF
 
             ! remove kpp1_env%v_ao and work directly on k_p_p1 ?
-             CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp,error=error)
+             CALL cp_dbcsr_set(p_env%kpp1_env%v_ao(ispin)%matrix,0.0_dp)
 
              CALL integrate_v_rspace(v_rspace=v_rspace_new(ispin),&
                  p=rho%rho_ao(ispin),&
@@ -1224,8 +1224,7 @@ CONTAINS
 
           END IF
 
-          CALL cp_dbcsr_copy(p_env%kpp1(ispin)%matrix,p_env%kpp1_env%v_ao(ispin)%matrix,&
-               error=error)
+          CALL cp_dbcsr_copy(p_env%kpp1(ispin)%matrix,p_env%kpp1_env%v_ao(ispin)%matrix)
        END DO
 
        IF (gapw) THEN
@@ -1307,15 +1306,15 @@ CONTAINS
           CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
           nspins=dft_control%nspins
 
-          CALL cp_dbcsr_allocate_matrix_set(p_env%kpp1,nspins,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(p_env%kpp1,nspins)
              name="p_env"//cp_to_string(p_env%id_nr)//"%kpp1-"
              !CALL compress(name,full=.TRUE.)
              DO ispin=1,nspins
                 ALLOCATE(p_env%kpp1(ispin)%matrix)
-                CALL cp_dbcsr_init(p_env%kpp1(ispin)%matrix,error=error)
+                CALL cp_dbcsr_init(p_env%kpp1(ispin)%matrix)
                 CALL cp_dbcsr_copy(p_env%kpp1(ispin)%matrix,matrix_s(1)%matrix,&
-                     name=TRIM(name)//ADJUSTL(cp_to_string(ispin)),error=error)
-                CALL cp_dbcsr_set(p_env%kpp1(ispin)%matrix,0.0_dp,error=error)
+                     name=TRIM(name)//ADJUSTL(cp_to_string(ispin)))
+                CALL cp_dbcsr_set(p_env%kpp1(ispin)%matrix,0.0_dp)
              END DO
 
           CALL qs_rho_rebuild(p_env%rho1, qs_env=qs_env, error=error)
@@ -1391,12 +1390,12 @@ CONTAINS
     END IF
 
     IF (.NOT.ASSOCIATED(kpp1_env%v_ao)) THEN
-       CALL cp_dbcsr_allocate_matrix_set(kpp1_env%v_ao,nspins,error)
+       CALL cp_dbcsr_allocate_matrix_set(kpp1_env%v_ao,nspins)
           DO ispin=1,nspins
              ALLOCATE(kpp1_env%v_ao(ispin)%matrix)
-             CALL cp_dbcsr_init(kpp1_env%v_ao(ispin)%matrix,error=error)
+             CALL cp_dbcsr_init(kpp1_env%v_ao(ispin)%matrix)
              CALL cp_dbcsr_copy(kpp1_env%v_ao(ispin)%matrix,matrix_s(1)%matrix,&
-                  name="kpp1%v_ao-"//ADJUSTL(cp_to_string(ispin)),error=error)
+                  name="kpp1%v_ao-"//ADJUSTL(cp_to_string(ispin)))
           END DO
     END IF
 
@@ -1952,3 +1951,4 @@ CONTAINS
   END SUBROUTINE check_p_env_init
 
 END MODULE qs_linres_methods
+

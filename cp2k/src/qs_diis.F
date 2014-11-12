@@ -681,16 +681,16 @@ CONTAINS
     diis_buffer%ncall = diis_buffer%ncall + 1
     nb = MIN(diis_buffer%ncall,diis_buffer%nbuffer)
 ! Create scratch arrays
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
+    CALL cp_dbcsr_init(matrix_tmp)
     CALL cp_dbcsr_create(matrix_tmp, &
                          template=ls_scf_env%matrix_ks(1),&
-                         matrix_type='N',error=error)
-    CALL cp_dbcsr_set(matrix_tmp,0.0_dp,error=error)     ! reset matrix
-    CALL cp_dbcsr_init(matrix_KSerr_t,error=error)
+                         matrix_type='N')
+    CALL cp_dbcsr_set(matrix_tmp,0.0_dp)     ! reset matrix
+    CALL cp_dbcsr_init(matrix_KSerr_t)
     CALL cp_dbcsr_create(matrix_KSerr_t,&
                          template=ls_scf_env%matrix_ks(1),&
-                         matrix_type='N',error=error)
-    CALL cp_dbcsr_set(matrix_KSerr_t,0.0_dp,error=error) ! reset matrix
+                         matrix_type='N')
+    CALL cp_dbcsr_set(matrix_KSerr_t,0.0_dp) ! reset matrix
 
     DO ispin=1,nspin ! ------ Loop-ispin----START
 
@@ -698,8 +698,7 @@ CONTAINS
       parameters => diis_buffer%parameter(ib,ispin)%matrix
       ! Copy the Kohn-Sham matrix K to the DIIS buffer
       CALL cp_dbcsr_copy(parameters,              & ! out
-                         matrix_ks(ispin)%matrix, & ! in
-                         error=error)
+                         matrix_ks(ispin)%matrix)   ! in
 
         IF (PRESENT(s_matrix)) THEN ! if-s_matrix ---------- START
 ! Calculate Kohn-Sham error (non-orthogonal)= K*P*S-(K*P*S)^T
@@ -708,22 +707,20 @@ CONTAINS
                    1.0_dp,ls_scf_env%matrix_p(ispin),& 
                           s_matrix,                  &
                    0.0_dp,matrix_tmp,                &
-                   filter_eps=threshold, error=error)    
+                   filter_eps=threshold)    
 ! new_errors= K*P*S    
             CALL cp_dbcsr_multiply("N", "N",         &
                    1.0_dp,matrix_ks(ispin)%matrix,   & 
                           matrix_tmp,                &
                    0.0_dp,new_errors,                &
-                   filter_eps=threshold,error=error) 
+                   filter_eps=threshold) 
 ! matrix_KSerr_t= transpose(K*P*S)        
             CALL cp_dbcsr_transposed(matrix_KSerr_t, &
-                                     new_errors,     &
-                                     error=error)
+                                     new_errors)
 ! new_errors=K*P*S-transpose(K*P*S)
             CALL cp_dbcsr_add(new_errors,       &
                               matrix_KSerr_t,   &
-                              1.0_dp,-1.0_dp,   &
-                              error=error)
+                              1.0_dp,-1.0_dp)
         ELSE   ! if-s_matrix ---------- MID
 ! Calculate Kohn-Sham error (orthogonal)= K*P - P*K
 ! new_errors=K*P
@@ -731,16 +728,14 @@ CONTAINS
                    1.0_dp,matrix_ks(ispin)%matrix,   & 
                           ls_scf_env%matrix_p(ispin),&
                    0.0_dp,new_errors,                &
-                   filter_eps=threshold,error=error)  
+                   filter_eps=threshold)  
 ! matrix_KSerr_t= transpose(K*P)   
             CALL cp_dbcsr_transposed(matrix_KSerr_t, & 
-                                     new_errors,     & 
-                                     error=error)
+                                     new_errors)
 ! new_errors=K*P-transpose(K*P)
             CALL cp_dbcsr_add(new_errors,            & 
                               matrix_KSerr_t,        &
-                              1.0_dp,-1.0_dp,        &
-                              error=error)
+                              1.0_dp,-1.0_dp)
         END IF ! if-s_matrix ---------- END
 
        tmp=cp_dbcsr_maxabs(new_errors)
@@ -774,8 +769,7 @@ CONTAINS
           new_errors => diis_buffer%error(ib,ispin)%matrix
           CALL cp_dbcsr_trace(old_errors, &
                               new_errors, &
-                              tmp,        & ! out : < f_i | f_j >
-                              error=error)
+                              tmp)        ! out : < f_i | f_j >
           b(jb,ib) = b(jb,ib) + tmp
         END DO ! end-loop-ispin
         b(ib,jb) = b(jb,ib)
@@ -823,13 +817,11 @@ CONTAINS
 
         DO ispin=1,nspin
           CALL cp_dbcsr_set(matrix_ks(ispin)%matrix, & ! reset matrix
-                            0.0_dp,                  &
-                            error=error)  
+                            0.0_dp)
           DO jb=1,nb
              parameters => diis_buffer%parameter(jb,ispin)%matrix
              CALL cp_dbcsr_add(matrix_ks(ispin)%matrix,parameters, &
-                               1.0_dp,-ev(jb),                     &
-                               error=error)
+                               1.0_dp,-ev(jb))
           END DO ! end-loop-jb
         END DO ! end-loop-ispin
       ENDIF ! if-iscf-to-updateKS------ END
@@ -845,12 +837,11 @@ CONTAINS
       DO ispin=1,nspin
        parameters => diis_buffer%parameter(ib,ispin)%matrix
        CALL cp_dbcsr_copy(parameters,              & ! out
-                          matrix_ks(ispin)%matrix, & ! in
-                          error=error)
+                          matrix_ks(ispin)%matrix)   ! in
       ENDDO ! end-loop-ispin
     END IF
-      CALL cp_dbcsr_release(matrix_tmp    ,error=error)
-      CALL cp_dbcsr_release(matrix_KSerr_t,error=error)
+      CALL cp_dbcsr_release(matrix_tmp    )
+      CALL cp_dbcsr_release(matrix_KSerr_t)
       CALL timestop(handle)
 
   END SUBROUTINE qs_diis_b_step_4lscf
@@ -909,12 +900,11 @@ CONTAINS
       DO ispin=1,nspin
         DO ibuffer=1,nbuffer
           ALLOCATE (diis_buffer%error(ibuffer,ispin)%matrix,STAT=istat)
-          CALL cp_dbcsr_init(diis_buffer%error(ibuffer,ispin)%matrix, &
-                             error=error)
+          CALL cp_dbcsr_init(diis_buffer%error(ibuffer,ispin)%matrix)
 
           CALL cp_dbcsr_create(diis_buffer%error(ibuffer,ispin)%matrix, &
                                template=ls_scf_env%matrix_ks(1),&
-                               matrix_type='N',error=error)
+                               matrix_type='N')
         END DO
       END DO
     END IF
@@ -927,11 +917,10 @@ CONTAINS
       DO ispin=1,nspin
         DO ibuffer=1,nbuffer
           ALLOCATE (diis_buffer%parameter(ibuffer,ispin)%matrix,STAT=istat)
-          CALL cp_dbcsr_init(diis_buffer%parameter(ibuffer,ispin)%matrix, &
-                             error=error)
+          CALL cp_dbcsr_init(diis_buffer%parameter(ibuffer,ispin)%matrix)
           CALL cp_dbcsr_create(diis_buffer%parameter(ibuffer,ispin)%matrix, &
                                template=ls_scf_env%matrix_ks(1),&
-                               matrix_type='N',error=error)
+                               matrix_type='N')
         END DO
       END DO
     END IF
@@ -1036,3 +1025,5 @@ CONTAINS
   END SUBROUTINE qs_diis_b_create_sparse
 
 END MODULE qs_diis
+
+

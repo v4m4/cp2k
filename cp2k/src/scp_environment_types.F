@@ -318,10 +318,10 @@ SUBROUTINE scp_env_release(scp_env,error)
         IF (ASSOCIATED(scp_env%energy)) &
              CALL deallocate_scp_energy(scp_env%energy)
         IF (ASSOCIATED(scp_env%pscp)) THEN
-           CALL cp_dbcsr_deallocate_matrix ( scp_env%pscp, error )
+           CALL cp_dbcsr_deallocate_matrix ( scp_env%pscp )
         ENDIF
         IF (ASSOCIATED(scp_env%ks_scp)) THEN
-           CALL cp_dbcsr_deallocate_matrix ( scp_env%ks_scp, error )
+           CALL cp_dbcsr_deallocate_matrix ( scp_env%ks_scp )
         ENDIF
         IF (ASSOCIATED(scp_env%ascp_diag)) THEN
            DEALLOCATE ( scp_env%ascp_diag, stat=stat)
@@ -342,3 +342,4 @@ SUBROUTINE scp_env_release(scp_env,error)
 END SUBROUTINE scp_env_release
 
 END MODULE scp_environment_types
+

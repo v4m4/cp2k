@@ -158,11 +158,11 @@ CONTAINS
        matrix_p => rho%rho_ao
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_w(1)%matrix, matrix_w(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
        END IF
     ELSE
        IF (cp_print_key_should_output(logger%iter_info,qs_env%input,&
@@ -213,11 +213,11 @@ CONTAINS
     END IF
 
     ! initialize H matrix
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
     ALLOCATE(matrix_h(1)%matrix,STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_h(1)%matrix, error=error)
-    CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_t(1)%matrix,name="CORE HAMILTONIAN MATRIX",error=error)
+    CALL cp_dbcsr_init(matrix_h(1)%matrix)
+    CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_t(1)%matrix,name="CORE HAMILTONIAN MATRIX")
     !The band energy elements will be added to the kinetic energy.
 
     ALLOCATE (scptb_kind_param(nkind),scptb_defined(nkind),STAT=istat)
@@ -337,9 +337,9 @@ CONTAINS
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp,error=error)
+                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp)
        END IF
     END IF
 
@@ -462,27 +462,27 @@ CONTAINS
                               error=error)
 
     ! initialize H matrix
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,ncount,error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,ncount)
     DO ic=1,ncount
        ALLOCATE(matrix_h(1,ic)%matrix,STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-       CALL cp_dbcsr_init(matrix_h(1,ic)%matrix, error=error)
+       CALL cp_dbcsr_init(matrix_h(1,ic)%matrix)
        CALL cp_dbcsr_copy(matrix_h(1,ic)%matrix,matrix_t(1,ic)%matrix,&
-                          name="CORE HAMILTONIAN MATRIX",error=error)
+                          name="CORE HAMILTONIAN MATRIX")
     END DO
 
     ! initialize the overlap matrix in the qs_env (gamma)
     ! used many times later as the template for the setup of matrices
     CALL get_qs_env(qs_env=qs_env,matrix_s=gamma_s,error=error)
-    CALL cp_dbcsr_allocate_matrix_set(gamma_s,1,error)
+    CALL cp_dbcsr_allocate_matrix_set(gamma_s,1)
     ALLOCATE(gamma_s(1)%matrix,STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(gamma_s(1)%matrix, error=error)
+    CALL cp_dbcsr_init(gamma_s(1)%matrix)
     CALL cp_dbcsr_copy(gamma_s(1)%matrix,matrix_s(1,1)%matrix,&
-                          name="OVERLAP MATRIX GAMMA",error=error)
+                          name="OVERLAP MATRIX GAMMA")
     DO ic=2,ncount
        CALL cp_dbcsr_add(gamma_s(1)%matrix,matrix_s(1,ic)%matrix,&
-                   alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                   alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
     END DO
     CALL set_ks_env(ks_env, matrix_s=gamma_s, error=error)
 
@@ -580,4 +580,5 @@ CONTAINS
   END SUBROUTINE build_scptb_core_matrix_kp
 
 END MODULE scptb_core_matrix
+
 

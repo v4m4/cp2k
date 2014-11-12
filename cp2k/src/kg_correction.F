@@ -284,9 +284,9 @@ CONTAINS
 
     ekin_mol = 0.0_dp
     DO ispin=1,nspins
-       CALL cp_dbcsr_trace(tnadd_matrix(1)%matrix,density_matrix(ispin)%matrix,ekin_mol,error=error)
+       CALL cp_dbcsr_trace(tnadd_matrix(1)%matrix,density_matrix(ispin)%matrix,ekin_mol)
        CALL cp_dbcsr_add(ks_matrix(ispin)%matrix, tnadd_matrix(1)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
     END DO
     ! definition is inverted (see qs_ks_methods)
     ekin_mol = -ekin_mol
@@ -296,3 +296,4 @@ CONTAINS
   END SUBROUTINE kg_ekin_atomic
 
 END MODULE kg_correction
+

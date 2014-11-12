@@ -410,13 +410,13 @@ CONTAINS
 
     ALLOCATE (sm_q,STAT=stat)
     CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(sm_q,error=error)
-    CALL cp_dbcsr_get_block_diag(sm_s,sm_q,error=error)
+    CALL cp_dbcsr_init(sm_q)
+    CALL cp_dbcsr_get_block_diag(sm_s,sm_q)
 
     ALLOCATE (sm_v,STAT=stat)
     CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(sm_v,error=error)
-    CALL cp_dbcsr_get_block_diag(sm_s,sm_v,error=error)
+    CALL cp_dbcsr_init(sm_v)
+    CALL cp_dbcsr_get_block_diag(sm_s,sm_v)
 
     ! Loop over all spins
 
@@ -438,8 +438,8 @@ CONTAINS
 
       sm_p => matrix_p(ispin)%matrix ! Density matrix for spin ispin in sparse format
 
-      CALL cp_dbcsr_set(sm_q,0.0_dp,error=error)
-      CALL cp_dbcsr_set(sm_v,0.0_dp,error=error)
+      CALL cp_dbcsr_set(sm_q,0.0_dp)
+      CALL cp_dbcsr_set(sm_v,0.0_dp)
 
       ! Calculate S^(1/2)*P*S^(1/2) as a full matrix (Lowdin)
 
@@ -872,8 +872,8 @@ CONTAINS
 
     ! Release (local) sparse matrices
 
-    CALL cp_dbcsr_deallocate_matrix(sm_q,error=error)
-    CALL cp_dbcsr_deallocate_matrix(sm_v,error=error)
+    CALL cp_dbcsr_deallocate_matrix(sm_q)
+    CALL cp_dbcsr_deallocate_matrix(sm_v)
 
     CALL timestop(handle)
 
@@ -1077,18 +1077,18 @@ CONTAINS
       IF (.NOT.ASSOCIATED(sm_q)) THEN
         ALLOCATE (sm_q,STAT=stat)
         CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
-        CALL cp_dbcsr_init(sm_q,error=error)
-        CALL cp_dbcsr_get_block_diag(sm_p,sm_q,error=error)
+        CALL cp_dbcsr_init(sm_q)
+        CALL cp_dbcsr_get_block_diag(sm_p,sm_q)
       END IF
-      CALL cp_dbcsr_set(sm_q,0.0_dp,error=error)
+      CALL cp_dbcsr_set(sm_q,0.0_dp)
 
       IF (.NOT.ASSOCIATED(sm_v)) THEN
         ALLOCATE (sm_v,STAT=stat)
         CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
-        CALL cp_dbcsr_init(sm_v,error=error)
-        CALL cp_dbcsr_get_block_diag(sm_p,sm_v,error=error)
+        CALL cp_dbcsr_init(sm_v)
+        CALL cp_dbcsr_get_block_diag(sm_p,sm_v)
       END IF
-      CALL cp_dbcsr_set(sm_v,0.0_dp,error=error)
+      CALL cp_dbcsr_set(sm_v,0.0_dp)
 
       DO iatom=1,natom
 
@@ -1557,8 +1557,8 @@ CONTAINS
                    "if this warning persists or try a different method!",&
                    only_ionode=.TRUE.)
 
-    CALL cp_dbcsr_deallocate_matrix(sm_q,error=error)
-    CALL cp_dbcsr_deallocate_matrix(sm_v,error=error)
+    CALL cp_dbcsr_deallocate_matrix(sm_q)
+    CALL cp_dbcsr_deallocate_matrix(sm_v)
 
     CALL timestop(handle)
 
@@ -2154,3 +2154,4 @@ CONTAINS
   END SUBROUTINE mulliken_charges
 
 END MODULE dft_plus_u
+

@@ -236,19 +236,19 @@ END SUBROUTINE wfs_create
 
       ! rho_ao
       IF (ASSOCIATED(input_snapshot%rho_ao)) THEN
-        CALL cp_dbcsr_allocate_matrix_set(output_snapshot%rho_ao, SIZE(input_snapshot%rho_ao),error=error)
+        CALL cp_dbcsr_allocate_matrix_set(output_snapshot%rho_ao, SIZE(input_snapshot%rho_ao))
         DO i = 1,SIZE(input_snapshot%rho_ao)
            CALL cp_dbcsr_copy(output_snapshot%rho_ao(i)%matrix,input_snapshot%rho_ao(i)%matrix, &
-                name="myDensityMatrix_for_Spin_"//TRIM(ADJUSTL(cp_to_string(i))),error=error)
-           CALL cp_dbcsr_set(output_snapshot%rho_ao(i)%matrix,0.0_dp,error=error)
+                name="myDensityMatrix_for_Spin_"//TRIM(ADJUSTL(cp_to_string(i))))
+           CALL cp_dbcsr_set(output_snapshot%rho_ao(i)%matrix,0.0_dp)
         END DO
       END IF
 
       ! overlap
       IF (ASSOCIATED(input_snapshot%overlap)) THEN
          CALL cp_dbcsr_copy(output_snapshot%overlap,input_snapshot%overlap,&
-              name="myOverlapMatrix",error=error)
-         CALL cp_dbcsr_set(output_snapshot%overlap,0.0_dp,error=error)
+              name="myOverlapMatrix")
+         CALL cp_dbcsr_set(output_snapshot%overlap,0.0_dp)
          !CALL replicate_matrix(source=input_snapshot%overlap, &
          !                     TARGET=output_snapshot%overlap, &
          !                     target_name="myOverlapMatrix", &
@@ -400,31 +400,30 @@ SUBROUTINE wfs_update(snapshot,wf_history,qs_env,dt,error)
 
      IF (ASSOCIATED(snapshot%rho_ao)) THEN ! the sparsity might be different
         ! (future struct:check)
-        CALL cp_dbcsr_deallocate_matrix_set(snapshot%rho_ao,error=error)
+        CALL cp_dbcsr_deallocate_matrix_set(snapshot%rho_ao)
      END IF
      IF (wf_history%store_rho_ao) THEN
         CALL qs_rho_get(rho, rho_ao=rho_ao,error=error)
         CPPrecondition(ASSOCIATED(rho_ao),cp_failure_level,routineP,error,failure)
 
-        CALL cp_dbcsr_allocate_matrix_set(snapshot%rho_ao,nspins,error=error)
+        CALL cp_dbcsr_allocate_matrix_set(snapshot%rho_ao,nspins)
         DO ispin=1,nspins
            ALLOCATE(snapshot%rho_ao(ispin)%matrix)
-           CALL cp_dbcsr_init(snapshot%rho_ao(ispin)%matrix,error=error)
-           CALL cp_dbcsr_copy(snapshot%rho_ao(ispin)%matrix,rho_ao(ispin)%matrix,&
-                error=error)
+           CALL cp_dbcsr_init(snapshot%rho_ao(ispin)%matrix)
+           CALL cp_dbcsr_copy(snapshot%rho_ao(ispin)%matrix,rho_ao(ispin)%matrix)
         END DO
      END IF
 
      IF (ASSOCIATED(snapshot%overlap)) THEN ! the sparsity might be different
         ! (future struct:check)
-        CALL cp_dbcsr_deallocate_matrix(snapshot%overlap,error=error)
+        CALL cp_dbcsr_deallocate_matrix(snapshot%overlap)
      END IF
      IF (wf_history%store_overlap) THEN
         CPPrecondition(ASSOCIATED(s_array),cp_failure_level,routineP,error,failure)
         CPPrecondition(ASSOCIATED(s_array(1)%matrix),cp_failure_level,routineP,error,failure)
         ALLOCATE(snapshot%overlap)
-        CALL cp_dbcsr_init(snapshot%overlap,error=error)
-        CALL cp_dbcsr_copy(snapshot%overlap,s_array(1)%matrix,error=error)
+        CALL cp_dbcsr_init(snapshot%overlap)
+        CALL cp_dbcsr_copy(snapshot%overlap,s_array(1)%matrix)
      END IF
 
      IF (wf_history%store_frozen_density) THEN
@@ -706,8 +705,7 @@ END FUNCTION wfi_get_method_label
           DO ispin=1,SIZE(t0_state%rho_frozen%rho_ao)
              CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,&
                              t0_state%rho_frozen%rho_ao(ispin)%matrix,&
-                             keep_sparsity=.TRUE.,&
-                             error=error)
+                             keep_sparsity=.TRUE.)
           END DO
           !FM updating rho_ao directly with t0_state%rho_ao would have the
           !FM wrong matrix structure
@@ -724,8 +722,7 @@ END FUNCTION wfi_get_method_label
           DO ispin=1,SIZE(t0_state%rho_ao)
              CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,&
                              t0_state%rho_ao(ispin)%matrix,&
-                             keep_sparsity=.TRUE.,&
-                             error=error)
+                             keep_sparsity=.TRUE.)
           END DO
           rho%rho_g_valid=.TRUE.
 
@@ -756,8 +753,7 @@ END FUNCTION wfi_get_method_label
           DO ispin=1,SIZE(t0_state%rho_ao)
              CALL cp_dbcsr_copy(rho%rho_ao(ispin)%matrix,&
                              t0_state%rho_ao(ispin)%matrix,&
-                             keep_sparsity=.TRUE.,&
-                             error=error)
+                             keep_sparsity=.TRUE.)
           END DO
           !FM updating rho_ao directly with t0_state%rho_ao would have the
           !FM wrong matrix structure
@@ -830,9 +826,9 @@ END FUNCTION wfi_get_method_label
             t2=t1+dt
             DO ispin=1,SIZE(rho%rho_ao)
                CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix,t1_state%rho_ao(ispin)%matrix,&
-                    alpha_scalar=0.0_dp,beta_scalar=(t2-t0)/(t1-t0),error=error) ! this copy should be unnecessary
+                    alpha_scalar=0.0_dp,beta_scalar=(t2-t0)/(t1-t0)) ! this copy should be unnecessary
                CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix,t0_state%rho_ao(ispin)%matrix,&
-                    alpha_scalar=1.0_dp,beta_scalar=(t1-t2)/(t1-t0),error=error)
+                    alpha_scalar=1.0_dp,beta_scalar=(t1-t2)/(t1-t0))
             END DO
             CALL qs_rho_update_rho(rho, qs_env=qs_env, error=error)
             CALL qs_ks_did_change(qs_env%ks_env, rho_changed=.TRUE., error=error)
@@ -1275,3 +1271,4 @@ END SUBROUTINE wfi_change_memory_depth
   END SUBROUTINE reorthogonalize_vectors
 
 END MODULE qs_wf_history_methods
+

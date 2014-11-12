@@ -729,33 +729,33 @@ END SUBROUTINE qs_ks_env_create
           IF (ASSOCIATED(ks_env%v_hartree_rspace)) &
             CALL pw_release(ks_env%v_hartree_rspace,error=error)
           IF (ASSOCIATED(ks_env%matrix_h)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_h,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_h)
           IF (ASSOCIATED(ks_env%matrix_ks)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks)
           IF (ASSOCIATED(ks_env%matrix_ks_im)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_im,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_im)
           IF (ASSOCIATED(ks_env%matrix_vxc)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_vxc,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_vxc)
           IF (ASSOCIATED(ks_env%matrix_ks_aux_fit)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_aux_fit,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_aux_fit)
           IF (ASSOCIATED(ks_env%matrix_ks_aux_fit_im)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_aux_fit_im,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_aux_fit_im)
           IF (ASSOCIATED(ks_env%matrix_s)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s)
           IF (ASSOCIATED(ks_env%matrix_s_aux_fit)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s_aux_fit,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s_aux_fit)
           IF (ASSOCIATED(ks_env%matrix_s_aux_fit_vs_orb)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s_aux_fit_vs_orb,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s_aux_fit_vs_orb)
           IF (ASSOCIATED(ks_env%matrix_w)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_w,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_w)
           IF (ASSOCIATED(ks_env%matrix_w_mp2)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_w_mp2,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_w_mp2)
           IF (ASSOCIATED(ks_env%matrix_p_mp2)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_p_mp2,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_p_mp2)
           IF (ASSOCIATED(ks_env%gamma_matrix)) &
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%gamma_matrix,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%gamma_matrix)
           IF (ASSOCIATED(ks_env%kinetic))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%kinetic,error)
+            CALL cp_dbcsr_deallocate_matrix_set(ks_env%kinetic)
           IF(ASSOCIATED(ks_env%rho))&
             CALL qs_rho_release(ks_env%rho, error=error)
           IF(ASSOCIATED(ks_env%rho_buffer))&
@@ -877,3 +877,4 @@ SUBROUTINE qs_ks_retain(ks_env, error)
 END SUBROUTINE qs_ks_retain
 
 END MODULE qs_ks_types
+

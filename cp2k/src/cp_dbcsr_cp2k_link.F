@@ -279,7 +279,7 @@ CONTAINS
 
     CPPrecondition(ASSOCIATED(sab_orb),cp_failure_level,routineP,error,failure)
 
-    CALL cp_dbcsr_finalize (matrix, error=error)
+    CALL cp_dbcsr_finalize (matrix)
     ALLOCATE (rows(1), cols(1))
     blk_cnt = 0
 
@@ -326,14 +326,14 @@ CONTAINS
     CALL neighbor_list_iterator_release(nl_iterator)
 
     !
-    CALL cp_dbcsr_reserve_blocks (matrix, rows(1:blk_cnt), cols(1:blk_cnt),&
-         error=error)
+    CALL cp_dbcsr_reserve_blocks (matrix, rows(1:blk_cnt), cols(1:blk_cnt))
     DEALLOCATE (rows)
     DEALLOCATE (cols)
-    CALL cp_dbcsr_finalize( matrix, error=error )
+    CALL cp_dbcsr_finalize( matrix )
 
     CALL timestop(handle)
 
   END SUBROUTINE cp_dbcsr_alloc_block_from_nbl
 
 END MODULE cp_dbcsr_cp2k_link
+

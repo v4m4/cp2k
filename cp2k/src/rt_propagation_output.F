@@ -468,7 +468,7 @@ CONTAINS
    CALL get_rtp(rtp=rtp,rho_new=rho_new,error=error)
 
    DO i=1,SIZE(rho_new)
-      CALL cp_dbcsr_add(delta_P(i)%matrix,rho_new(i)%matrix,one,-one,error=error)
+      CALL cp_dbcsr_add(delta_P(i)%matrix,rho_new(i)%matrix,one,-one)
    ENDDO
    !get the maximum value of delta_P
    DO i=1,SIZE(delta_P)
@@ -482,11 +482,11 @@ CONTAINS
    END DO
    NULLIFY(tmp)
    ALLOCATE(tmp)
-   CALL cp_dbcsr_init(tmp,error=error)
-   CALL cp_dbcsr_create(tmp,template=delta_P(1)%matrix,matrix_type="N",error=error)
+   CALL cp_dbcsr_init(tmp)
+   CALL cp_dbcsr_create(tmp,template=delta_P(1)%matrix,matrix_type="N")
    DO ispin=1,SIZE(delta_P)/2
-      CALL cp_dbcsr_desymmetrize(delta_P(2*ispin-1)%matrix,tmp,error=error)
-      CALL cp_dbcsr_add(delta_P(2*ispin)%matrix,tmp,one,one,error=error)
+      CALL cp_dbcsr_desymmetrize(delta_P(2*ispin-1)%matrix,tmp)
+      CALL cp_dbcsr_add(delta_P(2*ispin)%matrix,tmp,one,one)
    END DO
    !the absolute values are now in the even entries of delta_P
    max_alpha=zero
@@ -501,7 +501,7 @@ CONTAINS
    END DO
    CALL mp_max(max_alpha,dbcsr_mp_group(dbcsr_distribution_mp(cp_dbcsr_distribution(delta_P(1)%matrix))))
    delta_eps=SQRT(max_alpha)
-   CALL cp_dbcsr_deallocate_matrix(tmp,error=error)
+   CALL cp_dbcsr_deallocate_matrix(tmp)
    CALL timestop(handle)
 
  END SUBROUTINE rt_convergence_density
@@ -573,18 +573,18 @@ CONTAINS
     logger => cp_error_get_logger(error)
     unit_nr = cp_logger_get_default_io_unit(logger)
     NULLIFY(tmp)
-    CALL cp_dbcsr_allocate_matrix_set(tmp,SIZE(rho),error=error)
+    CALL cp_dbcsr_allocate_matrix_set(tmp,SIZE(rho))
     DO i=1,SIZE(rho)
-      CALL cp_dbcsr_init_p(tmp(i)%matrix,error=error)
-      CALL cp_dbcsr_create(tmp(i)%matrix,template=rho(i)%matrix,error=error)
-      CALL cp_dbcsr_copy(tmp(i)%matrix,rho(i)%matrix,error=error)
+      CALL cp_dbcsr_init_p(tmp(i)%matrix)
+      CALL cp_dbcsr_create(tmp(i)%matrix,template=rho(i)%matrix)
+      CALL cp_dbcsr_copy(tmp(i)%matrix,rho(i)%matrix)
     ENDDO
     DO ispin=1,SIZE(rho)/2
       re=2*ispin-1
       im=2*ispin
       eps=MAX(rtp%filter_eps,10E-12_dp)
       DO WHILE(eps<1.1_dp)
-         CALL cp_dbcsr_filter(tmp(re)%matrix,eps,error=error)
+         CALL cp_dbcsr_filter(tmp(re)%matrix,eps)
          occ=cp_dbcsr_get_occupation(tmp(re)%matrix)
          IF(unit_nr>0) WRITE(unit_nr,FMT="((T3,A,I1,A,F15.12,A,T61,F20.10))") "Occupation of rho spin ",&
                        ispin," eps ", eps, " real: ", occ
@@ -592,14 +592,14 @@ CONTAINS
       ENDDO
       eps=MAX(rtp%filter_eps,10E-12_dp)
       DO WHILE(eps<1.1_dp)
-         CALL cp_dbcsr_filter(tmp(im)%matrix,eps,error=error)
+         CALL cp_dbcsr_filter(tmp(im)%matrix,eps)
          occ=cp_dbcsr_get_occupation(tmp(im)%matrix)
          IF(unit_nr>0) WRITE(unit_nr,FMT="((T3,A,I1,A,F15.12,A,T61,F20.10))") "Occupation of rho spin ",&
                        ispin," eps ", eps, " imag: " ,occ
          eps=eps*10 
       ENDDO
     ENDDO
-    CALL cp_dbcsr_deallocate_matrix_set(tmp,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(tmp)
     CALL timestop(handle)
 
   END SUBROUTINE report_density_occupation
@@ -652,17 +652,17 @@ CONTAINS
        re=2*ispin-1
        im=2*ispin
        WRITE(file_name,'(A,I0,A)') "LS_DM_SPIN_RE",ispin,"_RESTART.dm"
-       cs_pos = cp_dbcsr_checksum (rho_new(re)%matrix, pos=.TRUE., error=error)
+       cs_pos = cp_dbcsr_checksum (rho_new(re)%matrix, pos=.TRUE.)
        IF (unit_nr>0) THEN
           WRITE(unit_nr,'(T2,A,E20.8)') "Writing restart DM "//TRIM(file_name)//" with checksum: ",cs_pos
        ENDIF
-       CALL cp_dbcsr_binary_write(rho_new(re)%matrix,file_name,error)
+       CALL cp_dbcsr_binary_write(rho_new(re)%matrix,file_name)
        WRITE(file_name,'(A,I0,A)') "LS_DM_SPIN_IM",ispin,"_RESTART.dm"
-       cs_pos = cp_dbcsr_checksum (rho_new(im)%matrix, pos=.TRUE., error=error)
+       cs_pos = cp_dbcsr_checksum (rho_new(im)%matrix, pos=.TRUE.)
        IF (unit_nr>0) THEN
           WRITE(unit_nr,'(T2,A,E20.8)') "Writing restart DM "//TRIM(file_name)//" with checksum: ",cs_pos
        ENDIF
-       CALL cp_dbcsr_binary_write(rho_new(im)%matrix,file_name,error)
+       CALL cp_dbcsr_binary_write(rho_new(im)%matrix,file_name)
     ENDDO
 
     CALL timestop(handle)
@@ -670,3 +670,9 @@ CONTAINS
   END SUBROUTINE write_rt_p_to_restart
 
 END MODULE rt_propagation_output
+
+
+
+
+
+

@@ -167,8 +167,8 @@ END SUBROUTINE p_env_retain
             CALL qs_rho_release(p_env%rho1_xc,error=error)
           ENDIF
           CALL qs_rho_release(p_env%rho1,error=error)
-          IF (ASSOCIATED(p_env%kpp1)) CALL cp_dbcsr_deallocate_matrix_set(p_env%kpp1,error)
-          IF (ASSOCIATED(p_env%p1)) CALL cp_dbcsr_deallocate_matrix_set(p_env%p1,error)
+          IF (ASSOCIATED(p_env%kpp1)) CALL cp_dbcsr_deallocate_matrix_set(p_env%kpp1)
+          IF (ASSOCIATED(p_env%p1)) CALL cp_dbcsr_deallocate_matrix_set(p_env%p1)
           IF (ASSOCIATED(p_env%local_rho_set)) THEN
              CALL local_rho_set_release(p_env%local_rho_set,error=error)
           END IF
@@ -327,3 +327,4 @@ END SUBROUTINE p_env_retain
    END SUBROUTINE p_env_write
 
 END MODULE qs_p_env_types
+

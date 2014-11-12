@@ -452,19 +452,19 @@ CONTAINS
        END IF
     END IF
 
-    CALL cp_dbcsr_set(density_matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(density_matrix,0.0_dp)
 
     IF ( .NOT. mo_set%uniform_occupation ) THEN ! not all orbitals 1..homo are equally occupied
 
        IF(my_use_dbcsr) THEN
-          CALL cp_dbcsr_init(dbcsr_tmp,error=error)
-          CALL cp_dbcsr_copy(dbcsr_tmp,mo_set%mo_coeff_b,error=error)
+          CALL cp_dbcsr_init(dbcsr_tmp)
+          CALL cp_dbcsr_copy(dbcsr_tmp,mo_set%mo_coeff_b)
           CALL cp_dbcsr_scale_by_vector(dbcsr_tmp,mo_set%occupation_numbers(1:mo_set%homo),&
-               side='right',error=error)
+               side='right')
           CALL cp_dbcsr_multiply("N", "T", 1.0_dp, mo_set%mo_coeff_b, dbcsr_tmp,&
                1.0_dp, density_matrix, retain_sparsity=.TRUE.,&
-               last_k = mo_set%homo, error=error)
-          CALL cp_dbcsr_release(dbcsr_tmp, error=error)
+               last_k = mo_set%homo)
+          CALL cp_dbcsr_release(dbcsr_tmp)
        ELSE
           NULLIFY(fm_tmp)
           CALL cp_fm_create(fm_tmp,mo_set%mo_coeff%matrix_struct,error=error)
@@ -475,14 +475,14 @@ CONTAINS
                                   matrix_v=mo_set%mo_coeff,&
                                   matrix_g=fm_tmp,&
                                   ncol=mo_set%homo,&
-                                  alpha=alpha,error=error)
+                                  alpha=alpha, error=error)
           CALL cp_fm_release(fm_tmp,error=error)
        ENDIF
     ELSE
        IF(my_use_dbcsr) THEN
           CALL cp_dbcsr_multiply("N", "T", mo_set%maxocc, mo_set%mo_coeff_b, mo_set%mo_coeff_b,&
                1.0_dp, density_matrix, retain_sparsity=.TRUE.,&
-               last_k = mo_set%homo, error=error)
+               last_k = mo_set%homo)
        ELSE
           alpha=mo_set%maxocc
           CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=density_matrix,&
@@ -717,8 +717,8 @@ CONTAINS
 
         ALLOCATE(evals(ncol_global))
 
-        CALL cp_dbcsr_init_p(weighted_vectors,error=error)
-        CALL cp_dbcsr_copy(weighted_vectors,orbitals,name="weighted_vectors",error=error)
+        CALL cp_dbcsr_init_p(weighted_vectors)
+        CALL cp_dbcsr_copy(weighted_vectors,orbitals,name="weighted_vectors")
 
         CALL cp_create_bl_distribution (col_dist, col_blk_size, ncol_global, &
              dbcsr_mp_npcols(dbcsr_distribution_mp(cp_dbcsr_distribution(orbitals))))
@@ -732,16 +732,14 @@ CONTAINS
         !CALL cp_fm_struct_create(fm_struct_tmp, nrow_global=ncol_global,  ncol_global=ncol_global, &
         !                                        para_env=orbitals%matrix_struct%para_env, &
         !                                        context=orbitals%matrix_struct%context,error=error)
-        CALL cp_dbcsr_init_p(h_block,error=error)
+        CALL cp_dbcsr_init_p(h_block)
         CALL cp_dbcsr_create(h_block, "h_block", dist, dbcsr_type_no_symmetry,&
-             row_blk_size, col_blk_size, 0, 0, dbcsr_type_real_default, &
-             error=error)
+             row_blk_size, col_blk_size, 0, 0, dbcsr_type_real_default)
         !CALL cp_fm_create(h_block,fm_struct_tmp, name="h block",error=error)
         IF (compute_evecs) THEN
-           CALL cp_dbcsr_init_p(e_vectors,error=error)
+           CALL cp_dbcsr_init_p(e_vectors)
            CALL cp_dbcsr_create(e_vectors, "e_vectors", dist, dbcsr_type_no_symmetry,&
-                row_blk_size, col_blk_size, 0, 0, dbcsr_type_real_default,&
-                error=error)
+                row_blk_size, col_blk_size, 0, 0, dbcsr_type_real_default)
            !CALL cp_fm_create(e_vectors,fm_struct_tmp, name="e vectors",error=error)
         ENDIF
         CALL cp_dbcsr_distribution_release (dist)
@@ -750,10 +748,10 @@ CONTAINS
 
         ! h subblock and diag
         CALL cp_dbcsr_multiply('N','N',1.0_dp,ks_matrix,orbitals,&
-             0.0_dp,weighted_vectors,error=error)
-        !CALL cp_dbcsr_sm_fm_multiply(ks_matrix,orbitals,weighted_vectors, ncol_global,error=error)
+             0.0_dp,weighted_vectors)
+        !CALL cp_dbcsr_sm_fm_multiply(ks_matrix,orbitals,weighted_vectors, ncol_global)
 
-        CALL cp_dbcsr_multiply('T','N',1.0_dp,orbitals,weighted_vectors,0.0_dp,h_block,error=error)
+        CALL cp_dbcsr_multiply('T','N',1.0_dp,orbitals,weighted_vectors,0.0_dp,h_block)
         !CALL cp_gemm('T','N',ncol_global,ncol_global,nrow_global,1.0_dp, &
         !                orbitals,weighted_vectors,0.0_dp,h_block,error=error)
 
@@ -766,17 +764,17 @@ CONTAINS
 
         ! rotate the orbitals
         IF (do_rotation_local) THEN
-           CALL cp_dbcsr_multiply('N','N',1.0_dp,orbitals,e_vectors,0.0_dp,weighted_vectors,error=error)
+           CALL cp_dbcsr_multiply('N','N',1.0_dp,orbitals,e_vectors,0.0_dp,weighted_vectors)
            !CALL cp_gemm('N','N',nrow_global,ncol_global,ncol_global,1.0_dp, &
            !             orbitals,e_vectors,0.0_dp,weighted_vectors,error=error)
-           CALL cp_dbcsr_copy(orbitals,weighted_vectors,error=error)
+           CALL cp_dbcsr_copy(orbitals,weighted_vectors)
            !CALL cp_fm_to_fm(weighted_vectors,orbitals,error=error)
            IF (PRESENT(co_rotate)) THEN
               IF (ASSOCIATED(co_rotate)) THEN
-                 CALL cp_dbcsr_multiply('N','N',1.0_dp,co_rotate,e_vectors,0.0_dp,weighted_vectors,error=error)
+                 CALL cp_dbcsr_multiply('N','N',1.0_dp,co_rotate,e_vectors,0.0_dp,weighted_vectors)
                  !CALL cp_gemm('N','N',nrow_global,ncol_global,ncol_global,1.0_dp, &
                  !     co_rotate,e_vectors,0.0_dp,weighted_vectors,error=error)
-                 CALL cp_dbcsr_copy(co_rotate,weighted_vectors,error=error)
+                 CALL cp_dbcsr_copy(co_rotate,weighted_vectors)
                  !CALL cp_fm_to_fm(weighted_vectors,co_rotate,error=error)
               ENDIF
            ENDIF
@@ -807,12 +805,12 @@ CONTAINS
           ENDIF
         ENDIF
 
-        CALL cp_dbcsr_release_p(weighted_vectors,error=error)
-        CALL cp_dbcsr_release_p(h_block,error=error)
+        CALL cp_dbcsr_release_p(weighted_vectors)
+        CALL cp_dbcsr_release_p(h_block)
         !CALL cp_fm_release(weighted_vectors,error=error)
         !CALL cp_fm_release(h_block,error=error)
         IF (compute_evecs) THEN
-           CALL cp_dbcsr_release_p(e_vectors,error=error)
+           CALL cp_dbcsr_release_p(e_vectors)
            !CALL cp_fm_release(e_vectors,error=error)
         ENDIF
 
@@ -1050,3 +1048,4 @@ CONTAINS
   END SUBROUTINE make_mo_eig
 
 END MODULE qs_mo_methods
+

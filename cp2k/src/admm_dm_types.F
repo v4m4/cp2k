@@ -110,7 +110,7 @@ MODULE admm_dm_types
     IF(.NOT. ASSOCIATED(admm_dm)) RETURN
 
     IF(ASSOCIATED(admm_dm%matrix_a)) THEN
-      CALL cp_dbcsr_release(admm_dm%matrix_a, error)
+      CALL cp_dbcsr_release(admm_dm%matrix_a)
       DEALLOCATE(admm_dm%matrix_a)
     ENDIF
 
@@ -123,4 +123,6 @@ MODULE admm_dm_types
   END SUBROUTINE admm_dm_release
 
 END MODULE admm_dm_types
+
+
 

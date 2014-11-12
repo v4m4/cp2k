@@ -655,10 +655,10 @@ CPSourceFileRef,&
     CALL get_neighbor_list_set_p(neighbor_list_sets=sab_nl,symmetric=do_symmetric)
 
     IF(wfn_real_only) THEN
-       CALL cp_dbcsr_set(rmatrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(rmatrix,0.0_dp)
     ELSE
-       CALL cp_dbcsr_set(rmatrix,0.0_dp,error=error)
-       CALL cp_dbcsr_set(cmatrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(rmatrix,0.0_dp)
+       CALL cp_dbcsr_set(cmatrix,0.0_dp)
     END IF
 
     CALL neighbor_list_iterator_create(nl_iterator,sab_nl)
@@ -908,13 +908,13 @@ CPSourceFileRef,&
     ! work storage
     ALLOCATE(rpmat,cpmat,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(rpmat,error=error)
-    CALL cp_dbcsr_init(cpmat,error=error)
+    CALL cp_dbcsr_init(rpmat)
+    CALL cp_dbcsr_init(cpmat)
     CALL get_kpoint_info(kpoint,matrix_s=refmatrix,sab_nl=sab_nl,error=error)
     CALL cp_dbcsr_create(rpmat,template=refmatrix(1,1)%matrix,&
-         matrix_type=dbcsr_type_symmetric,error=error)
+         matrix_type=dbcsr_type_symmetric)
     CALL cp_dbcsr_create(cpmat,template=refmatrix(1,1)%matrix,&
-         matrix_type=dbcsr_type_antisymmetric,error=error)
+         matrix_type=dbcsr_type_antisymmetric)
     CALL cp_dbcsr_alloc_block_from_nbl(rpmat,sab_nl,error)
     CALL cp_dbcsr_alloc_block_from_nbl(cpmat,sab_nl,error)
 
@@ -931,7 +931,7 @@ CPSourceFileRef,&
     NULLIFY(fmdummy)
     DO ispin=1,nspin
        DO ic=1,ncount
-          CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp)
        END DO
        !
        DO ik=1,nkp
@@ -1005,11 +1005,12 @@ CPSourceFileRef,&
        END DO
     END DO
 
-    CALL cp_dbcsr_deallocate_matrix(rpmat,error)
-    CALL cp_dbcsr_deallocate_matrix(cpmat,error)
+    CALL cp_dbcsr_deallocate_matrix(rpmat)
+    CALL cp_dbcsr_deallocate_matrix(cpmat)
 
   END SUBROUTINE kpoint_density_transform
 
 ! *****************************************************************************
 
 END MODULE kpoint_methods
+

@@ -365,12 +365,12 @@ MODULE mp2_gpw
     CALL array_new (row_blk_sizes, rbs, gift=.TRUE.)
     ALLOCATE(mat_munu%matrix, STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(mat_munu%matrix,error=error_sub)
+    CALL cp_dbcsr_init(mat_munu%matrix)
     CALL cp_dbcsr_create(matrix=mat_munu%matrix,&
                name="(ai|munu)",&
                dist=dbcsr_dist_sub, matrix_type=dbcsr_type_symmetric,&
                row_blk_size=row_blk_sizes, col_blk_size=row_blk_sizes, &
-               nblks=0, nze=0, error=error_sub)
+               nblks=0, nze=0)
     CALL cp_dbcsr_alloc_block_from_nbl(mat_munu%matrix,sab_orb_sub,error_sub)
     CALL array_release (row_blk_sizes)
 
@@ -518,7 +518,7 @@ MODULE mp2_gpw
 
     ! Free possibly large buffers allocated by dbcsr on the GPU,
     ! large hybrid dgemm/pdgemm's coming later will need the space.
-    CALL cp_dbcsr_clear_mempools(error_sub)
+    CALL cp_dbcsr_clear_mempools()
 
     ! moved down
     ! CALL deallocate_task_list(task_list_sub,error=error_sub)
@@ -527,34 +527,34 @@ MODULE mp2_gpw
     IF(calc_forces) THEN
       ! make a copy of mo_coeff_o and mo_coeff_v
       NULLIFY(mp2_env%ri_grad%mo_coeff_o)
-      CALL cp_dbcsr_init_p(mp2_env%ri_grad%mo_coeff_o,error=error_sub)
-      CALL cp_dbcsr_copy(mp2_env%ri_grad%mo_coeff_o,mo_coeff_o,name="mo_coeff_o",error=error_sub)
+      CALL cp_dbcsr_init_p(mp2_env%ri_grad%mo_coeff_o)
+      CALL cp_dbcsr_copy(mp2_env%ri_grad%mo_coeff_o,mo_coeff_o,name="mo_coeff_o")
       NULLIFY(mp2_env%ri_grad%mo_coeff_v)
-      CALL cp_dbcsr_init_p(mp2_env%ri_grad%mo_coeff_v,error=error_sub)
-      CALL cp_dbcsr_copy(mp2_env%ri_grad%mo_coeff_v,mo_coeff_v,name="mo_coeff_v",error=error_sub)
+      CALL cp_dbcsr_init_p(mp2_env%ri_grad%mo_coeff_v)
+      CALL cp_dbcsr_copy(mp2_env%ri_grad%mo_coeff_v,mo_coeff_v,name="mo_coeff_v")
       my_group_L_size=sizes_array(color_sub)
       my_group_L_start=starts_array(color_sub)
       my_group_L_end=ends_array(color_sub)
     END IF
 
-    CALL cp_dbcsr_release(mo_coeff_o,error=error_sub)
+    CALL cp_dbcsr_release(mo_coeff_o)
     DEALLOCATE(mo_coeff_o, STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_release(mo_coeff_v,error=error_sub)
+    CALL cp_dbcsr_release(mo_coeff_v)
     DEALLOCATE(mo_coeff_v, STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     IF(nspins==2) THEN
-      CALL cp_dbcsr_release(mo_coeff_o_beta,error=error_sub)
+      CALL cp_dbcsr_release(mo_coeff_o_beta)
       DEALLOCATE(mo_coeff_o_beta, STAT=stat)
       CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-      CALL cp_dbcsr_release(mo_coeff_v_beta,error=error_sub)
+      CALL cp_dbcsr_release(mo_coeff_v_beta)
       DEALLOCATE(mo_coeff_v_beta, STAT=stat)
       CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     END IF
 
     IF(.NOT.calc_forces) THEN
       ! release stuff
-      CALL cp_dbcsr_release(mat_munu%matrix,error=error_sub)
+      CALL cp_dbcsr_release(mat_munu%matrix)
       DEALLOCATE(mat_munu%matrix, STAT=stat)
       CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
@@ -665,15 +665,15 @@ MODULE mp2_gpw
           CALL pw_pool_give_back_pw(auxbas_pw_pool,rho_g%pw,error=error_sub)
           CALL pw_pool_give_back_pw(auxbas_pw_pool,pot_g%pw,error=error_sub)
 
-          CALL cp_dbcsr_release(mp2_env%ri_grad%mo_coeff_o,error=error_sub)
+          CALL cp_dbcsr_release(mp2_env%ri_grad%mo_coeff_o)
           DEALLOCATE(mp2_env%ri_grad%mo_coeff_o, STAT=stat)
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
-          CALL cp_dbcsr_release(mp2_env%ri_grad%mo_coeff_v,error=error_sub)
+          CALL cp_dbcsr_release(mp2_env%ri_grad%mo_coeff_v)
           DEALLOCATE(mp2_env%ri_grad%mo_coeff_v, STAT=stat)
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
-          CALL cp_dbcsr_release(mat_munu%matrix,error=error_sub)
+          CALL cp_dbcsr_release(mat_munu%matrix)
           DEALLOCATE(mat_munu%matrix, STAT=stat)
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
 
@@ -909,8 +909,8 @@ MODULE mp2_gpw
        PRESENT(Emp2_AB)) do_alpha_beta=.TRUE.
 
     ! initialize and create the matrix (ia|jnu)
-    CALL cp_dbcsr_init(matrix_ia_jnu,error=error_sub)
-    CALL cp_dbcsr_create(matrix_ia_jnu,template=mo_coeff_o,error=error_sub)
+    CALL cp_dbcsr_init(matrix_ia_jnu)
+    CALL cp_dbcsr_create(matrix_ia_jnu,template=mo_coeff_o)
 
     ! Allocate Sparse matrices: (ia|jb)
     CALL cp_create_bl_distribution (col_dist, col_blk_size, nmo-homo, &
@@ -919,9 +919,9 @@ MODULE mp2_gpw
           dbcsr_mp_nprows(dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o))))
     CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o)),&
           row_dist,col_dist)
-    CALL cp_dbcsr_init(matrix_ia_jb,error=error_sub)
+    CALL cp_dbcsr_init(matrix_ia_jb)
     CALL cp_dbcsr_create(matrix_ia_jb,"matrix_ia_jb",dist,dbcsr_type_no_symmetry,&
-         row_blk_size,col_blk_size,0,0,dbcsr_type_real_default,error=error_sub)
+         row_blk_size,col_blk_size,0,0,dbcsr_type_real_default)
     CALL cp_dbcsr_distribution_release (dist)
     CALL array_release (col_blk_size)
     CALL array_release (col_dist)
@@ -929,9 +929,9 @@ MODULE mp2_gpw
     CALL array_release (row_dist)
 
     ! set all to zero in such a way that the memory is actually allocated
-    CALL cp_dbcsr_set(matrix_ia_jnu,0.0_dp,error=error_sub)
-    CALL cp_dbcsr_set(matrix_ia_jb,0.0_dp,error=error_sub)
-    CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+    CALL cp_dbcsr_set(matrix_ia_jnu,0.0_dp)
+    CALL cp_dbcsr_set(matrix_ia_jb,0.0_dp)
+    CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
 
     IF(calc_ex) THEN
       ! create the analogous of matrix_ia_jb in fm type
@@ -968,8 +968,8 @@ MODULE mp2_gpw
 
     IF(do_alpha_beta) THEN
       ! initialize and create the matrix (ia|jnu)
-      CALL cp_dbcsr_init(matrix_ia_jnu_beta,error=error_sub)
-      CALL cp_dbcsr_create(matrix_ia_jnu_beta,template=mo_coeff_o_beta,error=error_sub)
+      CALL cp_dbcsr_init(matrix_ia_jnu_beta)
+      CALL cp_dbcsr_create(matrix_ia_jnu_beta,template=mo_coeff_o_beta)
 
       ! Allocate Sparse matrices: (ia|jb)
       CALL cp_create_bl_distribution (col_dist, col_blk_size, nmo-homo_beta, &
@@ -978,9 +978,9 @@ MODULE mp2_gpw
             dbcsr_mp_nprows(dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o_beta))))
       CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o_beta)),&
             row_dist,col_dist)
-      CALL cp_dbcsr_init(matrix_ia_jb_beta,error=error_sub)
+      CALL cp_dbcsr_init(matrix_ia_jb_beta)
       CALL cp_dbcsr_create(matrix_ia_jb_beta,"matrix_ia_jb_beta",dist,dbcsr_type_no_symmetry,&
-           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default,error=error_sub)
+           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default)
       CALL cp_dbcsr_distribution_release (dist)
       CALL array_release (col_blk_size)
       CALL array_release (col_dist)
@@ -988,8 +988,8 @@ MODULE mp2_gpw
       CALL array_release (row_dist)
       virtual_beta=nmo-homo_beta
 
-      CALL cp_dbcsr_set(matrix_ia_jnu_beta,0.0_dp,error=error_sub)
-      CALL cp_dbcsr_set(matrix_ia_jb_beta,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(matrix_ia_jnu_beta,0.0_dp)
+      CALL cp_dbcsr_set(matrix_ia_jb_beta,0.0_dp)
     END IF
 
     mem_real=m_memory()
@@ -1254,7 +1254,7 @@ MODULE mp2_gpw
 
         ! and finally (ia|munu)
         CALL timeset(routineN//"_int",handle3)
-        CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+        CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
         CALL integrate_v_rspace(rho_r, h=mat_munu,qs_env=qs_env,calculate_forces=.FALSE.,compute_tau=.FALSE.,gapw=.FALSE.,&
            basis_set_id=use_orb_basis_set, pw_env_external=pw_env_sub, task_list_external=task_list_sub, error=error_sub)
         CALL timestop(handle3)
@@ -1262,20 +1262,20 @@ MODULE mp2_gpw
         ! multiply and goooooooo ...
         CALL timeset(routineN//"_mult_o",handle3)
         CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, mo_coeff_o, &
-                                0.0_dp, matrix_ia_jnu, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jnu, filter_eps=eps_filter)
         IF(do_alpha_beta) THEN
           ! transform orbitals using the beta coeff matrix
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, mo_coeff_o_beta, &
-                                0.0_dp, matrix_ia_jnu_beta, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jnu_beta, filter_eps=eps_filter)
         END IF      
         CALL timestop(handle3)
         CALL timeset(routineN//"_mult_v",handle3)
         CALL cp_dbcsr_multiply("T", "N", 1.0_dp, matrix_ia_jnu, mo_coeff_v, &
-                                0.0_dp, matrix_ia_jb, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jb, filter_eps=eps_filter)
         IF(do_alpha_beta) THEN
           ! transform orbitals using the beta coeff matrix
           CALL cp_dbcsr_multiply("T", "N", 1.0_dp, matrix_ia_jnu_beta, mo_coeff_v_beta, &
-                                0.0_dp, matrix_ia_jb_beta, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jb_beta, filter_eps=eps_filter)
         END IF
         CALL timestop(handle3)
 
@@ -1404,11 +1404,11 @@ MODULE mp2_gpw
 
     CALL cp_para_env_release(para_env_exchange,error=error_sub)
 
-    CALL cp_dbcsr_release(matrix_ia_jnu,error=error_sub)
-    CALL cp_dbcsr_release(matrix_ia_jb,error=error_sub)
+    CALL cp_dbcsr_release(matrix_ia_jnu)
+    CALL cp_dbcsr_release(matrix_ia_jb)
     IF(do_alpha_beta) THEN
-      CALL cp_dbcsr_release(matrix_ia_jnu_beta,error=error_sub)
-      CALL cp_dbcsr_release(matrix_ia_jb_beta,error=error_sub)
+      CALL cp_dbcsr_release(matrix_ia_jnu_beta)
+      CALL cp_dbcsr_release(matrix_ia_jb_beta)
     END IF
 
     DO i=my_I_occupied_start, my_I_occupied_end
@@ -1806,14 +1806,13 @@ MODULE mp2_gpw
     CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp (cp_dbcsr_distribution(mat_munu%matrix)),&
          dbcsr_distribution_row_dist(cp_dbcsr_distribution(mat_munu%matrix)), col_dist)
     NULLIFY(mo_coeff_o)
-    CALL cp_dbcsr_init_p(mo_coeff_o,error=error_sub)
+    CALL cp_dbcsr_init_p(mo_coeff_o)
     CALL cp_dbcsr_create(mo_coeff_o, "mo_coeff_o", dist, dbcsr_type_no_symmetry,&
-         cp_dbcsr_row_block_sizes(mat_munu%matrix), col_blk_size, 0, 0, dbcsr_type_real_default,&
-         error=error_sub)
+         cp_dbcsr_row_block_sizes(mat_munu%matrix), col_blk_size, 0, 0, dbcsr_type_real_default)
     CALL cp_dbcsr_distribution_release (dist)
     CALL array_release (col_blk_size)
     CALL array_release (col_dist)
-    CALL cp_dbcsr_reserve_all_blocks(mo_coeff_o,error)
+    CALL cp_dbcsr_reserve_all_blocks(mo_coeff_o)
 
     ! accumulate data on mo_coeff_o starting from myself
     CALL cp_dbcsr_iterator_start(iter, mo_coeff_o)
@@ -1871,7 +1870,7 @@ MODULE mp2_gpw
       DEALLOCATE(rec_C)
 
     END DO
-    CALL cp_dbcsr_filter(mo_coeff_o,mp2_env%mp2_gpw%eps_filter,error=error_sub)
+    CALL cp_dbcsr_filter(mo_coeff_o,mp2_env%mp2_gpw%eps_filter)
 
     DEALLOCATE(Cocc)
 
@@ -1881,14 +1880,13 @@ MODULE mp2_gpw
     CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp (cp_dbcsr_distribution(mat_munu%matrix)),&
          dbcsr_distribution_row_dist(cp_dbcsr_distribution(mat_munu%matrix)), col_dist)
     NULLIFY(mo_coeff_v)
-    CALL cp_dbcsr_init_p(mo_coeff_v,error=error_sub)
+    CALL cp_dbcsr_init_p(mo_coeff_v)
     CALL cp_dbcsr_create(mo_coeff_v, "mo_coeff_v", dist, dbcsr_type_no_symmetry,&
-         cp_dbcsr_row_block_sizes(mat_munu%matrix), col_blk_size, 0, 0, dbcsr_type_real_default,&
-         error=error_sub)
+         cp_dbcsr_row_block_sizes(mat_munu%matrix), col_blk_size, 0, 0, dbcsr_type_real_default)
     CALL cp_dbcsr_distribution_release (dist)
     CALL array_release (col_blk_size)
     CALL array_release (col_dist)
-    CALL cp_dbcsr_reserve_all_blocks(mo_coeff_v,error)
+    CALL cp_dbcsr_reserve_all_blocks(mo_coeff_v)
 
     ! accumulate data on mo_coeff_v starting from myself
     CALL cp_dbcsr_iterator_start(iter, mo_coeff_v)
@@ -1946,7 +1944,7 @@ MODULE mp2_gpw
       DEALLOCATE(rec_C)
 
     END DO
-    CALL cp_dbcsr_filter(mo_coeff_v,mp2_env%mp2_gpw%eps_filter,error=error_sub)
+    CALL cp_dbcsr_filter(mo_coeff_v,mp2_env%mp2_gpw%eps_filter)
 
     DEALLOCATE(Cvirt)
 
@@ -2062,3 +2060,4 @@ MODULE mp2_gpw
   END SUBROUTINE grep_occ_virt_wavefunc
 
 END MODULE mp2_gpw
+

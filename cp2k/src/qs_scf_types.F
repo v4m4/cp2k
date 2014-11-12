@@ -267,13 +267,13 @@ CONTAINS
 
     IF (.NOT.failure) THEN
        IF (ASSOCIATED(scf_env%p_mix_new)) THEN
-          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new,error=error)
+          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new)
        END IF
        IF (ASSOCIATED(scf_env%p_delta)) THEN
-          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta,error=error)
+          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta)
        END IF
        IF (ASSOCIATED(scf_env%p_mix_kp)) THEN
-          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_kp,error=error)
+          CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_kp)
        END IF
     END IF
 
@@ -316,34 +316,34 @@ CONTAINS
           IF (ASSOCIATED(scf_env%ortho_dbcsr)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error) 
-             CALL cp_dbcsr_deallocate_matrix(scf_env%ortho_dbcsr,error=error)
+             CALL cp_dbcsr_deallocate_matrix(scf_env%ortho_dbcsr)
           END IF
           IF (ASSOCIATED(scf_env%buf1_dbcsr)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error)
-             CALL cp_dbcsr_deallocate_matrix(scf_env%buf1_dbcsr,error=error)
+             CALL cp_dbcsr_deallocate_matrix(scf_env%buf1_dbcsr)
           END IF
           IF (ASSOCIATED(scf_env%buf2_dbcsr)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error)
-             CALL cp_dbcsr_deallocate_matrix(scf_env%buf2_dbcsr,error=error)
+             CALL cp_dbcsr_deallocate_matrix(scf_env%buf2_dbcsr)
           END IF
           CALL cp_fm_release(scf_env%s_half,error=error)
           CALL cp_fm_release(scf_env%s_minus_one,error=error)
           IF (ASSOCIATED(scf_env%p_mix_new)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error) 
-             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new,error=error)
+             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_new)
           END IF
           IF (ASSOCIATED(scf_env%p_delta)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error)
-             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta,error=error)
+             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_delta)
           END IF
           IF (ASSOCIATED(scf_env%p_mix_kp)) THEN
              ! we should not end up here, and give back using the pools
              CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error)
-             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_kp,error=error)
+             CALL cp_dbcsr_deallocate_matrix_set(scf_env%p_mix_kp)
           END IF
           IF (ASSOCIATED(scf_env%ot_preconditioner)) THEN
              DO i=1,SIZE(scf_env%ot_preconditioner)
@@ -623,7 +623,7 @@ CONTAINS
        IF (ASSOCIATED(subspace_env%p_matrix_store)) THEN
 
            CPPreconditionNoFail(.TRUE.,cp_failure_level,routineP,error) ! should be given back using the pools
-           CALL cp_dbcsr_deallocate_matrix_set(subspace_env%p_matrix_store,error=error)
+           CALL cp_dbcsr_deallocate_matrix_set(subspace_env%p_matrix_store)
        ENDIF
        DO i = 1,SIZE(subspace_env%chc_mat)
          CALL cp_fm_release(subspace_env%chc_mat(i)%matrix,error=error)
@@ -649,3 +649,4 @@ CONTAINS
  END SUBROUTINE diag_subspace_env_release
 
 END MODULE qs_scf_types
+

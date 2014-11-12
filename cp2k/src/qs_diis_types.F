@@ -185,8 +185,7 @@ SUBROUTINE qs_diis_b_release_sparse(diis_buffer,error)
         IF (ASSOCIATED(diis_buffer%error)) THEN
            DO j=1,SIZE(diis_buffer%error,2)
               DO i=1,SIZE(diis_buffer%error,1)
-               CALL cp_dbcsr_release(diis_buffer%error(i,j)%matrix, &
-                                     error=error)
+               CALL cp_dbcsr_release(diis_buffer%error(i,j)%matrix)
                DEALLOCATE(diis_buffer%error(i,j)%matrix)
               END DO
            END DO
@@ -196,8 +195,7 @@ SUBROUTINE qs_diis_b_release_sparse(diis_buffer,error)
         IF (ASSOCIATED(diis_buffer%parameter)) THEN
            DO j=1,SIZE(diis_buffer%parameter,2)
               DO i=1,SIZE(diis_buffer%parameter,1)
-               CALL cp_dbcsr_release(diis_buffer%parameter(i,j)%matrix, &
-                                     error=error)
+               CALL cp_dbcsr_release(diis_buffer%parameter(i,j)%matrix)
                DEALLOCATE(diis_buffer%parameter(i,j)%matrix)
               END DO
            END DO
@@ -210,3 +208,4 @@ SUBROUTINE qs_diis_b_release_sparse(diis_buffer,error)
 END SUBROUTINE qs_diis_b_release_sparse
 
 END MODULE qs_diis_types
+

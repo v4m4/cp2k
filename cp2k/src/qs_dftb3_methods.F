@@ -147,7 +147,7 @@ CONTAINS
        matrix_p => rho%rho_ao
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-               alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+               alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
        END IF
        !
        CALL cp_dbcsr_iterator_start(iter, matrix_s(1)%matrix)
@@ -192,7 +192,7 @@ CONTAINS
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
        IF ( SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
        END IF
     END IF
 
@@ -241,4 +241,5 @@ CONTAINS
   END SUBROUTINE build_dftb3_diagonal
 
 END MODULE qs_dftb3_methods
+
 

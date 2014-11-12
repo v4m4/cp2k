@@ -81,7 +81,7 @@ CONTAINS
     escp = 0.0_dp
 
 !    WRITE ( *, * ) 'XXXXXXXXX'
-!    CALL cp_dbcsr_print ( ks_scp, matlab_format=.TRUE., error=error )
+!    CALL cp_dbcsr_print ( ks_scp, matlab_format=.TRUE. )
     DO ikind=1,nkind
        CALL get_atomic_kind(atomic_kind_set(ikind), atom_list=atom_list)
        CALL get_qs_kind(qs_kind_set(ikind),scp_se_parameter=se_kind)
@@ -126,15 +126,15 @@ CONTAINS
        ALLOCATE (ksdiag(n_el),STAT=stat)
        CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
 
-      CALL cp_dbcsr_get_diag ( ks_scp, ksdiag, error=error )
+      CALL cp_dbcsr_get_diag ( ks_scp, ksdiag )
       sum_ksdiag = SUM ( ksdiag )
       sum_adiag = SUM ( ascp_diag )
       ratio = sum_ksdiag/sum_adiag
       DO ii = 1, n_el
          ksdiag ( ii ) = ksdiag ( ii ) - ascp_diag ( ii ) * ratio
       END DO
-!      CALL cp_dbcsr_print ( ks_scp, matlab_format=.TRUE., error=error )
-      CALL cp_dbcsr_set_diag ( ks_scp, ksdiag, error=error )
+!      CALL cp_dbcsr_print ( ks_scp, matlab_format=.TRUE. )
+      CALL cp_dbcsr_set_diag ( ks_scp, ksdiag )
       DEALLOCATE (ksdiag,STAT=stat)
       CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
     END IF
@@ -144,4 +144,5 @@ CONTAINS
 ! *****************************************************************************
 
 END MODULE scp_nddo_utils
+
 

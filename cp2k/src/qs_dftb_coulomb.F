@@ -348,7 +348,7 @@ CONTAINS
 
       IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
         CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-             alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+             alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
       END IF
 
       CALL cp_dbcsr_iterator_start(iter, ks_matrix(1)%matrix)
@@ -393,7 +393,7 @@ CONTAINS
       CALL cp_dbcsr_iterator_stop(iter)
       IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
          CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                        alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                        alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
       END IF
     END IF
 
@@ -482,7 +482,7 @@ CONTAINS
 
           IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
              CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
           END IF
 
           CALL cp_dbcsr_iterator_start(iter, ks_matrix(1)%matrix)
@@ -518,7 +518,7 @@ CONTAINS
           CALL cp_dbcsr_iterator_stop(iter)
           IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
              CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                  alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                  alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
           END IF
        END IF
     END IF
@@ -835,4 +835,5 @@ CONTAINS
   END SUBROUTINE dftb_ewald_overlap
 
 END MODULE qs_dftb_coulomb
+
 

@@ -293,8 +293,8 @@ CONTAINS
     IF (PRESENT(q_index_down)) q_index_down => env%q_index_down
     IF (PRESENT(copy_matrix_x)) THEN
        !DO ispin=1,env%nspins
-          !CALL cp_dbcsr_copy(copy_matrix_x(ispin),env%matrix_x(ispin),error=error)
-          CALL cp_dbcsr_copy(copy_matrix_x,env%matrix_x,error=error)
+          !CALL cp_dbcsr_copy(copy_matrix_x(ispin),env%matrix_x(ispin))
+          CALL cp_dbcsr_copy(copy_matrix_x,env%matrix_x)
        !ENDDO
     ENDIF
     !IF (PRESENT(matrix_x)) matrix_x => env%matrix_x
@@ -441,10 +441,10 @@ CONTAINS
     NULLIFY(env%blacs_env)
 
     !DO ispin=1,env%nspins
-       CALL cp_dbcsr_release(env%matrix_x,error=error)
-       CALL cp_dbcsr_release(env%matrix_res,error=error)
-       !CALL cp_dbcsr_release(env%matrix_x(ispin),error=error)
-       !CALL cp_dbcsr_release(env%matrix_res(ispin),error=error)
+       CALL cp_dbcsr_release(env%matrix_x)
+       CALL cp_dbcsr_release(env%matrix_res)
+       !CALL cp_dbcsr_release(env%matrix_x(ispin))
+       !CALL cp_dbcsr_release(env%matrix_res(ispin))
     !ENDDO
     !DEALLOCATE(env%matrix_x,env%matrix_res)
     
@@ -464,4 +464,5 @@ CONTAINS
   END SUBROUTINE ct_step_env_clean
 
 END MODULE ct_types
+
 

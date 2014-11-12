@@ -189,10 +189,10 @@ CONTAINS
                 IF(qs_env%et_coupling%first_run)THEN
                    NULLIFY(qs_env%et_coupling%rest_mat(1)%matrix)
                    ALLOCATE(qs_env%et_coupling%rest_mat(1)%matrix)
-                   CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(1)%matrix, error=error)
+                   CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(1)%matrix)
                    CALL cp_dbcsr_copy(qs_env%et_coupling%rest_mat(1)%matrix, ks_matrix(1)%matrix, &
-                        name="ET_RESTRAINT_MATRIX_B", error=error)
-                   CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(1)%matrix, 0.0_dp, error=error)
+                        name="ET_RESTRAINT_MATRIX_B")
+                   CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(1)%matrix, 0.0_dp)
                    CALL integrate_v_rspace(v_spin_ddapc_rest_r,&
                         h=qs_env%et_coupling%rest_mat(1),&
                         qs_env=qs_env,calculate_forces=.FALSE.,error=error)
@@ -203,10 +203,10 @@ CONTAINS
                 ELSE
                    NULLIFY(qs_env%et_coupling%rest_mat(2)%matrix)
                    ALLOCATE(qs_env%et_coupling%rest_mat(2)%matrix)
-                   CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(2)%matrix, error=error)
+                   CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(2)%matrix)
                    CALL cp_dbcsr_copy(qs_env%et_coupling%rest_mat(2)%matrix, ks_matrix(1)%matrix, &
-                        name="ET_RESTRAINT_MATRIX_B", error=error)
-                   CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(2)%matrix, 0.0_dp, error=error)
+                        name="ET_RESTRAINT_MATRIX_B")
+                   CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(2)%matrix, 0.0_dp)
                    CALL integrate_v_rspace(v_spin_ddapc_rest_r,&
                         h=qs_env%et_coupling%rest_mat(2),&
                         qs_env=qs_env,calculate_forces=.FALSE.,error=error)
@@ -622,3 +622,4 @@ CONTAINS
   END SUBROUTINE cp_ddapc_apply_RF
 
 END MODULE cp_ddapc
+

@@ -122,10 +122,9 @@ CONTAINS
     ! later, we might want to use our own format (e.g. clustered)
     SELECT CASE(ls_mstruct%cluster_type)
     CASE(ls_cluster_atomic)
-       CALL cp_dbcsr_init(matrix_ls,error=error)
+       CALL cp_dbcsr_init(matrix_ls)
        CALL cp_dbcsr_create(matrix_ls,template=matrix_qs, &
-                            data_type=data_type,&
-                            error=error)
+                            data_type=data_type)
     CASE(ls_cluster_molecular)
        ! create format of the clustered matrix
        natom=cp_dbcsr_nblkrows_total(matrix_qs)
@@ -181,16 +180,15 @@ CONTAINS
        CALL array_release (clustered_col_dist)
 
        ! the matrix
-       CALL cp_dbcsr_init (matrix_ls, error=error)
+       CALL cp_dbcsr_init (matrix_ls)
        CALL cp_dbcsr_create (matrix_ls, dbcsr_name (matrix_qs%matrix),&
             clustered_distribution,&
             dbcsr_type_symmetric,&
             clustered_blk_sizes, clustered_blk_sizes,&
-            data_type=data_type,&
-            error=error)
+            data_type=data_type)
        CALL array_release (clustered_blk_sizes)
        CALL dbcsr_distribution_release (clustered_distribution)
-       CALL cp_dbcsr_finalize (matrix_ls, error=error)
+       CALL cp_dbcsr_finalize (matrix_ls)
     CASE DEFAULT
        STOP " BUG cluster option"
     END SELECT
@@ -228,31 +226,30 @@ CONTAINS
     SELECT CASE(ls_mstruct%cluster_type)
     CASE(ls_cluster_atomic)
        ! takes care of an eventual data_type conversion
-       CALL cp_dbcsr_copy(matrix_ls,matrix_qs,error=error)
+       CALL cp_dbcsr_copy(matrix_ls,matrix_qs)
     CASE(ls_cluster_molecular)
        ! desymmetrize the qs matrix
-       CALL cp_dbcsr_init (matrix_qs_nosym, error=error)
+       CALL cp_dbcsr_init (matrix_qs_nosym)
        CALL cp_dbcsr_create (matrix_qs_nosym, template=matrix_qs,&
-            matrix_type=dbcsr_type_no_symmetry, error=error)
-       CALL cp_dbcsr_desymmetrize (matrix_qs, matrix_qs_nosym,&
-            error=error)
+            matrix_type=dbcsr_type_no_symmetry)
+       CALL cp_dbcsr_desymmetrize (matrix_qs, matrix_qs_nosym)
 
        ! complete_redistribute does not zero blocks that might be present in the
        ! target but not in the source
-       CALL cp_dbcsr_set(matrix_ls,0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_ls,0.0_dp)
 
        ! perform the magic complete redistribute copy
        IF (ls_mstruct%single_precision) THEN
-          CALL cp_dbcsr_init(matrix_tmp, error=error)
+          CALL cp_dbcsr_init(matrix_tmp)
           CALL cp_dbcsr_create(matrix_tmp,template=matrix_qs_nosym, &
-                               data_type=dbcsr_type_real_4, error=error)
-          CALL cp_dbcsr_copy(matrix_tmp,matrix_qs_nosym,error=error)
-          CALL cp_dbcsr_complete_redistribute(matrix_tmp, matrix_ls, error=error);
-          CALL cp_dbcsr_release(matrix_tmp, error=error)
+                               data_type=dbcsr_type_real_4)
+          CALL cp_dbcsr_copy(matrix_tmp,matrix_qs_nosym)
+          CALL cp_dbcsr_complete_redistribute(matrix_tmp, matrix_ls);
+          CALL cp_dbcsr_release(matrix_tmp)
        ELSE
-          CALL cp_dbcsr_complete_redistribute(matrix_qs_nosym, matrix_ls, error=error);
+          CALL cp_dbcsr_complete_redistribute(matrix_qs_nosym, matrix_ls);
        ENDIF
-       CALL cp_dbcsr_release (matrix_qs_nosym, error=error)
+       CALL cp_dbcsr_release (matrix_qs_nosym)
 
     CASE DEFAULT
        STOP
@@ -288,33 +285,33 @@ CONTAINS
     CALL timeset(routineN,handle)
 
     IF (ls_mstruct%single_precision) THEN
-       CALL cp_dbcsr_init (matrix_tmp, error=error)
+       CALL cp_dbcsr_init (matrix_tmp)
        CALL cp_dbcsr_create (matrix_tmp, template=matrix_ls,&
-            data_type=dbcsr_type_real_8, error=error)
-       CALL cp_dbcsr_copy (matrix_tmp, matrix_ls, error=error)
+            data_type=dbcsr_type_real_8)
+       CALL cp_dbcsr_copy (matrix_tmp, matrix_ls)
     ENDIF
 
 
     SELECT CASE(ls_mstruct%cluster_type)
     CASE(ls_cluster_atomic)
        IF (ls_mstruct%single_precision) THEN
-          CALL cp_dbcsr_copy_into_existing (matrix_qs, matrix_tmp, error=error)
+          CALL cp_dbcsr_copy_into_existing (matrix_qs, matrix_tmp)
        ELSE
-          CALL cp_dbcsr_copy_into_existing (matrix_qs, matrix_ls, error=error)
+          CALL cp_dbcsr_copy_into_existing (matrix_qs, matrix_ls)
        ENDIF
     CASE(ls_cluster_molecular)
-       CALL cp_dbcsr_set(matrix_qs,0.0_dp,error=error)
+       CALL cp_dbcsr_set(matrix_qs,0.0_dp)
        IF (ls_mstruct%single_precision) THEN
-          CALL cp_dbcsr_complete_redistribute(matrix_tmp, matrix_qs, keep_sparsity=.TRUE., error=error)
+          CALL cp_dbcsr_complete_redistribute(matrix_tmp, matrix_qs, keep_sparsity=.TRUE.)
        ELSE
-          CALL cp_dbcsr_complete_redistribute(matrix_ls, matrix_qs, keep_sparsity=.TRUE., error=error)
+          CALL cp_dbcsr_complete_redistribute(matrix_ls, matrix_qs, keep_sparsity=.TRUE.)
        ENDIF
     CASE DEFAULT
        STOP "BUG"
     END SELECT
 
     IF (ls_mstruct%single_precision) THEN
-       CALL cp_dbcsr_release(matrix_tmp,error=error)
+       CALL cp_dbcsr_release(matrix_tmp)
     ENDIF
 
     CALL timestop(handle)
@@ -369,13 +366,13 @@ CONTAINS
 
     ! we might have to create matrix_ks
     IF (.NOT.ASSOCIATED(matrix_ks)) THEN
-       CALL cp_dbcsr_allocate_matrix_set(matrix_ks,nspin,error)
+       CALL cp_dbcsr_allocate_matrix_set(matrix_ks,nspin)
        DO ispin=1,nspin
           ALLOCATE(matrix_ks(ispin)%matrix)
-          CALL cp_dbcsr_init(matrix_ks(ispin)%matrix,error=error)
-          CALL cp_dbcsr_create(matrix_ks(ispin)%matrix,template=matrix_s(1)%matrix,error=error)
+          CALL cp_dbcsr_init(matrix_ks(ispin)%matrix)
+          CALL cp_dbcsr_create(matrix_ks(ispin)%matrix,template=matrix_s(1)%matrix)
           CALL cp_dbcsr_alloc_block_from_nbl(matrix_ks(ispin)%matrix,sab_orb,error=error)
-          CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(matrix_ks(ispin)%matrix,0.0_dp)
        ENDDO
        CALL set_ks_env(ks_env,matrix_ks=matrix_ks,error=error)
     ENDIF
@@ -449,7 +446,7 @@ CONTAINS
 
     ! create an initial atomic guess
     DO ispin=1,nspin
-       CALL cp_dbcsr_set(rho%rho_ao(ispin)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(rho%rho_ao(ispin)%matrix,0.0_dp)
        IF (dft_control%qs_control%dftb .OR. dft_control%qs_control%semi_empirical) THEN
           CALL calculate_mopac_dm(rho%rho_ao(ispin)%matrix,matrix_s(1)%matrix, has_unit_metric, &
                                   dft_control,particle_set, atomic_kind_set, qs_kind_set,&
@@ -570,9 +567,9 @@ CONTAINS
 
     ! convert the density matrix (ls style) to QS style
     ALLOCATE(matrix_p_qs)
-    CALL cp_dbcsr_init(matrix_p_qs,error=error) !initialization
-    CALL cp_dbcsr_copy(matrix_p_qs,matrix_ks(1)%matrix,error=error)
-    CALL cp_dbcsr_set(matrix_p_qs,0.0_dp,error=error) !zero matrix creation   
+    CALL cp_dbcsr_init(matrix_p_qs) !initialization
+    CALL cp_dbcsr_copy(matrix_p_qs,matrix_ks(1)%matrix)
+    CALL cp_dbcsr_set(matrix_p_qs,0.0_dp) !zero matrix creation   
     CALL matrix_ls_to_qs(matrix_p_qs, matrix_p_ls,ls_scf_env%ls_mstruct,error=error) 
 
     ! Print total electronic density
@@ -606,7 +603,7 @@ CONTAINS
     !free memory
     CALL pw_pool_give_back_pw(auxbas_pw_pool,wf_r%pw,error=error) 
     CALL pw_pool_give_back_pw(auxbas_pw_pool,wf_g%pw,error=error)   
-    CALL cp_dbcsr_release(matrix_p_qs,error=error)
+    CALL cp_dbcsr_release(matrix_p_qs)
     DEALLOCATE(matrix_p_qs)
 
     CALL timestop(handle)
@@ -614,3 +611,4 @@ CONTAINS
   END SUBROUTINE write_matrix_to_cube
 
 END MODULE dm_ls_scf_qs
+

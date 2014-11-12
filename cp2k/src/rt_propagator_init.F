@@ -113,7 +113,7 @@ CONTAINS
     CALL s_matrices_create (s_mat,rtp,error)
     CALL calc_SinvH(exp_H_new,qs_env,error)
     DO i=1,SIZE(exp_H_old)
-       CALL cp_dbcsr_copy(exp_H_old(i)%matrix,exp_H_new(i)%matrix,error=error)
+       CALL cp_dbcsr_copy(exp_H_old(i)%matrix,exp_H_new(i)%matrix)
     END DO
     ! use the fact that CN propagator is a first order pade approximation on the EM propagator
     IF(rtp_control%propagator==do_cn)THEN
@@ -143,8 +143,8 @@ CONTAINS
         prefac=-1.0_dp*dt
     END SELECT 
     DO imat=1,SIZE(exp_H_new)
-        CALL cp_dbcsr_copy(propagator_matrix(imat)%matrix,exp_H_new(imat)%matrix,error=error)
-        CALL cp_dbcsr_scale(propagator_matrix(imat)%matrix,prefac,error=error)
+        CALL cp_dbcsr_copy(propagator_matrix(imat)%matrix,exp_H_new(imat)%matrix)
+        CALL cp_dbcsr_scale(propagator_matrix(imat)%matrix,prefac)
     END DO
 
     ! For ETRS this bit could be avoided but it drastically simplifies the workflow afterwards.
@@ -167,7 +167,7 @@ CONTAINS
              CALL compute_exponential(exp_H_new,propagator_matrix,rtp_control,rtp,error=error)
           END IF
           DO imat=1,SIZE(exp_H_new)
-             CALL cp_dbcsr_copy(exp_H_old(imat)%matrix,exp_H_new(imat)%matrix,error=error)
+             CALL cp_dbcsr_copy(exp_H_old(imat)%matrix,exp_H_new(imat)%matrix)
           END DO
        END IF
     END IF
@@ -366,20 +366,20 @@ CONTAINS
 
     NULLIFY(s_half)
     ALLOCATE(s_half)
-    CALL cp_dbcsr_init(s_half,error=error)
-    CALL cp_dbcsr_create(s_half,template=s_mat(1)%matrix,error=error)
+    CALL cp_dbcsr_init(s_half)
+    CALL cp_dbcsr_create(s_half,template=s_mat(1)%matrix)
     NULLIFY(s_minus_half)
     ALLOCATE(s_minus_half)
-    CALL cp_dbcsr_init(s_minus_half,error=error)
-    CALL cp_dbcsr_create(s_minus_half,template=s_mat(1)%matrix,error=error)
+    CALL cp_dbcsr_init(s_minus_half)
+    CALL cp_dbcsr_create(s_minus_half,template=s_mat(1)%matrix)
     NULLIFY(tmp)
     ALLOCATE(tmp)
-    CALL cp_dbcsr_init(tmp,error=error)
-    CALL cp_dbcsr_create(tmp,template=s_mat(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp)
+    CALL cp_dbcsr_create(tmp,template=s_mat(1)%matrix,matrix_type="N")
     NULLIFY(tmp2)
     ALLOCATE(tmp2)
-    CALL cp_dbcsr_init(tmp2,error=error)
-    CALL cp_dbcsr_create(tmp2,template=s_mat(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp2)
+    CALL cp_dbcsr_create(tmp2,template=s_mat(1)%matrix,matrix_type="N")
     scale=1.0_dp
     IF(dft_control%rtp_control%propagator==do_etrs)scale=2.0_dp
     t=-t/scale
@@ -391,9 +391,9 @@ CONTAINS
          rtp%newton_schulz_order,rtp%lanzcos_threshold,rtp%lanzcos_max_iter,error=error)
     DO ispin=1,SIZE(matrix_ks)
        CALL cp_dbcsr_multiply("N","N",t,matrix_ks(ispin)%matrix,s_minus_half,zero,tmp,&
-            filter_eps=rtp%filter_eps,error=error)
+            filter_eps=rtp%filter_eps)
        CALL cp_dbcsr_multiply("N","N",one,s_minus_half,tmp,zero,tmp2,&
-            filter_eps=rtp%filter_eps,error=error)
+            filter_eps=rtp%filter_eps)
        CALL lanczos_alg_serial(tmp2, max_ev, min_ev, threshold=rtp%lanzcos_threshold, &
             max_iter=rtp%lanzcos_max_iter, converged=converged, error=error)
        norm2=2.0_dp*MAX(ABS(min_ev),ABS(max_ev))
@@ -401,10 +401,10 @@ CONTAINS
             dft_control%rtp_control%eps_exp,method,emd,error)
     END DO
 
-    CALL cp_dbcsr_deallocate_matrix(s_half,error=error)
-    CALL cp_dbcsr_deallocate_matrix(s_minus_half,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmp,error=error)
-    CALL cp_dbcsr_deallocate_matrix(tmp2,error=error)
+    CALL cp_dbcsr_deallocate_matrix(s_half)
+    CALL cp_dbcsr_deallocate_matrix(s_minus_half)
+    CALL cp_dbcsr_deallocate_matrix(tmp)
+    CALL cp_dbcsr_deallocate_matrix(tmp2)
 
     CALL timestop(handle)
 
@@ -533,8 +533,8 @@ CONTAINS
          rtp%newton_schulz_order,rtp%lanzcos_threshold,rtp%lanzcos_max_iter,error=error)
     NULLIFY(tmp)
     ALLOCATE(tmp)
-    CALL cp_dbcsr_init(tmp,error=error)
-    CALL cp_dbcsr_create(tmp,template=matrix_ks(1)%matrix,matrix_type="N",error=error)
+    CALL cp_dbcsr_init(tmp)
+    CALL cp_dbcsr_create(tmp,template=matrix_ks(1)%matrix,matrix_type="N")
 
     e_homo = 0
     e_lumo = 0
@@ -548,22 +548,23 @@ CONTAINS
        CALL density_matrix_trs4(rho_old(re)%matrix, matrix_ks(ispin)%matrix, S_minus_half, &
             nelectron_spin_real, rtp%filter_eps, e_homo, e_lumo, e_mu, .FALSE., tmp,&
             max_iter_lanczos=rtp%lanzcos_max_iter, eps_lanczos=rtp%lanzcos_threshold, error=error)
-       IF(SIZE(matrix_ks)==1) CALL cp_dbcsr_scale(rho_old(re)%matrix,2.0_dp,error=error)
+       IF(SIZE(matrix_ks)==1) CALL cp_dbcsr_scale(rho_old(re)%matrix,2.0_dp)
        IF(rtp_control%orthonormal) THEN
-          CALL cp_dbcsr_multiply("N","N",one,S_half,rho_old(re)%matrix,zero,tmp,filter_eps=rtp%filter_eps_small,error=error)
-          CALL cp_dbcsr_multiply("N","N",one,tmp,S_half,zero,rho_old(re)%matrix,filter_eps=rtp%filter_eps_small,error=error)
-          CALL cp_dbcsr_multiply("N","N",one,S_half,rho_old(im)%matrix,zero,tmp,filter_eps=rtp%filter_eps_small,error=error)
-          CALL cp_dbcsr_multiply("N","N",one,tmp,S_half,zero,rho_old(im)%matrix,filter_eps=rtp%filter_eps_small,error=error)
+          CALL cp_dbcsr_multiply("N","N",one,S_half,rho_old(re)%matrix,zero,tmp,filter_eps=rtp%filter_eps_small)
+          CALL cp_dbcsr_multiply("N","N",one,tmp,S_half,zero,rho_old(re)%matrix,filter_eps=rtp%filter_eps_small)
+          CALL cp_dbcsr_multiply("N","N",one,S_half,rho_old(im)%matrix,zero,tmp,filter_eps=rtp%filter_eps_small)
+          CALL cp_dbcsr_multiply("N","N",one,tmp,S_half,zero,rho_old(im)%matrix,filter_eps=rtp%filter_eps_small)
        ENDIF
-       CALL cp_dbcsr_filter(rho_old(re)%matrix,eps=rtp%filter_eps,error=error)
+       CALL cp_dbcsr_filter(rho_old(re)%matrix,eps=rtp%filter_eps)
     END DO
 
     DO i=1,SIZE(rho_new)
-       CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix,error=error)
+       CALL cp_dbcsr_copy(rho_new(i)%matrix,rho_old(i)%matrix)
     ENDDO
     CALL calc_update_rho_sparse(qs_env,error)
 
-    CALL cp_dbcsr_deallocate_matrix(tmp,error=error)
+    CALL cp_dbcsr_deallocate_matrix(tmp)
    END SUBROUTINE rt_initialize_rho_from_ks
 
 END MODULE rt_propagator_init
+

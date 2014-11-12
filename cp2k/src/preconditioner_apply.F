@@ -186,7 +186,7 @@ SUBROUTINE apply_full_single(preconditioner_env, matrix_in, matrix_out,error)
        CALL stop_program(routineN,moduleN,__LINE__,&
                          "NOT ASSOCIATED preconditioner_env%dbcsr_matrix")
     CALL cp_dbcsr_multiply('N','N',1.0_dp,preconditioner_env%dbcsr_matrix,matrix_in,&
-         0.0_dp,matrix_out,error=error)
+         0.0_dp,matrix_out)
 
     CALL timestop(handle)
 
@@ -307,10 +307,10 @@ SUBROUTINE apply_full_single(preconditioner_env, matrix_in, matrix_out,error)
 
     CALL timeset(routineN,handle)
   
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_copy(matrix_tmp,matrix_in,name="apply_full_all",error=error)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_copy(matrix_tmp,matrix_in,name="apply_full_all")
     CALL cp_dbcsr_multiply('T','N',1.0_dp,preconditioner_env%dbcsr_matrix, &
-                    matrix_in,0.0_dp,matrix_tmp,error=error)
+                    matrix_in,0.0_dp,matrix_tmp)
     ! do the right scaling
     CALL cp_dbcsr_iterator_start(iter, matrix_tmp)
     DO WHILE (cp_dbcsr_iterator_blocks_left (iter))
@@ -330,10 +330,11 @@ SUBROUTINE apply_full_single(preconditioner_env, matrix_in, matrix_out,error)
 
     ! mult back
     CALL cp_dbcsr_multiply('N','N',1.0_dp,preconditioner_env%dbcsr_matrix, &
-                    matrix_tmp,0.0_dp,matrix_out,error=error)
-    CALL cp_dbcsr_release(matrix_tmp, error=error)
+                    matrix_tmp,0.0_dp,matrix_out)
+    CALL cp_dbcsr_release(matrix_tmp)
     CALL timestop(handle)
   
   END SUBROUTINE apply_all
 
 END MODULE preconditioner_apply
+

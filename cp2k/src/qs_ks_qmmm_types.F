@@ -106,7 +106,7 @@ CONTAINS
              CPPostconditionNoFail(stat==0,cp_warning_level,routineP,error)
           END IF
           IF (ASSOCIATED(ks_qmmm_env%matrix_h)) THEN
-             CALL cp_dbcsr_deallocate_matrix_set(ks_qmmm_env%matrix_h,error)
+             CALL cp_dbcsr_deallocate_matrix_set(ks_qmmm_env%matrix_h)
           END IF
           DEALLOCATE(ks_qmmm_env, stat=stat)
           CPPostconditionNoFail(stat==0,cp_warning_level,routineP,error)
@@ -143,3 +143,4 @@ SUBROUTINE qs_ks_qmmm_retain(ks_qmmm_env, error)
 END SUBROUTINE qs_ks_qmmm_retain
 
 END MODULE qs_ks_qmmm_types
+

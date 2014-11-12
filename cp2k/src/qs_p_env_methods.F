@@ -210,14 +210,14 @@ CONTAINS
           p_env%p1 => p1_option
        ELSE
 
-          CALL cp_dbcsr_allocate_matrix_set(p_env%p1,n_spins,error)
+          CALL cp_dbcsr_allocate_matrix_set(p_env%p1,n_spins)
           DO spin=1, n_spins
              ALLOCATE(p_env%p1(spin)%matrix)
-             CALL cp_dbcsr_init(p_env%p1(spin)%matrix,error=error)
+             CALL cp_dbcsr_init(p_env%p1(spin)%matrix)
              CALL cp_dbcsr_copy(p_env%p1(spin)%matrix,matrix_s(1)%matrix,&
                   name="p_env"//TRIM(ADJUSTL(cp_to_string(p_env%id_nr)))//&
-                  "%p1-"//TRIM(ADJUSTL(cp_to_string(spin))),error=error)
-             CALL cp_dbcsr_set(p_env%p1(spin)%matrix,0.0_dp,error=error)
+                  "%p1-"//TRIM(ADJUSTL(cp_to_string(spin))))
+             CALL cp_dbcsr_set(p_env%p1(spin)%matrix,0.0_dp)
           END DO
        END IF
 
@@ -365,14 +365,14 @@ CONTAINS
           CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
           nspins=dft_control%nspins
 
-          CALL cp_dbcsr_allocate_matrix_set(p_env%kpp1,nspins,error)
+          CALL cp_dbcsr_allocate_matrix_set(p_env%kpp1,nspins)
              name="p_env"//cp_to_string(p_env%id_nr)//"%kpp1-"
              CALL compress(name,full=.TRUE.)
              DO ispin=1,nspins
                 ALLOCATE(p_env%kpp1(ispin)%matrix)
-                CALL cp_dbcsr_init(p_env%kpp1(ispin)%matrix,error=error)
+                CALL cp_dbcsr_init(p_env%kpp1(ispin)%matrix)
                 CALL cp_dbcsr_copy(p_env%kpp1(ispin)%matrix,matrix_s(1)%matrix,&
-                     name=TRIM(name)//ADJUSTL(cp_to_string(ispin)),error=error)
+                     name=TRIM(name)//ADJUSTL(cp_to_string(ispin)))
              END DO
 
           CALL qs_rho_rebuild(p_env%rho1, qs_env=qs_env, error=error)
@@ -417,7 +417,7 @@ SUBROUTINE p_env_did_change(p_env, s_struct_changed, grid_changed,error)
      IF (PRESENT(s_struct_changed)) THEN
         IF (s_struct_changed) THEN
            IF (ASSOCIATED(p_env%kpp1)) THEN
-              CALL cp_dbcsr_deallocate_matrix_set(p_env%kpp1,error=error)
+              CALL cp_dbcsr_deallocate_matrix_set(p_env%kpp1)
            END IF
         END IF
      END IF
@@ -592,13 +592,12 @@ END SUBROUTINE p_env_did_change
              CALL get_mo_set(mos(spin)%mo_set,lfomo=lfomo,&
                   nmo=nmo,maxocc=maxocc)
              IF (lfomo>nmo) THEN
-                CALL cp_dbcsr_set(rho%rho_ao(spin)%matrix,0.0_dp,error=error)
+                CALL cp_dbcsr_set(rho%rho_ao(spin)%matrix,0.0_dp)
                 CALL cp_dbcsr_plus_fm_fm_t(rho%rho_ao(spin)%matrix,&
                      matrix_v=my_psi0(spin)%matrix,&
                      matrix_g=p_env%psi0d(spin)%matrix,&
                      ncol=p_env%n_mo(spin),error=error)
-                CALL cp_dbcsr_scale(rho%rho_ao(spin)%matrix,alpha_scalar=maxocc,&
-                     error=error)
+                CALL cp_dbcsr_scale(rho%rho_ao(spin)%matrix,alpha_scalar=maxocc)
              ELSE
                 CALL cp_unimplemented_error(fromWhere=routineP,&
                      message="symmetrized onesided smearing to do",&
@@ -875,7 +874,7 @@ END SUBROUTINE p_env_did_change
        DO ispin=1, SIZE(p1)
           ! hack to avoid crashes in ep regs
           IF(.not.ASSOCIATED(p_env%rho1%rho_ao(ispin)%matrix,p1(ispin)%matrix)) THEN
-             CALL cp_dbcsr_copy(p_env%rho1%rho_ao(ispin)%matrix,p1(ispin)%matrix,error=error)
+             CALL cp_dbcsr_copy(p_env%rho1%rho_ao(ispin)%matrix,p1(ispin)%matrix)
           ENDIF
        ENDDO
        CALL qs_rho_update_rho(rho_struct=p_env%rho1, &
@@ -1212,7 +1211,7 @@ END SUBROUTINE p_env_did_change
           CALL get_mo_set(mos(ispin)%mo_set,lfomo=lfomo,nmo=nmo,&
                maxocc=maxocc)
           IF (lfomo>nmo) THEN
-             CALL cp_dbcsr_set(p1_new(ispin)%matrix,0.0_dp,error=error)
+             CALL cp_dbcsr_set(p1_new(ispin)%matrix,0.0_dp)
              ! optimize?
              CALL cp_dbcsr_plus_fm_fm_t(p1_new(ispin)%matrix,&
                   matrix_v=v(ispin)%matrix,&
@@ -1222,7 +1221,7 @@ END SUBROUTINE p_env_did_change
                   matrix_v=p_env%psi0d(ispin)%matrix,&
                   matrix_g=v(ispin)%matrix,&
                   ncol=p_env%n_mo(ispin),error=error)
-             CALL cp_dbcsr_scale(p1_new(ispin)%matrix,alpha_scalar=maxocc,error=error)
+             CALL cp_dbcsr_scale(p1_new(ispin)%matrix,alpha_scalar=maxocc)
           ELSE
              CALL cp_unimplemented_error(fromWhere=routineP,&
                   message="symmetrized onesided smearing to do",&
@@ -1244,3 +1243,4 @@ END SUBROUTINE p_env_did_change
   END SUBROUTINE p_op_l2_fawzi
 
 END MODULE qs_p_env_methods
+

@@ -152,7 +152,7 @@ CONTAINS
     ENDIF
 
     IF (ASSOCIATED(kg_env%tnadd_mat)) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat,error)
+       CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat)
     ENDIF
     sac_kin => kg_env%sac_kin
     atom_to_molecule => kg_env%atom_to_molecule
@@ -168,9 +168,9 @@ CONTAINS
        nder = 1
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp)
        END IF
     ELSE
        nder = 0
@@ -207,7 +207,7 @@ CONTAINS
     CALL get_particle_set(particle_set, qs_kind_set, nsgf=cbs,&
                           basis_set_id=use_orb_basis_set,error=error)
 
-    CALL cp_dbcsr_allocate_matrix_set(matrix_kg,1,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_kg,1)
     ! prepare for allocation
     CALL array_nullify (row_blk_sizes)
     CALL array_nullify (col_blk_sizes)
@@ -216,18 +216,18 @@ CONTAINS
 
     ALLOCATE(matrix_kg(1)%matrix, STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_kg(1)%matrix,error=error)
+    CALL cp_dbcsr_init(matrix_kg(1)%matrix)
     CALL cp_dbcsr_create(matrix=matrix_kg(1)%matrix, &
              name="Nonadditive kinetic energy potential", &
              dist=dbcsr_dist, matrix_type=dbcsr_type_symmetric,&
              row_blk_size=row_blk_sizes, col_blk_size=col_blk_sizes, &
-             nblks=0, nze=0, error=error)
+             nblks=0, nze=0)
     CALL cp_dbcsr_alloc_block_from_nbl(matrix_kg(1)%matrix,sab_orb,error)
 
     CALL array_release (row_blk_sizes)
     CALL array_release (col_blk_sizes)
 
-    CALL cp_dbcsr_set(matrix_kg(1)%matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(matrix_kg(1)%matrix,0.0_dp)
 
     nthread=1
 !$  nthread=omp_get_max_threads()
@@ -518,7 +518,7 @@ CONTAINS
     CALL neighbor_list_iterator_release(nl_iterator)
 
     DO i = 1,SIZE(matrix_kg)
-       CALL cp_dbcsr_finalize(matrix_kg(i)%matrix, error=error)
+       CALL cp_dbcsr_finalize(matrix_kg(i)%matrix)
     ENDDO
     kg_env%tnadd_mat => matrix_kg
 
@@ -530,9 +530,9 @@ CONTAINS
        ! *** from the total density (1) and the spin density (2)     ***
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp,error=error)
+                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp)
        END IF
     END IF
 
@@ -543,3 +543,4 @@ CONTAINS
 !==========================================================================================================
 
 END MODULE kg_tnadd_mat
+

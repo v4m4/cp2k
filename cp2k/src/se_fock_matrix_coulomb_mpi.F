@@ -217,19 +217,19 @@ CONTAINS
           CALL get_atomic_kind_set(atomic_kind_set=atomic_kind_set,atom_of_kind=atom_of_kind)
        END IF
 
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins)
 
        DO ispin=1,nspins
           ! Allocate diagonal block matrices
           ALLOCATE(diagmat_p(ispin)%matrix,diagmat_ks(ispin)%matrix)!sm->dbcsr
-          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp)
+          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix)
        END DO
 
        ecore2   = 0.0_dp
@@ -469,13 +469,13 @@ CONTAINS
        CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
 
        DO ispin = 1, nspins
-          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix)
           CALL cp_dbcsr_add(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix,&
-               1.0_dp,1.0_dp,error=error)
+               1.0_dp,1.0_dp)
        END DO
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p, error=error )
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks, error=error )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks )
 
        IF (calculate_forces) THEN
           DEALLOCATE(atom_of_kind,stat=stat)
@@ -600,20 +600,20 @@ CONTAINS
        CPPrecondition(ASSOCIATED(matrix_p),cp_failure_level,routineP,error,failure)
        CPPrecondition(SIZE(ks_matrix)>0,cp_failure_level,routineP,error,failure)
 
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins)
 
        nkind = SIZE(atomic_kind_set)
        DO ispin=1,nspins
           ! Allocate diagonal block matrices
           ALLOCATE(diagmat_p(ispin)%matrix,diagmat_ks(ispin)%matrix)!sm->dbcsr
-          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp)
+          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix)
        END DO
 
        ! Check for implemented SE methods
@@ -846,13 +846,13 @@ CONTAINS
        END IF
 
        DO ispin = 1, nspins
-          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix, error=error )
-          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix )
+          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix)
           CALL cp_dbcsr_add(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix,&
-               1.0_dp,1.0_dp,error=error)
+               1.0_dp,1.0_dp)
        END DO
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p, error=error )
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks, error=error )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks )
 
        ! Set the Fock matrix contribution to SCP
        IF (calculate_forces) THEN
@@ -1391,20 +1391,20 @@ CONTAINS
        CPPrecondition(ASSOCIATED(matrix_p),cp_failure_level,routineP,error,failure)
        CPPrecondition(SIZE(ks_matrix)>0,cp_failure_level,routineP,error,failure)
 
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins)
 
        nkind = SIZE(atomic_kind_set)
        DO ispin=1,nspins
           ! Allocate diagonal block matrices
           ALLOCATE(diagmat_p(ispin)%matrix,diagmat_ks(ispin)%matrix)!sm->dbcsr
-          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp)
+          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix)
        END DO
 
        ! Possibly compute forces
@@ -1612,13 +1612,13 @@ CONTAINS
        CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
 
        DO ispin = 1, nspins
-          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix, error=error )
-          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_sum_replicated( diagmat_ks(ispin)%matrix )
+          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix)
           CALL cp_dbcsr_add(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix,&
-               1.0_dp,1.0_dp,error=error)
+               1.0_dp,1.0_dp)
        END DO
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p, error=error )
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks, error=error )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks )
 
        IF (calculate_forces) THEN
           DEALLOCATE(atom_of_kind,stat=stat)
@@ -1634,4 +1634,5 @@ CONTAINS
   END SUBROUTINE build_fock_matrix_coul_lr_r3
 
 END MODULE se_fock_matrix_coulomb_mpi
+
 

@@ -163,13 +163,13 @@ CONTAINS
     CALL get_qs_env(qs_env=qs_env, matrix_s=matrix_s,error=error)
 
     nm = (6 + 11*nmoments + 6*nmoments**2 + nmoments**3)/6 - 1
-    CALL cp_dbcsr_allocate_matrix_set ( moments, nm ,error=error)
+    CALL cp_dbcsr_allocate_matrix_set ( moments, nm )
 
     DO i=1,nm
        ALLOCATE(moments(i)%matrix)
-       CALL cp_dbcsr_init (moments(i)%matrix, error=error)
-       CALL cp_dbcsr_copy(moments(i)%matrix, matrix_s(1)%matrix, "Moments", error)
-       CALL cp_dbcsr_set(moments(i)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_init (moments(i)%matrix)
+       CALL cp_dbcsr_copy(moments(i)%matrix, matrix_s(1)%matrix, "Moments")
+       CALL cp_dbcsr_set(moments(i)%matrix,0.0_dp)
     END DO
 
     NULLIFY (qs_kind_set,particle_set,sab_orb,cell)
@@ -427,13 +427,13 @@ CONTAINS
 
     ! magnetic dipoles/angular moments only
     nm = 3
-    CALL cp_dbcsr_allocate_matrix_set ( magmom, nm ,error=error)
+    CALL cp_dbcsr_allocate_matrix_set ( magmom, nm )
 
     DO i=1,nm
        ALLOCATE(magmom(i)%matrix)
-       CALL cp_dbcsr_init (magmom(i)%matrix, error=error)
-       CALL cp_dbcsr_copy(magmom(i)%matrix, matrix_s(1)%matrix, "Moments", error)
-       CALL cp_dbcsr_set(magmom(i)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_init (magmom(i)%matrix)
+       CALL cp_dbcsr_copy(magmom(i)%matrix, matrix_s(1)%matrix, "Moments")
+       CALL cp_dbcsr_set(magmom(i)%matrix,0.0_dp)
     END DO
 
     NULLIFY (qs_kind_set,particle_set,sab_orb,cell)
@@ -677,8 +677,8 @@ CONTAINS
                     particle_set=particle_set,cell=cell,&
                     sab_orb=sab_orb,error=error)
 
-    CALL cp_dbcsr_set(sinmat,0.0_dp,error=error)
-    CALL cp_dbcsr_set(cosmat,0.0_dp,error=error)
+    CALL cp_dbcsr_set(sinmat,0.0_dp)
+    CALL cp_dbcsr_set(cosmat,0.0_dp)
 
     CALL get_qs_kind_set(qs_kind_set=qs_kind_set, maxco=ldwork )
     ldab = ldwork
@@ -917,12 +917,12 @@ CONTAINS
 
        NULLIFY ( cosmat, sinmat )
        ALLOCATE(cosmat, sinmat)
-       CALL cp_dbcsr_init(cosmat, error=error)
-       CALL cp_dbcsr_init(sinmat, error=error)
-       CALL cp_dbcsr_copy(cosmat,matrix_s(1)%matrix,'COS MOM',error=error)
-       CALL cp_dbcsr_copy(sinmat,matrix_s(1)%matrix,'SIN MOM',error=error)
-       CALL cp_dbcsr_set(cosmat,0.0_dp,error=error)
-       CALL cp_dbcsr_set(sinmat,0.0_dp,error=error)
+       CALL cp_dbcsr_init(cosmat)
+       CALL cp_dbcsr_init(sinmat)
+       CALL cp_dbcsr_copy(cosmat,matrix_s(1)%matrix,'COS MOM')
+       CALL cp_dbcsr_copy(sinmat,matrix_s(1)%matrix,'SIN MOM')
+       CALL cp_dbcsr_set(cosmat,0.0_dp)
+       CALL cp_dbcsr_set(sinmat,0.0_dp)
 
        ALLOCATE ( op_fm_set( 2, dft_control%nspins ), STAT = istat )
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
@@ -1078,7 +1078,7 @@ CONTAINS
        ! charge
        trace = 0.0_dp
        DO ispin=1,dft_control%nspins
-         CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,matrix_s(1)%matrix,trace,error=error)
+         CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,matrix_s(1)%matrix,trace)
          rmom(1,1) = rmom(1,1) + trace
        END DO
 
@@ -1236,8 +1236,8 @@ CONTAINS
           CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
        END IF
 
-       CALL cp_dbcsr_deallocate_matrix ( cosmat, error )
-       CALL cp_dbcsr_deallocate_matrix ( sinmat, error )
+       CALL cp_dbcsr_deallocate_matrix ( cosmat )
+       CALL cp_dbcsr_deallocate_matrix ( sinmat )
 
        DO ispin = 1, dft_control%nspins
          CALL cp_fm_release(opvec(ispin)%matrix,error=error)
@@ -1477,20 +1477,20 @@ CONTAINS
 
        trace = 0.0_dp
        DO ispin=1,dft_control%nspins
-         CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,matrix_s(1)%matrix,trace,error=error)
+         CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,matrix_s(1)%matrix,trace)
          rmom(1,1) = rmom(1,1) + trace
        END DO
 
        DO i = 1, SIZE(moments)
           strace = 0._dp
           DO ispin=1,dft_control%nspins
-            CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,moments(i)%matrix,trace,error=error)
+            CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,moments(i)%matrix,trace)
             strace = strace + trace
           END DO
           rmom(i+1,1) = strace
        END DO
 
-       CALL cp_dbcsr_deallocate_matrix_set ( moments, error )
+       CALL cp_dbcsr_deallocate_matrix_set ( moments )
 
        ! magnetic moments
        IF (magnetic) THEN
@@ -1502,7 +1502,7 @@ CONTAINS
           DO i = 1, SIZE(magmom)
              strace = 0._dp
              DO ispin=1,dft_control%nspins
-               CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,magmom(i)%matrix,trace,error=error)
+               CALL cp_dbcsr_trace(rho%rho_ao(ispin)%matrix,magmom(i)%matrix,trace)
                strace = strace + trace
              END DO
              mmom(i) = strace
@@ -1685,4 +1685,5 @@ CONTAINS
   END SUBROUTINE print_moments
 
 END MODULE qs_moments
+
 

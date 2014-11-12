@@ -231,11 +231,11 @@ CONTAINS
      END IF
 
      IF(dokp) THEN
-        CALL cp_dbcsr_allocate_matrix_set(matrixkp_s,maxder,ncount,error=error)
+        CALL cp_dbcsr_allocate_matrix_set(matrixkp_s,maxder,ncount)
         CALL create_sab_matrix(ks_env, matrixkp_s, matrix_name, basis_set_id_a, basis_set_id_b, &
                                sab_nl, do_symmetric, error)
      ELSE
-        CALL cp_dbcsr_allocate_matrix_set(matrix_s,maxder,error=error)
+        CALL cp_dbcsr_allocate_matrix_set(matrix_s,maxder)
         CALL create_sab_matrix(ks_env, matrix_s, matrix_name, basis_set_id_a, basis_set_id_b, &
                                sab_nl, do_symmetric, error)
      END IF
@@ -420,16 +420,16 @@ CONTAINS
      IF(dokp) THEN
         DO i = 1,maxs
            DO ic=1,ncount
-              CALL cp_dbcsr_finalize(matrixkp_s(i,ic)%matrix, error=error)
+              CALL cp_dbcsr_finalize(matrixkp_s(i,ic)%matrix)
               CALL cp_dbcsr_filter(matrixkp_s(i,ic)%matrix, &
-                   dft_control%qs_control%eps_filter_matrix, error=error)
+                   dft_control%qs_control%eps_filter_matrix)
            ENDDO
         ENDDO
      ELSE
         DO i = 1,maxs
-           CALL cp_dbcsr_finalize(matrix_s(i)%matrix, error=error)
+           CALL cp_dbcsr_finalize(matrix_s(i)%matrix)
            CALL cp_dbcsr_filter(matrix_s(i)%matrix, &
-                dft_control%qs_control%eps_filter_matrix, error=error)
+                dft_control%qs_control%eps_filter_matrix)
         ENDDO
      END IF
 
@@ -763,12 +763,12 @@ CONTAINS
        CALL uppercase(name)
        ALLOCATE(matrix_s(i)%matrix, STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-       CALL cp_dbcsr_init(matrix_s(i)%matrix,error=error)
+       CALL cp_dbcsr_init(matrix_s(i)%matrix)
        CALL cp_dbcsr_create(matrix=matrix_s(i)%matrix, &
             name=TRIM(name), &
             dist=dbcsr_dist, matrix_type=symmetry_string,&
             row_blk_size=row_blk_sizes, col_blk_size=col_blk_sizes, &
-            nblks=0, nze=0, error=error)
+            nblks=0, nze=0)
        CALL cp_dbcsr_alloc_block_from_nbl(matrix_s(i)%matrix,sab_nl,error)
      END DO
 
@@ -878,12 +878,12 @@ CONTAINS
           CALL uppercase(name)
           ALLOCATE(matrix_s(i1,i2)%matrix, STAT=istat)
           CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-          CALL cp_dbcsr_init(matrix_s(i1,i2)%matrix,error=error)
+          CALL cp_dbcsr_init(matrix_s(i1,i2)%matrix)
           CALL cp_dbcsr_create(matrix=matrix_s(i1,i2)%matrix, &
                name=TRIM(name), &
                dist=dbcsr_dist, matrix_type=symmetry_string,&
                row_blk_size=row_blk_sizes, col_blk_size=col_blk_sizes, &
-               nblks=0, nze=0, error=error)
+               nblks=0, nze=0)
           CALL cp_dbcsr_alloc_block_from_nbl(matrix_s(i1,i2)%matrix,sab_nl,error)
        END DO
     END DO
@@ -895,5 +895,6 @@ CONTAINS
 ! *****************************************************************************
 
 END MODULE qs_overlap
+
 
 

@@ -158,7 +158,7 @@ CONTAINS
          NULLIFY(h_block)
          CALL cp_dbcsr_get_block_p(h_matrix,row,col,h_block,found)
          IF (.NOT.ASSOCIATED(h_block)) THEN
-              CALL cp_dbcsr_add_block_node (h_matrix, row, col, h_block ,error=error)
+              CALL cp_dbcsr_add_block_node (h_matrix, row, col, h_block )
          END IF
 
          atom_a = atom_of_kind(iatom)
@@ -190,7 +190,7 @@ CONTAINS
          CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
       END DO
 
-      CALL cp_dbcsr_finalize(h_matrix, error=error)
+      CALL cp_dbcsr_finalize(h_matrix)
  
       CALL neighbor_list_iterator_release(nl_iterator)
       DEALLOCATE(atom_of_kind,STAT=stat)
@@ -380,3 +380,4 @@ CONTAINS
   END SUBROUTINE print_v_xc_cube
 !
 END MODULE lri_ks_methods
+

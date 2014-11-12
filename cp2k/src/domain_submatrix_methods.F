@@ -1487,10 +1487,9 @@ CONTAINS
        block_p(:,:)=0.0_dp
     ENDDO
     CALL cp_dbcsr_iterator_stop(iter)
-    CALL cp_dbcsr_filter(matrix,0.1_dp,error=error)
+    CALL cp_dbcsr_filter(matrix,0.1_dp)
 
-    CALL cp_dbcsr_work_create(matrix,work_mutable=.TRUE.,&
-            error=error)
+    CALL cp_dbcsr_work_create(matrix,work_mutable=.TRUE.)
 
     ldesc=2
     ALLOCATE(send_descriptor(ldesc,nNodes))
@@ -1677,7 +1676,7 @@ CONTAINS
     DEALLOCATE(recv_data)
     DEALLOCATE(recv_data2)
        
-    CALL cp_dbcsr_finalize(matrix,error=error)
+    CALL cp_dbcsr_finalize(matrix)
     
     CALL timestop(handle)
   
@@ -1778,5 +1777,6 @@ CONTAINS
   END FUNCTION qblk_exists
 
 END MODULE domain_submatrix_methods
+
 
 

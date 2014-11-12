@@ -220,13 +220,13 @@ CONTAINS
              CALL get_mo_set(mo_set=mo_array(ispin)%mo_set,mo_coeff_b=mo_coeff)
              CALL cp_dbcsr_get_info(mo_coeff,nfullrows_total=n,nfullcols_total=k)
              CALL cp_dbcsr_multiply('T','N',1.0_dp,mo_coeff,matrix_dedc(ispin)%matrix, &
-                  0.0_dp,qs_ot_env(ispin)%rot_mat_chc,error=error)
-             CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_buf1,qs_ot_env(ispin)%rot_mat_chc,error=error)
+                  0.0_dp,qs_ot_env(ispin)%rot_mat_chc)
+             CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_buf1,qs_ot_env(ispin)%rot_mat_chc)
 
-             CALL cp_dbcsr_scale_by_vector(qs_ot_env(ispin)%matrix_buf1,alpha=scaling_factor(ispin)%array,side='right',error=error)
+             CALL cp_dbcsr_scale_by_vector(qs_ot_env(ispin)%matrix_buf1,alpha=scaling_factor(ispin)%array,side='right')
              ! create the derivative of the energy wrt to rot_mat_u
              CALL cp_dbcsr_multiply('N','N',1.0_dp,qs_ot_env(ispin)%rot_mat_u,qs_ot_env(ispin)%matrix_buf1, &
-                  0.0_dp,qs_ot_env(ispin)%rot_mat_dedu,error=error)
+                  0.0_dp,qs_ot_env(ispin)%rot_mat_dedu)
           ENDDO
 
           ! here we construct the derivative of the free energy with respect to the evals
@@ -234,7 +234,7 @@ CONTAINS
           ! the mo occupations should in principle remain unaltered
           IF (qs_ot_env(1)%settings%do_ener) THEN
             DO ispin=1,SIZE(mo_array)
-               CALL cp_dbcsr_get_diag(qs_ot_env(ispin)%rot_mat_chc,expectation_values(ispin)%array,error=error)
+               CALL cp_dbcsr_get_diag(qs_ot_env(ispin)%rot_mat_chc,expectation_values(ispin)%array)
                qs_ot_env(ispin)%ener_gx=expectation_values(ispin)%array
                CALL set_mo_occupation(mo_set=mo_array(ispin)%mo_set,&
                        smear=smear, eval_deriv=qs_ot_env(ispin)%ener_gx, error=error)
@@ -248,9 +248,9 @@ CONTAINS
              DO ispin=1,SIZE(qs_ot_env)
                 CALL cp_dbcsr_get_info(qs_ot_env(ispin)%rot_mat_u,nfullcols_total=k)
                 CALL cp_dbcsr_multiply('N','N',1.0_dp,qs_ot_env(ispin)%rot_mat_u,qs_ot_env(ispin)%rot_mat_chc, &
-                  0.0_dp,qs_ot_env(ispin)%matrix_buf1,error=error)
+                  0.0_dp,qs_ot_env(ispin)%matrix_buf1)
                 CALL cp_dbcsr_multiply('N','T',1.0_dp,qs_ot_env(ispin)%matrix_buf1,qs_ot_env(ispin)%rot_mat_u, &
-                  0.0_dp,qs_ot_env(ispin)%rot_mat_chc,error=error)
+                  0.0_dp,qs_ot_env(ispin)%rot_mat_chc)
              ENDDO
           ENDIF
        ENDIF
@@ -263,17 +263,17 @@ CONTAINS
           ! transform \tilde H to the current basis of C (assuming non-selfconsistent H)
           CALL cp_dbcsr_get_info(qs_ot_env(ispin)%rot_mat_u,nfullcols_total=k)
           CALL cp_dbcsr_multiply('T','N',1.0_dp,qs_ot_env(ispin)%rot_mat_u,qs_ot_env(ispin)%rot_mat_chc, &
-            0.0_dp,qs_ot_env(ispin)%matrix_buf1,error=error)
+            0.0_dp,qs_ot_env(ispin)%matrix_buf1)
           CALL cp_dbcsr_multiply('N','N',1.0_dp,qs_ot_env(ispin)%matrix_buf1,qs_ot_env(ispin)%rot_mat_u, &
-            0.0_dp,qs_ot_env(ispin)%matrix_buf2,error=error)
+            0.0_dp,qs_ot_env(ispin)%matrix_buf2)
 
           ! subtract the current ener_x from the diagonal
-          CALL cp_dbcsr_get_diag(qs_ot_env(ispin)%matrix_buf2,expectation_values(ispin)%array,error=error)
+          CALL cp_dbcsr_get_diag(qs_ot_env(ispin)%matrix_buf2,expectation_values(ispin)%array)
           expectation_values(ispin)%array=expectation_values(ispin)%array-qs_ot_env(ispin)%ener_x
-          CALL cp_dbcsr_set_diag(qs_ot_env(ispin)%matrix_buf2,expectation_values(ispin)%array,error=error)
+          CALL cp_dbcsr_set_diag(qs_ot_env(ispin)%matrix_buf2,expectation_values(ispin)%array)
 
           ! get nondiag energy trace (D^T D)
-          CALL cp_dbcsr_trace(qs_ot_env(ispin)%matrix_buf2,qs_ot_env(ispin)%matrix_buf2,trace,error=error)
+          CALL cp_dbcsr_trace(qs_ot_env(ispin)%matrix_buf2,qs_ot_env(ispin)%matrix_buf2,trace)
           ener_nondiag=ener_nondiag+0.5_dp*qs_ot_env(1)%settings%nondiag_energy_strength*trace
 
           ! get gradient (again ignoring dependencies of H)
@@ -284,10 +284,10 @@ CONTAINS
 
              ! next for the rot_mat_u derivative (2 * k * \tilde H U D)
              CALL cp_dbcsr_multiply('N','N',1.0_dp,qs_ot_env(ispin)%rot_mat_chc,qs_ot_env(ispin)%rot_mat_u,&
-                   0.0_dp,qs_ot_env(ispin)%matrix_buf1,error=error)
+                   0.0_dp,qs_ot_env(ispin)%matrix_buf1)
              CALL cp_dbcsr_multiply('N','N',2.0_dp * qs_ot_env(1)%settings%nondiag_energy_strength, &
                    qs_ot_env(ispin)%matrix_buf1,qs_ot_env(ispin)%matrix_buf2,&
-                   1.0_dp,qs_ot_env(ispin)%rot_mat_dedu,error=error)
+                   1.0_dp,qs_ot_env(ispin)%rot_mat_dedu)
           ENDIF
        ENDDO
     ENDIF
@@ -299,24 +299,24 @@ CONTAINS
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     DO ispin=1,SIZE(matrix_dedc)
        ALLOCATE(matrix_dedc_scaled(ispin)%matrix)
-       CALL cp_dbcsr_init(matrix_dedc_scaled(ispin)%matrix, error=error)
-       CALL cp_dbcsr_copy(matrix_dedc_scaled(ispin)%matrix,matrix_dedc(ispin)%matrix,error=error)
+       CALL cp_dbcsr_init(matrix_dedc_scaled(ispin)%matrix)
+       CALL cp_dbcsr_copy(matrix_dedc_scaled(ispin)%matrix,matrix_dedc(ispin)%matrix)
 
        ! as a preconditioner, one might want to scale only with a constant, not with f(i)
        ! for the convergence criterium, maybe take it back out
        IF (qs_ot_env(1)%settings%occupation_preconditioner) THEN
           scaling_factor(ispin)%array=2.0_dp
        ENDIF
-       CALL cp_dbcsr_scale_by_vector(matrix_dedc_scaled(ispin)%matrix,alpha=scaling_factor(ispin)%array,side='right',error=error)
+       CALL cp_dbcsr_scale_by_vector(matrix_dedc_scaled(ispin)%matrix,alpha=scaling_factor(ispin)%array,side='right')
     ENDDO
 
     ! notice we use qs_ot_env(1) for driving all output and the minimization in case of LSD
     qs_ot_env(1)%etotal=energy+ener_nondiag
 
     IF ( PRESENT ( fscp ) ) CALL cp_dbcsr_replicate (fscp, restrict_source=0, replicate_rows=.TRUE., &
-                            replicate_columns=.TRUE., error=error )
+                            replicate_columns=.TRUE. )
     IF ( PRESENT ( pscp ) ) CALL cp_dbcsr_replicate (pscp, restrict_source=0, replicate_rows=.TRUE., &
-                            replicate_columns=.TRUE., error=error )
+                            replicate_columns=.TRUE. )
 
     output_unit = cp_print_key_unit_nr(logger,input,"DFT%SCF%PRINT%PROGRAM_RUN_INFO",&
                                        extension=".scfLog",error=error)
@@ -333,9 +333,9 @@ CONTAINS
        CASE("TOD")
           IF (ASSOCIATED(matrix_s)) THEN
              CALL cp_dbcsr_multiply('N','N',1.0_dp,matrix_s,qs_ot_env(ispin)%matrix_x, &
-                  0.0_dp,qs_ot_env(ispin)%matrix_sx, error=error)
+                  0.0_dp,qs_ot_env(ispin)%matrix_sx)
           ELSE
-             CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin)%matrix_x,error=error)
+             CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin)%matrix_x)
           ENDIF
           CALL qs_ot_get_p(qs_ot_env(ispin)%matrix_x,qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin),error=error)
           CALL qs_ot_get_orbitals(mo_coeff,qs_ot_env(ispin)%matrix_x,qs_ot_env(ispin),error=error)
@@ -388,7 +388,7 @@ CONTAINS
     DEALLOCATE(occupation_numbers,stat=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     DO ispin=1,SIZE(matrix_dedc_scaled)
-       CALL cp_dbcsr_release(matrix_dedc_scaled(ispin)%matrix, error=error)
+       CALL cp_dbcsr_release(matrix_dedc_scaled(ispin)%matrix)
        DEALLOCATE(matrix_dedc_scaled(ispin)%matrix)
     ENDDO
     DEALLOCATE(matrix_dedc_scaled,stat=stat)
@@ -448,10 +448,9 @@ CONTAINS
                dbcsr_mp_npcols(dbcsr_distribution_mp(cp_dbcsr_distribution(matrix_ks))))
           CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp (cp_dbcsr_distribution(matrix_ks)),&
                dbcsr_distribution_row_dist(cp_dbcsr_distribution(matrix_ks)), col_dist)
-          CALL cp_dbcsr_init_p(mo_array(ispin)%mo_set%mo_coeff_b, error=error)
+          CALL cp_dbcsr_init_p(mo_array(ispin)%mo_set%mo_coeff_b)
           CALL cp_dbcsr_create(mo_array(ispin)%mo_set%mo_coeff_b, "mo_coeff_b", dist, dbcsr_type_no_symmetry,&
-               cp_dbcsr_row_block_sizes(matrix_ks), col_blk_size, 0, 0, dbcsr_type_real_default,&
-               error=error)
+               cp_dbcsr_row_block_sizes(matrix_ks), col_blk_size, 0, 0, dbcsr_type_real_default)
           CALL cp_dbcsr_distribution_release (dist)
           CALL array_release (col_dist)
           CALL array_release (col_blk_size)
@@ -483,27 +482,27 @@ CONTAINS
        ! **** SCP
 
        ! set c0,sc0
-       CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_c0,mo_coeff,error=error)
+       CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_c0,mo_coeff)
        IF (ASSOCIATED(matrix_s)) THEN
           CALL cp_dbcsr_multiply('N','N',1.0_dp,matrix_s,qs_ot_env(ispin)%matrix_c0, &
-               0.0_dp,qs_ot_env(ispin)%matrix_sc0,error=error)
+               0.0_dp,qs_ot_env(ispin)%matrix_sc0)
        ELSE
-          CALL cp_dbcsr_copy(qs_ot_env ( ispin ) % matrix_sc0, qs_ot_env ( ispin ) % matrix_c0, error = error )
+          CALL cp_dbcsr_copy(qs_ot_env ( ispin ) % matrix_sc0, qs_ot_env ( ispin ) % matrix_c0 )
        ENDIF
 
        ! init
        CALL qs_ot_init(qs_ot_env(ispin),error=error)
 
        ! set x
-       CALL cp_dbcsr_set(qs_ot_env(ispin)%matrix_x,0.0_dp,error=error)
-       CALL cp_dbcsr_set(qs_ot_env(ispin)%matrix_sx,0.0_dp,error=error)
+       CALL cp_dbcsr_set(qs_ot_env(ispin)%matrix_x,0.0_dp)
+       CALL cp_dbcsr_set(qs_ot_env(ispin)%matrix_sx,0.0_dp)
 
        IF (qs_ot_env(ispin)%settings%do_rotation) THEN
-          CALL cp_dbcsr_set(qs_ot_env(ispin)%rot_mat_x,0.0_dp,error=error)
+          CALL cp_dbcsr_set(qs_ot_env(ispin)%rot_mat_x,0.0_dp)
        ENDIF
 !********** PERHAPS ONLY ALLOCATE spin=1 for SCP ???????
        IF (qs_ot_env(ispin)%settings%scp_nddo) THEN
-          CALL cp_dbcsr_set ( qs_ot_env ( ispin ) % xmat, 0.0_dp, error=error )
+          CALL cp_dbcsr_set ( qs_ot_env ( ispin ) % xmat, 0.0_dp )
        ENDIF
 
        IF (qs_ot_env(ispin)%settings%do_ener) THEN
@@ -517,8 +516,8 @@ CONTAINS
           ! get c
           CALL qs_ot_get_p(qs_ot_env(ispin)%matrix_x,qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin),error=error)
        CASE("REF")
-          CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_x,qs_ot_env(ispin)%matrix_c0,error=error)
-          CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin)%matrix_sc0,error=error)
+          CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_x,qs_ot_env(ispin)%matrix_c0)
+          CALL cp_dbcsr_copy(qs_ot_env(ispin)%matrix_sx,qs_ot_env(ispin)%matrix_sc0)
        CASE DEFAULT
           CALL stop_program(routineN,moduleN,__LINE__,"Algorithm not yet implemented")
        END SELECT
@@ -526,8 +525,8 @@ CONTAINS
        ! **** SCP
        ! set c = qs_ot_env % x and -fc = qs_ot_env % gx  for SCP
        IF (qs_ot_env(1)%settings%scp_nddo .AND. ispin == 1) THEN
-         CALL cp_dbcsr_copy ( qs_ot_env(1)%xmat, pscp, error=error )
-         CALL cp_dbcsr_copy ( qs_ot_env(1)%gxmat, fscp, error=error )
+         CALL cp_dbcsr_copy ( qs_ot_env(1)%xmat, pscp )
+         CALL cp_dbcsr_copy ( qs_ot_env(1)%gxmat, fscp )
        END IF
        ! **** SCP
 
@@ -550,4 +549,5 @@ CONTAINS
   END SUBROUTINE ot_scf_destroy
 
 END MODULE qs_ot_scf
+
 

@@ -102,15 +102,15 @@ CONTAINS
     IF (.NOT.use_inv_guess) THEN
        gershgorin_norm=cp_dbcsr_gershgorin_norm(matrix)
        frob_matrix=cp_dbcsr_frobenius_norm(matrix)
-       CALL cp_dbcsr_set(matrix_inverse,0.0_dp,error=error)
-       CALL cp_dbcsr_add_on_diag(matrix_inverse,1/MIN(gershgorin_norm,frob_matrix),error=error)
+       CALL cp_dbcsr_set(matrix_inverse,0.0_dp)
+       CALL cp_dbcsr_add_on_diag(matrix_inverse,1/MIN(gershgorin_norm,frob_matrix))
     ENDIF
     CALL cp_dbcsr_get_info(matrix, nfullrows_total=nrow )
 
-    CALL cp_dbcsr_init(tmp1,error=error)
-    CALL cp_dbcsr_create(tmp1,template=matrix_inverse,error=error)
-    CALL cp_dbcsr_init(tmp2,error=error)
-    CALL cp_dbcsr_create(tmp2,template=matrix_inverse,error=error)
+    CALL cp_dbcsr_init(tmp1)
+    CALL cp_dbcsr_create(tmp1,template=matrix_inverse)
+    CALL cp_dbcsr_init(tmp2)
+    CALL cp_dbcsr_create(tmp2,template=matrix_inverse)
 
     IF (unit_nr>0) WRITE(unit_nr,*)
 
@@ -124,12 +124,12 @@ CONTAINS
        mymat(2)%matrix=>matrix_inverse
        CALL cp_dbcsr_setup_arnoldi_data(my_arnoldi,mymat,max_iter=30,threshold=1.0E-4_dp,&
                                         selection_crit=1,nval_request=2)
-       CALL cp_dbcsr_arnoldi_ev(mymat,my_arnoldi,error)
+       CALL cp_dbcsr_arnoldi_ev(mymat,my_arnoldi)
        max_eV=REAL(get_selected_ritz_val(my_arnoldi,2),dp)
        min_eV=REAL(get_selected_ritz_val(my_arnoldi,1),dp)
        max_abs_eig=MAX(max_eV,ABS(min_eV))
        CALL deallocate_arnoldi_data(my_arnoldi)
-       CALL cp_dbcsr_scale(matrix_inverse,1.0_dp/max_abs_eig,error=error)
+       CALL cp_dbcsr_scale(matrix_inverse,1.0_dp/max_abs_eig)
        t4 = m_walltime()
     END IF
 
@@ -138,26 +138,26 @@ CONTAINS
        t1 = m_walltime()
        ! tmp1 = S^-1 S
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_inverse, matrix,&
-                              0.0_dp, tmp1,flop=flop1, error=error)
+                              0.0_dp, tmp1,flop=flop1)
 
        ! for the convergence check
        !frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-       CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp,error=error)
+       CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp)
        frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
 
        CALL cp_dbcsr_norm(tmp1,&
-               dbcsr_norm_maxabsnorm, norm_scalar=maxnorm_matrix, error=error)
+               dbcsr_norm_maxabsnorm, norm_scalar=maxnorm_matrix)
 
-       CALL cp_dbcsr_add_on_diag(tmp1,+1.0_dp,error=error)
+       CALL cp_dbcsr_add_on_diag(tmp1,+1.0_dp)
        occ_matrix=cp_dbcsr_get_occupation(matrix_inverse)
 
        ! tmp2 = S^-1 S S^-1
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp1, matrix_inverse, 0.0_dp, tmp2,&
-                              flop=flop2, error=error)
+                              flop=flop2)
        ! S^-1_{n+1} = 2 S^-1 - S^-1 S S^-1
-       CALL cp_dbcsr_add(matrix_inverse, tmp2, 2.0_dp, -1.0_dp, error=error)
+       CALL cp_dbcsr_add(matrix_inverse, tmp2, 2.0_dp, -1.0_dp)
 
-       CALL cp_dbcsr_filter(matrix_inverse, threshold, error=error)
+       CALL cp_dbcsr_filter(matrix_inverse, threshold)
        t2 = m_walltime()
 
        IF (unit_nr>0) THEN
@@ -173,7 +173,7 @@ CONTAINS
           mymat(2)%matrix=>matrix_inverse
           CALL cp_dbcsr_setup_arnoldi_data(my_arnoldi,mymat,max_iter=30,threshold=1.0E-4_dp,&
                                            selection_crit=1,nval_request=2)
-          CALL cp_dbcsr_arnoldi_ev(mymat,my_arnoldi,error)
+          CALL cp_dbcsr_arnoldi_ev(mymat,my_arnoldi)
           max_eV=REAL(get_selected_ritz_val(my_arnoldi,2),dp)
           min_eV=REAL(get_selected_ritz_val(my_arnoldi,1),dp)
           max_abs_eig=MAX(max_eV,ABS(min_eV))
@@ -185,12 +185,12 @@ CONTAINS
        END IF
 
     ENDDO
-!    CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_inverse, matrix, 0.0_dp, tmp1,error=error)
+!    CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_inverse, matrix, 0.0_dp, tmp1)
     !!frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-    !CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp,error=error)
+    !CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp)
     !frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
     !CALL cp_dbcsr_norm(tmp1,&
-    !        dbcsr_norm_maxabsnorm, norm_scalar=maxnorm_matrix, error=error)
+    !        dbcsr_norm_maxabsnorm, norm_scalar=maxnorm_matrix)
     !occ_matrix=cp_dbcsr_get_occupation(matrix_inverse)
     IF (unit_nr>0) THEN
     !   WRITE(unit_nr,'(T6,A,1X,I3,1X,F10.8,E12.3)') "Final Hotelling ",i,occ_matrix,&
@@ -200,8 +200,8 @@ CONTAINS
        CALL m_flush(unit_nr)
     ENDIF
 
-    CALL cp_dbcsr_release(tmp1,error=error)
-    CALL cp_dbcsr_release(tmp2,error=error)
+    CALL cp_dbcsr_release(tmp1)
+    CALL cp_dbcsr_release(tmp2)
 
     CALL timestop(handle)
 
@@ -244,19 +244,19 @@ CONTAINS
        unit_nr=-1
     ENDIF
 
-    CALL cp_dbcsr_init(tmp1,error=error)
-    CALL cp_dbcsr_create(tmp1,template=matrix_sign,error=error)
+    CALL cp_dbcsr_init(tmp1)
+    CALL cp_dbcsr_create(tmp1,template=matrix_sign)
 
-    CALL cp_dbcsr_init(tmp2,error=error)
-    CALL cp_dbcsr_create(tmp2,template=matrix_sign,error=error)
+    CALL cp_dbcsr_init(tmp2)
+    CALL cp_dbcsr_create(tmp2,template=matrix_sign)
 
-    CALL cp_dbcsr_copy(matrix_sign,matrix,error=error)
-    CALL cp_dbcsr_filter(matrix_sign,threshold,error=error)
+    CALL cp_dbcsr_copy(matrix_sign,matrix)
+    CALL cp_dbcsr_filter(matrix_sign,threshold)
 
     ! scale the matrix to get into the convergence range
     frob_matrix=cp_dbcsr_frobenius_norm(matrix_sign)
     gersh_matrix=cp_dbcsr_gershgorin_norm(matrix_sign)
-    CALL cp_dbcsr_scale(matrix_sign,1/MIN(frob_matrix,gersh_matrix),error=error)
+    CALL cp_dbcsr_scale(matrix_sign,1/MIN(frob_matrix,gersh_matrix))
 
     IF (unit_nr>0) WRITE(unit_nr,*)
 
@@ -266,24 +266,24 @@ CONTAINS
        t1 = m_walltime()
        ! tmp1 = X * X
        CALL cp_dbcsr_multiply("N", "N", -1.0_dp, matrix_sign, matrix_sign, 0.0_dp, tmp1,&
-                              filter_eps=threshold, flop=flop1, error=error)
+                              filter_eps=threshold, flop=flop1)
 
        ! check convergence (frob norm of what should be the identity matrix minus identity matrix)
        frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-       CALL cp_dbcsr_add_on_diag(tmp1,+1.0_dp,error=error)
+       CALL cp_dbcsr_add_on_diag(tmp1,+1.0_dp)
        frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
 
        ! update the above to 3*I-X*X
-       CALL cp_dbcsr_add_on_diag(tmp1,+2.0_dp,error=error)
+       CALL cp_dbcsr_add_on_diag(tmp1,+2.0_dp)
        occ_matrix=cp_dbcsr_get_occupation(matrix_sign)
 
        ! tmp2 = 0.5 * X * (3*I-X*X)
        CALL cp_dbcsr_multiply("N", "N", 0.5_dp, matrix_sign, tmp1, 0.0_dp, tmp2, &
-                              filter_eps=threshold, flop=flop2, error=error)
+                              filter_eps=threshold, flop=flop2)
 
        ! done iterating
-       ! CALL cp_dbcsr_filter(tmp2,threshold,error=error)
-       CALL cp_dbcsr_copy(matrix_sign,tmp2,error=error)
+       ! CALL cp_dbcsr_filter(tmp2,threshold)
+       CALL cp_dbcsr_copy(matrix_sign,tmp2)
        t2 = m_walltime()
 
        IF (unit_nr>0) THEN
@@ -299,9 +299,9 @@ CONTAINS
 
     ! this check is not really needed
     CALL cp_dbcsr_multiply("N", "N", +1.0_dp, matrix_sign, matrix_sign, 0.0_dp, tmp1,&
-                           filter_eps=threshold, error=error)
+                           filter_eps=threshold)
     frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-    CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp,error=error)
+    CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp)
     frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
     occ_matrix=cp_dbcsr_get_occupation(matrix_sign)
     IF (unit_nr>0) THEN
@@ -311,8 +311,8 @@ CONTAINS
        CALL m_flush(unit_nr)
     ENDIF
 
-    CALL cp_dbcsr_release(tmp1,error=error)
-    CALL cp_dbcsr_release(tmp2,error=error)
+    CALL cp_dbcsr_release(tmp1)
+    CALL cp_dbcsr_release(tmp2)
 
     CALL timestop(handle)
 
@@ -369,19 +369,19 @@ CONTAINS
     ENDIF
 
     ! for stability symmetry can not be assumed
-    CALL cp_dbcsr_init(tmp1,error=error)
-    CALL cp_dbcsr_create(tmp1,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(tmp2,error=error)
-    CALL cp_dbcsr_create(tmp2,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(tmp1)
+    CALL cp_dbcsr_create(tmp1,template=matrix,matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(tmp2)
+    CALL cp_dbcsr_create(tmp2,template=matrix,matrix_type=dbcsr_type_no_symmetry)
     IF (order.GE.4) THEN
-       CALL cp_dbcsr_init(tmp3,error=error)
-       CALL cp_dbcsr_create(tmp3,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
+       CALL cp_dbcsr_init(tmp3)
+       CALL cp_dbcsr_create(tmp3,template=matrix,matrix_type=dbcsr_type_no_symmetry)
     ENDIF
 
-    CALL cp_dbcsr_set(matrix_sqrt_inv,0.0_dp,error=error)
-    CALL cp_dbcsr_add_on_diag(matrix_sqrt_inv,1.0_dp,error=error)
-    CALL cp_dbcsr_filter(matrix_sqrt_inv,threshold,error=error)
-    CALL cp_dbcsr_copy(matrix_sqrt,matrix,error=error)
+    CALL cp_dbcsr_set(matrix_sqrt_inv,0.0_dp)
+    CALL cp_dbcsr_add_on_diag(matrix_sqrt_inv,1.0_dp)
+    CALL cp_dbcsr_filter(matrix_sqrt_inv,threshold)
+    CALL cp_dbcsr_copy(matrix_sqrt,matrix)
 
     ! scale the matrix to get into the convergence range
     CALL lanczos_alg_serial(matrix_sqrt, max_ev, min_ev, threshold=eps_lanczos, &
@@ -396,8 +396,8 @@ CONTAINS
     ! and adjust the scaling to be on the safe side
     scaling=2/(max_ev+min_ev+100*eps_lanczos)
 
-    CALL cp_dbcsr_scale(matrix_sqrt,scaling,error=error)
-    CALL cp_dbcsr_filter(matrix_sqrt,threshold,error=error)
+    CALL cp_dbcsr_scale(matrix_sqrt,scaling)
+    CALL cp_dbcsr_filter(matrix_sqrt,threshold)
 
     DO i=1,100
 
@@ -405,9 +405,9 @@ CONTAINS
 
        ! tmp1 = Zk * Yk - I
        CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_sqrt_inv, matrix_sqrt, 0.0_dp, tmp1,&
-                              filter_eps=threshold, flop=flop1, error=error)
+                              filter_eps=threshold, flop=flop1)
        frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-       CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp,error=error)
+       CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp)
 
        ! check convergence (frob norm of what should be the identity matrix minus identity matrix)
        frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
@@ -416,28 +416,28 @@ CONTAINS
        SELECT CASE(order)
        CASE(2)
           ! update the above to 0.5*(3*I-Zk*Yk)
-          CALL cp_dbcsr_add_on_diag(tmp1,-2.0_dp,error=error)
-          CALL cp_dbcsr_scale(tmp1,-0.5_dp,error=error)
+          CALL cp_dbcsr_add_on_diag(tmp1,-2.0_dp)
+          CALL cp_dbcsr_scale(tmp1,-0.5_dp)
        CASE(3)
           ! tmp2 = tmp1 ** 2
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp1, tmp1, 0.0_dp, tmp2,&
-                                 filter_eps=threshold, flop=flop4, error=error)
+                                 filter_eps=threshold, flop=flop4)
           ! tmp1 = 1/16 * (16*I-8*tmp1+6*tmp1**2-5*tmp1**3)
-          CALL cp_dbcsr_add(tmp1, tmp2, -4.0_dp, 3.0_dp, error=error)
-          CALL cp_dbcsr_add_on_diag(tmp1,8.0_dp,error=error)
-          CALL cp_dbcsr_scale(tmp1,0.125_dp,error=error)
+          CALL cp_dbcsr_add(tmp1, tmp2, -4.0_dp, 3.0_dp)
+          CALL cp_dbcsr_add_on_diag(tmp1,8.0_dp)
+          CALL cp_dbcsr_scale(tmp1,0.125_dp)
        CASE(4) ! as expensive as case(5), so little need to use it
           ! tmp2 = tmp1 ** 2
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp1, tmp1, 0.0_dp, tmp2,&
-                                 filter_eps=threshold, flop=flop4, error=error)
+                                 filter_eps=threshold, flop=flop4)
           ! tmp3 = tmp2 * tmp1
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp2, tmp1, 0.0_dp, tmp3,&
-                                 filter_eps=threshold, flop=flop5, error=error)
-          CALL cp_dbcsr_scale(tmp1,-8.0_dp,error=error)
-          CALL cp_dbcsr_add_on_diag(tmp1,16.0_dp,error=error)
-          CALL cp_dbcsr_add(tmp1, tmp2, 1.0_dp, 6.0_dp, error=error)
-          CALL cp_dbcsr_add(tmp1, tmp3, 1.0_dp,-5.0_dp, error=error)
-          CALL cp_dbcsr_scale(tmp1,1/16.0_dp,error=error)
+                                 filter_eps=threshold, flop=flop5)
+          CALL cp_dbcsr_scale(tmp1,-8.0_dp)
+          CALL cp_dbcsr_add_on_diag(tmp1,16.0_dp)
+          CALL cp_dbcsr_add(tmp1, tmp2, 1.0_dp, 6.0_dp)
+          CALL cp_dbcsr_add(tmp1, tmp3, 1.0_dp,-5.0_dp)
+          CALL cp_dbcsr_scale(tmp1,1/16.0_dp)
        CASE(5)
           ! Knuth's reformulation to evaluate the polynomial of 4th degree in 2 multiplications
           ! p = y4+A*y3+B*y2+C*y+D
@@ -455,36 +455,36 @@ CONTAINS
           d=od-b*c
           ! tmp2 = tmp1 ** 2 + a * tmp1
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp1, tmp1, 0.0_dp, tmp2,&
-                                 filter_eps=threshold, flop=flop4, error=error)
-          CALL cp_dbcsr_add(tmp2, tmp1, 1.0_dp, a , error=error)
+                                 filter_eps=threshold, flop=flop4)
+          CALL cp_dbcsr_add(tmp2, tmp1, 1.0_dp, a )
           ! tmp3 = tmp2 + tmp1 + b
-          CALL cp_dbcsr_copy(tmp3,tmp2,error=error)
-          CALL cp_dbcsr_add(tmp3, tmp1, 1.0_dp, 1.0_dp , error=error)
-          CALL cp_dbcsr_add_on_diag(tmp3,b,error=error)
+          CALL cp_dbcsr_copy(tmp3,tmp2)
+          CALL cp_dbcsr_add(tmp3, tmp1, 1.0_dp, 1.0_dp )
+          CALL cp_dbcsr_add_on_diag(tmp3,b)
           ! tmp2 = tmp2 + c
-          CALL cp_dbcsr_add_on_diag(tmp2,c,error=error)
+          CALL cp_dbcsr_add_on_diag(tmp2,c)
           ! tmp1 = tmp2 * tmp3
           CALL cp_dbcsr_multiply("N", "N", 1.0_dp, tmp2, tmp3, 0.0_dp, tmp1,&
-                                 filter_eps=threshold, flop=flop5, error=error)
+                                 filter_eps=threshold, flop=flop5)
           ! tmp1 = tmp1 + d
-          CALL cp_dbcsr_add_on_diag(tmp1,d,error=error)
+          CALL cp_dbcsr_add_on_diag(tmp1,d)
           ! final scale
-          CALL cp_dbcsr_scale(tmp1,35.0_dp/128.0_dp,error=error)    
+          CALL cp_dbcsr_scale(tmp1,35.0_dp/128.0_dp)    
        CASE DEFAULT
           CPPrecondition(.FALSE.,cp_failure_level,routineP,error,failure)
        END SELECT
 
        ! tmp2 = Yk * tmp1 = Y(k+1)
        CALL cp_dbcsr_multiply("N", "N",  1.0_dp, matrix_sqrt, tmp1,  0.0_dp, tmp2,&
-                              filter_eps=threshold, flop=flop2, error=error)
-       ! CALL cp_dbcsr_filter(tmp2,threshold,error=error)
-       CALL cp_dbcsr_copy(matrix_sqrt, tmp2, error=error)
+                              filter_eps=threshold, flop=flop2)
+       ! CALL cp_dbcsr_filter(tmp2,threshold)
+       CALL cp_dbcsr_copy(matrix_sqrt, tmp2)
 
        ! tmp2 = tmp1 * Zk = Z(k+1)
        CALL cp_dbcsr_multiply("N", "N",  1.0_dp, tmp1, matrix_sqrt_inv,  0.0_dp, tmp2,&
-                              filter_eps=threshold,flop=flop3, error=error)
-       ! CALL cp_dbcsr_filter(tmp2,threshold,error=error)
-       CALL cp_dbcsr_copy(matrix_sqrt_inv, tmp2, error=error)
+                              filter_eps=threshold,flop=flop3)
+       ! CALL cp_dbcsr_filter(tmp2,threshold)
+       CALL cp_dbcsr_copy(matrix_sqrt_inv, tmp2)
 
        occ_matrix=cp_dbcsr_get_occupation(matrix_sqrt_inv)
 
@@ -503,16 +503,16 @@ CONTAINS
     ENDDO
 
     ! symmetrize the matrices as this is not guaranteed by the algorithm
-    CALL cp_dbcsr_transposed(tmp1,matrix_sqrt_inv,error=error)
-    CALL cp_dbcsr_add(matrix_sqrt_inv,tmp1,0.5_dp,0.5_dp,error=error)
-    CALL cp_dbcsr_transposed(tmp1,matrix_sqrt,error=error)
-    CALL cp_dbcsr_add(matrix_sqrt,tmp1,0.5_dp,0.5_dp,error=error)
+    CALL cp_dbcsr_transposed(tmp1,matrix_sqrt_inv)
+    CALL cp_dbcsr_add(matrix_sqrt_inv,tmp1,0.5_dp,0.5_dp)
+    CALL cp_dbcsr_transposed(tmp1,matrix_sqrt)
+    CALL cp_dbcsr_add(matrix_sqrt,tmp1,0.5_dp,0.5_dp)
 
     ! this check is not really needed
     CALL cp_dbcsr_multiply("N", "N", +1.0_dp, matrix_sqrt_inv, matrix_sqrt, 0.0_dp, tmp1,&
-                           filter_eps=threshold,error=error)
+                           filter_eps=threshold)
     frob_matrix_base=cp_dbcsr_frobenius_norm(tmp1)
-    CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp,error=error)
+    CALL cp_dbcsr_add_on_diag(tmp1,-1.0_dp)
     frob_matrix=cp_dbcsr_frobenius_norm(tmp1)
     occ_matrix=cp_dbcsr_get_occupation(matrix_sqrt_inv)
     IF (unit_nr>0) THEN
@@ -523,13 +523,13 @@ CONTAINS
     ENDIF
 
     ! scale to proper end results
-    CALL cp_dbcsr_scale(matrix_sqrt,1/SQRT(scaling),error=error)
-    CALL cp_dbcsr_scale(matrix_sqrt_inv,SQRT(scaling),error=error)
+    CALL cp_dbcsr_scale(matrix_sqrt,1/SQRT(scaling))
+    CALL cp_dbcsr_scale(matrix_sqrt_inv,SQRT(scaling))
 
-    CALL cp_dbcsr_release(tmp1,error=error)
-    CALL cp_dbcsr_release(tmp2,error=error)
+    CALL cp_dbcsr_release(tmp1)
+    CALL cp_dbcsr_release(tmp2)
     IF (order.GE.4) THEN
-       CALL cp_dbcsr_release(tmp3,error=error)
+       CALL cp_dbcsr_release(tmp3)
     ENDIF
 
     CALL timestop(handle)
@@ -583,46 +583,46 @@ CONTAINS
     END DO
 
     ! copy and scale the input matrix in matrix C and in matrix D
-    CALL cp_dbcsr_init(C,error=error)
-    CALL cp_dbcsr_create(C,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_copy(C,matrix,error=error)
-    CALL cp_dbcsr_scale(C, alpha_scalar=alpha/2.0_dp**k, error=error)
+    CALL cp_dbcsr_init(C)
+    CALL cp_dbcsr_create(C,template=matrix,matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_copy(C,matrix)
+    CALL cp_dbcsr_scale(C, alpha_scalar=alpha/2.0_dp**k)
 
-    CALL cp_dbcsr_init(D,error=error)
-    CALL cp_dbcsr_create(D,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_copy(D,C,error=error)
+    CALL cp_dbcsr_init(D)
+    CALL cp_dbcsr_create(D,template=matrix,matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_copy(D,C)
 
     !   write(*,*)
     !   write(*,*)
-    !   CALL cp_dbcsr_print(D, nodata=.FALSE., matlab_format=.TRUE., variable_name="D", unit_nr=6, error=error)
+    !   CALL cp_dbcsr_print(D, nodata=.FALSE., matlab_format=.TRUE., variable_name="D", unit_nr=6)
 
     ! set the B matrix as B=Identity+D
-    CALL cp_dbcsr_init(B,error=error)
-    CALL cp_dbcsr_create(B,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_copy(B,D,error=error)
-    CALL cp_dbcsr_add_on_diag(B, alpha_scalar=one,  error=error)
+    CALL cp_dbcsr_init(B)
+    CALL cp_dbcsr_create(B,template=matrix,matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_copy(B,D)
+    CALL cp_dbcsr_add_on_diag(B, alpha_scalar=one)
 
-    !   CALL cp_dbcsr_print(B, nodata=.FALSE., matlab_format=.TRUE., variable_name="B", unit_nr=6, error=error)
+    !   CALL cp_dbcsr_print(B, nodata=.FALSE., matlab_format=.TRUE., variable_name="B", unit_nr=6)
 
     ! Calculate the norm of C and moltiply by toll to be used as a threshold
     norm_C=toll*cp_dbcsr_frobenius_norm(matrix)
 
     ! iteration for the trucated taylor series expansion
-    CALL cp_dbcsr_init(D_product,error=error)
-    CALL cp_dbcsr_create(D_product,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(D_product)
+    CALL cp_dbcsr_create(D_product,template=matrix,matrix_type=dbcsr_type_no_symmetry)
     i=1
     DO
       i=i+1
       ! compute D_product=D*C
       CALL cp_dbcsr_multiply("N", "N", one, D, C, &
-                             zero, D_product, filter_eps=threshold,error=error)
+                             zero, D_product, filter_eps=threshold)
 
       ! copy D_product in D
-      CALL cp_dbcsr_copy(D,D_product,error=error)
+      CALL cp_dbcsr_copy(D,D_product)
 
       ! calculate B=B+D_product/fat(i)
       factorial=ifac(i)
-      CALL cp_dbcsr_add(B, D_product, one, factorial, error=error)
+      CALL cp_dbcsr_add(B, D_product, one, factorial)
 
       ! check for convergence using the norm of D (copy of the matrix D_product) and C
       norm_D=factorial*cp_dbcsr_frobenius_norm(D)
@@ -630,21 +630,21 @@ CONTAINS
     END DO
 
     ! start the k iteration for the squaring of the matrix
-    CALL cp_dbcsr_init(B_square,error=error)
-    CALL cp_dbcsr_create(B_square,template=matrix,matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(B_square)
+    CALL cp_dbcsr_create(B_square,template=matrix,matrix_type=dbcsr_type_no_symmetry)
     DO i=1, k
       !compute B_square=B*B
       CALL cp_dbcsr_multiply("N", "N", one, B, B, &
-                             zero, B_square, filter_eps=threshold,error=error)
+                             zero, B_square, filter_eps=threshold)
       ! copy Bsquare in B to iterate
-      CALL cp_dbcsr_copy(B,B_square,error=error)
+      CALL cp_dbcsr_copy(B,B_square)
     END DO
 
     ! copy B_square in matrix_exp and
-    CALL cp_dbcsr_copy(matrix_exp,B_square,error=error)
+    CALL cp_dbcsr_copy(matrix_exp,B_square)
 
     ! scale matrix_exp by omega, matrix_exp=omega*B_square
-    CALL cp_dbcsr_scale(matrix_exp, alpha_scalar=omega, error=error)
+    CALL cp_dbcsr_scale(matrix_exp, alpha_scalar=omega)
     ! write(*,*) alpha,omega
 
     CALL timestop(handle)
@@ -678,33 +678,33 @@ CONTAINS
     CALL timeset(routineN,handle)
     unit_nr = cp_logger_get_default_unit_nr()
 
-    CALL cp_dbcsr_init(matrix_pp,error=error)
-    CALL cp_dbcsr_create(matrix_pp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_tmp,error=error)
-    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(matrix_pp)
+    CALL cp_dbcsr_create(matrix_pp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_tmp)
+    CALL cp_dbcsr_create(matrix_tmp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry)
 
     DO ispin=1,SIZE(matrix_p)
        DO i=1,max_steps
            CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_p(ispin), matrix_p(ispin),&
-                0.0_dp, matrix_pp, filter_eps=threshold, error=error)
+                0.0_dp, matrix_pp, filter_eps=threshold)
 
            ! test convergence
-           CALL cp_dbcsr_copy(matrix_tmp, matrix_pp, error=error)
-           CALL cp_dbcsr_add(matrix_tmp, matrix_p(ispin), 1.0_dp, -1.0_dp, error=error)
+           CALL cp_dbcsr_copy(matrix_tmp, matrix_pp)
+           CALL cp_dbcsr_add(matrix_tmp, matrix_p(ispin), 1.0_dp, -1.0_dp)
            frob_norm = cp_dbcsr_frobenius_norm(matrix_tmp) ! tmp = PP - P
            IF(unit_nr > 0) WRITE(unit_nr,'(t3,a,f16.8)')"McWeeny: Deviation of idempotency",frob_norm
            IF(frob_norm<1000_dp*threshold .AND. i>1) EXIT
 
            ! construct new P
-           CALL cp_dbcsr_copy(matrix_tmp, matrix_pp, error=error)
+           CALL cp_dbcsr_copy(matrix_tmp, matrix_pp)
            CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_pp, matrix_p(ispin),&
-                3.0_dp, matrix_tmp, filter_eps=threshold, error=error)
-           CALL cp_dbcsr_copy(matrix_p(ispin), matrix_tmp, error=error) ! tmp = 3PP - 2PPP
+                3.0_dp, matrix_tmp, filter_eps=threshold)
+           CALL cp_dbcsr_copy(matrix_p(ispin), matrix_tmp) ! tmp = 3PP - 2PPP
        END DO
     END DO
 
-    CALL cp_dbcsr_release(matrix_pp,error)
-    CALL cp_dbcsr_release(matrix_tmp,error)
+    CALL cp_dbcsr_release(matrix_pp)
+    CALL cp_dbcsr_release(matrix_tmp)
     CALL timestop(handle)
   END SUBROUTINE purify_mcweeny_orth
 
@@ -738,38 +738,39 @@ CONTAINS
     CALL timeset(routineN,handle)
     unit_nr = cp_logger_get_default_unit_nr()
 
-    CALL cp_dbcsr_init(matrix_ps,error=error)
-    CALL cp_dbcsr_create(matrix_ps,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_psp,error=error)
-    CALL cp_dbcsr_create(matrix_psp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry,error=error)
-    CALL cp_dbcsr_init(matrix_test,error=error)
-    CALL cp_dbcsr_create(matrix_test,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry,error=error)
+    CALL cp_dbcsr_init(matrix_ps)
+    CALL cp_dbcsr_create(matrix_ps,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_psp)
+    CALL cp_dbcsr_create(matrix_psp,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_init(matrix_test)
+    CALL cp_dbcsr_create(matrix_test,template=matrix_p(1),matrix_type=dbcsr_type_no_symmetry)
 
     DO ispin=1,SIZE(matrix_p)
        DO i=1,max_steps
            CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_p(ispin), matrix_s,&
-                0.0_dp, matrix_ps, filter_eps=threshold,error=error)
+                0.0_dp, matrix_ps, filter_eps=threshold)
            CALL cp_dbcsr_multiply("N", "N", 1.0_dp, matrix_ps, matrix_p(ispin),&
-                0.0_dp, matrix_psp, filter_eps=threshold,error=error)
+                0.0_dp, matrix_psp, filter_eps=threshold)
 
            ! test convergence
-           CALL cp_dbcsr_copy(matrix_test, matrix_psp, error=error)
-           CALL cp_dbcsr_add(matrix_test, matrix_p(ispin), 1.0_dp,-1.0_dp, error=error)
+           CALL cp_dbcsr_copy(matrix_test, matrix_psp)
+           CALL cp_dbcsr_add(matrix_test, matrix_p(ispin), 1.0_dp,-1.0_dp)
            frob_norm = cp_dbcsr_frobenius_norm(matrix_test) ! test = PSP - P
            IF(unit_nr>0) WRITE(unit_nr,'(t3,a,2f16.8)')"McWeeny: Deviation of idempotency",frob_norm
            IF(frob_norm<1000_dp*threshold .AND. i>1) EXIT
 
            ! construct new P
-           CALL cp_dbcsr_copy(matrix_p(ispin), matrix_psp, error=error)
+           CALL cp_dbcsr_copy(matrix_p(ispin), matrix_psp)
            CALL cp_dbcsr_multiply("N", "N", -2.0_dp, matrix_ps, matrix_psp,&
-                3.0_dp, matrix_p(ispin), filter_eps=threshold, error=error)
+                3.0_dp, matrix_p(ispin), filter_eps=threshold)
        END DO
     END DO
 
-    CALL cp_dbcsr_release(matrix_ps,error)
-    CALL cp_dbcsr_release(matrix_psp,error)
-    CALL cp_dbcsr_release(matrix_test,error)
+    CALL cp_dbcsr_release(matrix_ps)
+    CALL cp_dbcsr_release(matrix_psp)
+    CALL cp_dbcsr_release(matrix_test)
     CALL timestop(handle)
   END SUBROUTINE purify_mcweeny_nonorth
 
 END MODULE iterate_matrix
+

@@ -464,8 +464,8 @@ CONTAINS
 
     NULLIFY(mo_set_new%mo_coeff_b)
     IF(ASSOCIATED(mo_set_old%mo_coeff_b)) THEN
-       CALL cp_dbcsr_init_p(mo_set_new%mo_coeff_b,error=error)
-       CALL cp_dbcsr_copy(mo_set_new%mo_coeff_b,mo_set_old%mo_coeff_b,error=error)
+       CALL cp_dbcsr_init_p(mo_set_new%mo_coeff_b)
+       CALL cp_dbcsr_copy(mo_set_new%mo_coeff_b,mo_set_old%mo_coeff_b)
     ENDIF
     mo_set_new%use_mo_coeff_b = mo_set_old%use_mo_coeff_b
 
@@ -693,7 +693,7 @@ CONTAINS
         CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
       END IF
       CALL cp_fm_release(mo_set%mo_coeff,error=error)
-      IF(ASSOCIATED(mo_set%mo_coeff_b)) CALL cp_dbcsr_release_p(mo_set%mo_coeff_b, error=error)
+      IF(ASSOCIATED(mo_set%mo_coeff_b)) CALL cp_dbcsr_release_p(mo_set%mo_coeff_b)
       DEALLOCATE (mo_set,STAT=istat)
       CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
     END IF
@@ -1098,3 +1098,4 @@ CONTAINS
   END SUBROUTINE set_mo_set
 
 END MODULE qs_mo_types
+

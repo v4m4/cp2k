@@ -113,13 +113,13 @@ CONTAINS
     failure =.FALSE.
     IF(ASSOCIATED(efield))THEN
        IF(ASSOCIATED(efield%sinmat).AND.ASSOCIATED(efield%cosmat))THEN
-          CALL cp_dbcsr_deallocate_matrix_set ( efield%cosmat, error )
-          CALL cp_dbcsr_deallocate_matrix_set ( efield%sinmat, error )
+          CALL cp_dbcsr_deallocate_matrix_set ( efield%cosmat )
+          CALL cp_dbcsr_deallocate_matrix_set ( efield%sinmat )
        END IF
        IF(ASSOCIATED(efield%dsinmat).AND.ASSOCIATED(efield%dcosmat))THEN
           DO i=1,3
-             CALL cp_dbcsr_deallocate_matrix_set(efield%dsinmat(i)%deriv,error)
-             CALL cp_dbcsr_deallocate_matrix_set(efield%dcosmat(i)%deriv,error)
+             CALL cp_dbcsr_deallocate_matrix_set(efield%dsinmat(i)%deriv)
+             CALL cp_dbcsr_deallocate_matrix_set(efield%dcosmat(i)%deriv)
           END DO
           DEALLOCATE(efield%dcosmat,stat=stat)
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
@@ -132,3 +132,4 @@ CONTAINS
   END SUBROUTINE efield_berry_release
 
 END MODULE qs_period_efield_types
+

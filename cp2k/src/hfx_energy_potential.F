@@ -1960,10 +1960,10 @@ MODULE hfx_energy_potential
     IF( distribute_fock_matrix) THEN
       !! ** Calculate the exchange energy
       CALL cp_dbcsr_trace(ks_matrix(ispin)%matrix, rho_ao(ispin)%matrix, &
-                          ene_x_aa, error=error)
+                          ene_x_aa)
       IF( nspins == 2 .AND. .NOT. treat_lsd_in_core ) THEN
         CALL cp_dbcsr_trace(ks_matrix(2)%matrix, rho_ao(2)%matrix, &
-                            ene_x_bb, error=error)
+                            ene_x_bb)
       END IF
 
       !! Update energy type
@@ -3013,3 +3013,4 @@ MODULE hfx_energy_potential
 
 #include "hfx_get_pmax_val.f90"
 END MODULE hfx_energy_potential
+

@@ -210,14 +210,14 @@ CONTAINS
          CPPrecondition(ASSOCIATED(matrixkp_h),cp_failure_level,routineP,error,failure)
          DO ispin=1,nspins
             DO ic=1,SIZE(matrixkp_h,2)
-               CALL cp_dbcsr_copy(ks_matrixkp(ispin,ic)%matrix,matrixkp_h(1,ic)%matrix,error=error)
+               CALL cp_dbcsr_copy(ks_matrixkp(ispin,ic)%matrix,matrixkp_h(1,ic)%matrix)
             END DO
          END DO
       ELSE
          CALL get_qs_env(qs_env=qs_env,matrix_h=matrix_h,error=error)
          CPPrecondition(ASSOCIATED(matrix_h),cp_failure_level,routineP,error,failure)
          DO ispin=1,nspins
-            CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix,error=error)
+            CALL cp_dbcsr_copy(ks_matrix(ispin)%matrix,matrix_h(1)%matrix)
          END DO
       END IF
 
@@ -295,7 +295,7 @@ CONTAINS
                CPPrecondition(.FALSE.,cp_failure_level,routineP,error,failure)
             ENDIF
             CALL cp_dbcsr_multiply('n','n',1.0_dp,ks_matrix(ispin)%matrix,mo_coeff,&
-                 0.0_dp,mo_derivs(ispin)%matrix, error=error)
+                 0.0_dp,mo_derivs(ispin)%matrix)
          ENDDO
       ENDIF
 
@@ -450,7 +450,7 @@ CONTAINS
             matrix_p => rho%rho_ao
             IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
               CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                   alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                   alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
             END IF
 
             nsize = SIZE(ks_matrix)
@@ -498,7 +498,7 @@ CONTAINS
             CALL cp_dbcsr_iterator_stop(iter)
             IF ( calculate_forces .AND. SIZE(matrix_p) == 2) THEN
                CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                              alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                              alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
             END IF
           END IF
           ! direct sum correction for Gaussians
@@ -568,7 +568,7 @@ CONTAINS
                matrix_p => rho%rho_ao
                IF (SIZE(matrix_p) == 2) THEN
                   CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                       alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                       alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
                END IF
             END IF
             ! calculate KS matrix
@@ -624,7 +624,7 @@ CONTAINS
                END DO
                IF (SIZE(matrix_p) == 2) THEN
                   CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                                 alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                                 alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
                END IF
             END IF
           END IF
@@ -706,7 +706,7 @@ CONTAINS
                matrix_p => rho%rho_ao
                IF (SIZE(matrix_p) == 2) THEN
                   CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                       alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                       alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
                END IF
             END IF
 
@@ -759,7 +759,7 @@ CONTAINS
                CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
                IF (SIZE(matrix_p) == 2) THEN
                   CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                                 alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                                 alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
                END IF
             END IF
  
@@ -968,7 +968,7 @@ CONTAINS
           matrix_p => rho%rho_ao
           IF (SIZE(matrix_p) == 2) THEN
              CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                  alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
+                  alpha_scalar=1.0_dp,beta_scalar=1.0_dp)
           END IF
        END IF
 
@@ -1014,7 +1014,7 @@ CONTAINS
        IF (calculate_forces) THEN
           IF (SIZE(matrix_p) == 2) THEN
              CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,&
-                           alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+                           alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
           END IF
        END IF
 
@@ -1385,4 +1385,5 @@ CONTAINS
 ! *****************************************************************************
 
 END MODULE scptb_ks_matrix
+
 

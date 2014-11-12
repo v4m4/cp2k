@@ -162,7 +162,7 @@ CONTAINS
     ! set up the buffer for the history of matrices
     DO istore=1,MIN(ls_scf_env%scf_history%istore,ls_scf_env%scf_history%nstore)
        DO ispin=1,SIZE(ls_scf_env%scf_history%matrix,1)
-          CALL cp_dbcsr_release(ls_scf_env%scf_history%matrix(ispin,istore),error=error)
+          CALL cp_dbcsr_release(ls_scf_env%scf_history%matrix(ispin,istore))
        ENDDO
     ENDDO
     DEALLOCATE(ls_scf_env%scf_history%matrix,stat=istat)
@@ -189,5 +189,6 @@ CONTAINS
   END SUBROUTINE ls_scf_release
 
 END MODULE dm_ls_scf_types
+
 
 

@@ -179,9 +179,9 @@ CONTAINS
   
     IF(.NOT.ASSOCIATED(preconditioner_env%sparse_matrix)) THEN
        ALLOCATE(preconditioner_env%sparse_matrix)
-       CALL cp_dbcsr_init(preconditioner_env%sparse_matrix,error=error)
+       CALL cp_dbcsr_init(preconditioner_env%sparse_matrix)
     END IF
-    CALL cp_dbcsr_copy(preconditioner_env%sparse_matrix,matrix_s,name="full_kinetic",error=error)
+    CALL cp_dbcsr_copy(preconditioner_env%sparse_matrix,matrix_s,name="full_kinetic")
   
     CALL timestop(handle)
   
@@ -220,14 +220,14 @@ CONTAINS
 
     IF(.NOT.ASSOCIATED(preconditioner_env%sparse_matrix)) THEN
        ALLOCATE(preconditioner_env%sparse_matrix)
-       CALL cp_dbcsr_init(preconditioner_env%sparse_matrix,error=error)
+       CALL cp_dbcsr_init(preconditioner_env%sparse_matrix)
     END IF
-    CALL cp_dbcsr_copy(preconditioner_env%sparse_matrix,matrix_t,name="full_kinetic",error=error)
+    CALL cp_dbcsr_copy(preconditioner_env%sparse_matrix,matrix_t,name="full_kinetic")
 
     shift=MAX(0.0_dp,energy_gap)
 
     CALL cp_dbcsr_add(preconditioner_env%sparse_matrix,matrix_s,&
-                      alpha_scalar=1.0_dp,beta_scalar=shift,error=error)
+                      alpha_scalar=1.0_dp,beta_scalar=shift)
 
     CALL timestop(handle)
 
@@ -887,4 +887,5 @@ SUBROUTINE make_full_all_ortho(preconditioner_env, matrix_c0, matrix_h, c0_evals
 END SUBROUTINE make_full_all_ortho
 
 END MODULE preconditioner_makes
+
 

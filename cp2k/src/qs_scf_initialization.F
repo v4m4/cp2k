@@ -369,15 +369,15 @@ CONTAINS
           ! Initialize dbcsr matrix to store the Cholesky decomposition
           IF (scf_env%cholesky_method == cholesky_dbcsr) THEN
              ref_matrix => matrix_s(1)%matrix
-             CALL cp_dbcsr_init_p(scf_env%ortho_dbcsr,error=error)
+             CALL cp_dbcsr_init_p(scf_env%ortho_dbcsr)
              CALL cp_dbcsr_create(scf_env%ortho_dbcsr,template=ref_matrix,&
-                                  matrix_type=dbcsr_type_no_symmetry,error=error)
-             CALL cp_dbcsr_init_p(scf_env%buf1_dbcsr,error=error)
+                                  matrix_type=dbcsr_type_no_symmetry)
+             CALL cp_dbcsr_init_p(scf_env%buf1_dbcsr)
              CALL cp_dbcsr_create(scf_env%buf1_dbcsr,template=ref_matrix,&
-                                  matrix_type=dbcsr_type_no_symmetry,error=error)
-             CALL cp_dbcsr_init_p(scf_env%buf2_dbcsr,error=error)
+                                  matrix_type=dbcsr_type_no_symmetry)
+             CALL cp_dbcsr_init_p(scf_env%buf2_dbcsr)
              CALL cp_dbcsr_create(scf_env%buf2_dbcsr,template=ref_matrix,&
-                                  matrix_type=dbcsr_type_no_symmetry,error=error)
+                                  matrix_type=dbcsr_type_no_symmetry)
           ELSE IF (scf_env%cholesky_method == cholesky_inverse) THEN
              CALL cp_fm_create(scf_env%ortho_m1,&
                                matrix_struct=ao_ao_fmstruct,&
@@ -513,10 +513,9 @@ CONTAINS
                   dbcsr_mp_npcols(dbcsr_distribution_mp(cp_dbcsr_distribution(matrix_s(1)%matrix))))! fm->dbcsr
              CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp (cp_dbcsr_distribution(matrix_s(1)%matrix)),&! fm->dbcsr
                   dbcsr_distribution_row_dist(cp_dbcsr_distribution(matrix_s(1)%matrix)), col_dist)! fm->dbcsr
-             CALL cp_dbcsr_init_p(mos(ispin)%mo_set%mo_coeff_b,error=error)
+             CALL cp_dbcsr_init_p(mos(ispin)%mo_set%mo_coeff_b)
              CALL cp_dbcsr_create(mos(ispin)%mo_set%mo_coeff_b, "mo_coeff_b", dist, dbcsr_type_no_symmetry,&! fm->dbcsr
-                  cp_dbcsr_row_block_sizes(matrix_s(1)%matrix), col_blk_size, 0, 0, dbcsr_type_real_default,&!fm->dbcsr
-                  error=error)! fm->dbcsr
+                  cp_dbcsr_row_block_sizes(matrix_s(1)%matrix), col_blk_size, 0, 0, dbcsr_type_real_default)!fm->dbcsr
              CALL cp_dbcsr_distribution_release (dist)! fm->dbcsr
              CALL array_release (col_blk_size)! fm->dbcsr
              CALL array_release (col_dist)! fm->dbcsr
@@ -539,11 +538,11 @@ CONTAINS
           DO ispin=1,nmo_mat
              CALL get_mo_set(mos(ispin)%mo_set,mo_coeff_b=mo_coeff_b)
              NULLIFY(mo_derivs(ispin)%matrix)
-             CALL cp_dbcsr_init_p(mo_derivs(ispin)%matrix,error=error)
+             CALL cp_dbcsr_init_p(mo_derivs(ispin)%matrix)
              CALL cp_dbcsr_create(mo_derivs(ispin)%matrix, "mo_derivs",&
                   cp_dbcsr_distribution(mo_coeff_b), dbcsr_type_no_symmetry,&
                   cp_dbcsr_row_block_sizes(mo_coeff_b), cp_dbcsr_col_block_sizes(mo_coeff_b),&
-                  0, 0, dbcsr_type_real_default, error=error)
+                  0, 0, dbcsr_type_real_default)
           ENDDO
           CALL set_qs_env(qs_env,mo_derivs=mo_derivs,error=error)
        ENDIF
@@ -1159,3 +1158,4 @@ CONTAINS
   END SUBROUTINE scf_env_initial_rho_setup
 
 END MODULE qs_scf_initialization 
+

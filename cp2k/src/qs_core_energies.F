@@ -99,7 +99,7 @@ CONTAINS
     ecore = 0.0_dp
     DO ispin=1,nspin
        etr=0.0_dp
-       CALL cp_dbcsr_trace(hmat(1)%matrix,pmat(ispin)%matrix,etr,error=error)
+       CALL cp_dbcsr_trace(hmat(1)%matrix,pmat(ispin)%matrix,etr)
        ecore = ecore + etr
     END DO
 
@@ -142,7 +142,7 @@ CONTAINS
     DO ispin=1,nspin
        DO ic = 1, nc
           etr=0.0_dp
-          CALL cp_dbcsr_trace(hmat(1,ic)%matrix,pmat(ispin,ic)%matrix,etr,error=error)
+          CALL cp_dbcsr_trace(hmat(1,ic)%matrix,pmat(ispin,ic)%matrix,etr)
           ecore = ecore + etr
        END DO
     END DO
@@ -183,7 +183,7 @@ CONTAINS
     CALL timeset(routineN,handle)
 
     ecore = 0.0_dp
-    CALL cp_dbcsr_trace(h,p,ecore,error=error)
+    CALL cp_dbcsr_trace(h,p,ecore)
 
     CALL timestop(handle)
 
@@ -443,3 +443,4 @@ CONTAINS
   END SUBROUTINE calculate_ecore_self
 
 END MODULE qs_core_energies
+

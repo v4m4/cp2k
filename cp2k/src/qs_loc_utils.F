@@ -651,11 +651,10 @@ CONTAINS
              DO j=1, SIZE ( qs_loc_env % op_sm_set, 1 )
                 NULLIFY(qs_loc_env%op_sm_set(j,i)%matrix)
                 ALLOCATE(qs_loc_env%op_sm_set(j,i)%matrix)
-                CALL cp_dbcsr_init(qs_loc_env%op_sm_set(j,i)%matrix, error=error)
+                CALL cp_dbcsr_init(qs_loc_env%op_sm_set(j,i)%matrix)
                 CALL cp_dbcsr_copy(qs_loc_env%op_sm_set(j,i)%matrix, matrix_s(1)%matrix,&
-                     name="qs_loc_env%op_sm_"//TRIM(ADJUSTL(cp_to_string(j)))//"-"//TRIM(ADJUSTL(cp_to_string(i))),&
-                     error=error)
-                CALL cp_dbcsr_set(qs_loc_env%op_sm_set(j,i)%matrix,0.0_dp,error=error)
+                     name="qs_loc_env%op_sm_"//TRIM(ADJUSTL(cp_to_string(j)))//"-"//TRIM(ADJUSTL(cp_to_string(i))))
+                CALL cp_dbcsr_set(qs_loc_env%op_sm_set(j,i)%matrix,0.0_dp)
              ENDDO
           END DO
 
@@ -1903,4 +1902,5 @@ CONTAINS
 
 
 END MODULE qs_loc_utils
+
 

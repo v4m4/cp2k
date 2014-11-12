@@ -568,7 +568,7 @@ CONTAINS
 
 ! GA option : distribute and deallocate
     CALL se_ga_diag_add ( ks_matrix ( 1 ) % matrix, ga_env, error )
-!       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE., error=error )
+!       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE. )
     CALL se_deallocate_local_ga ( pbuff_a, error=error )
     CALL se_deallocate_local_ga ( pbuff_b, error=error )
     CALL se_deallocate_local_ga ( ksbuff_a, error=error )
@@ -990,7 +990,7 @@ CONTAINS
        END IF
 ! GA option : distribute and deallocate
        CALL se_ga_diag_add ( ks_matrix ( 1 ) % matrix, ga_env, error )
-!       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE., error=error )
+!       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE. )
        CALL se_deallocate_local_ga ( pbuff_a, error=error )
        CALL se_deallocate_local_ga ( ksbuff_a, error=error )
 
@@ -1439,7 +1439,7 @@ CONTAINS
 
 ! GA option : distribute and deallocate
        CALL se_ga_diag_add ( ks_matrix ( 1 ) % matrix, ga_env, error )
-       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE., error=error )
+       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE. )
        CALL se_deallocate_local_ga ( pbuff_a, error=error )
        CALL se_deallocate_local_ga ( pbuff_b, error=error )
        CALL se_deallocate_local_ga ( ksbuff_a, error=error )
@@ -1798,7 +1798,7 @@ CONTAINS
 
 ! GA option : distribute and deallocate
        CALL se_ga_diag_add ( ks_matrix ( 1 ) % matrix, ga_env, error )
-       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE., error=error )
+       CALL cp_dbcsr_print ( ks_matrix ( 1 ) % matrix, matlab_format=.TRUE. )
        CALL se_deallocate_local_ga ( pbuff_a, error=error )
        CALL se_deallocate_local_ga ( pbuff_b, error=error )
        CALL se_deallocate_local_ga ( ksbuff_a, error=error )
@@ -1818,4 +1818,5 @@ CONTAINS
   END SUBROUTINE build_fock_matrix_coul_lr_r3
 
 END MODULE se_fock_matrix_coulomb_ga
+
 

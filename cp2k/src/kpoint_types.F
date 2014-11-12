@@ -650,11 +650,11 @@ CONTAINS
 
        NULLIFY(opmats%sab_nl)
 
-       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_ks,error)
-       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_s,error)
-       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_t,error)
-       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_vhxc,error)
-       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_h,error)
+       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_ks)
+       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_s)
+       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_t)
+       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_vhxc)
+       CALL cp_dbcsr_deallocate_matrix_set(opmats%matrix_h)
 
        DEALLOCATE(opmats,STAT=ierr)
        CPPostcondition(ierr==0, cp_failure_level, routineP, error, failure)
@@ -958,3 +958,4 @@ CONTAINS
 ! *****************************************************************************
 
 END MODULE kpoint_types
+

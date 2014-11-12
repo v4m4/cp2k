@@ -202,7 +202,7 @@ CONTAINS
 
     CALL pw_cuda_init()
 
-    CALL cp_dbcsr_init_lib (group=mpi_comm, error=error)
+    CALL cp_dbcsr_init_lib (group=mpi_comm)
 
     NULLIFY(globenv, force_env)
 
@@ -300,10 +300,10 @@ CONTAINS
              CALL cp2k_setup(root_section,para_env, globenv,suberror)
           END IF
 
-          CALL cp_dbcsr_config (root_section, error)
+          CALL cp_dbcsr_config(root_section, error)
           IF (output_unit > 0 .AND.&
                cp_logger_would_log(logger, cp_note_level)) THEN
-             CALL cp_dbcsr_print_config (unit_nr=output_unit, error=error)
+             CALL cp_dbcsr_print_config(unit_nr=output_unit, error=error)
              WRITE (UNIT=output_unit,FMT='()')
           ENDIF
 
@@ -319,10 +319,10 @@ CONTAINS
              ! Hack: DBCSR should be uninitialized when entering farming.
              ! But, we don't want to change the public f77_interface.
              ! TODO: refactor cp2k's startup code
-             CALL cp_dbcsr_finalize_lib(group=mpi_comm, output_unit=0, error=error)
+             CALL cp_dbcsr_finalize_lib(group=mpi_comm, output_unit=0)
              CALL pw_cuda_finalize()
              CALL farming_run(input_declaration, root_section, para_env, suberror )
-             CALL cp_dbcsr_init_lib(group=mpi_comm, error=error)
+             CALL cp_dbcsr_init_lib(group=mpi_comm)
              CALL pw_cuda_init()
           CASE (do_opt_basis)
              CALL run_optimize_basis (input_declaration, root_section, para_env, suberror)
@@ -462,7 +462,7 @@ CONTAINS
           END SELECT
 
           CALL pw_cuda_finalize()
-          CALL cp_dbcsr_finalize_lib(group=mpi_comm, output_unit=output_unit, error=error)
+          CALL cp_dbcsr_finalize_lib(group=mpi_comm, output_unit=output_unit)
 
           CALL cp_error_propagate_error(suberror,routineP,&
                "cp2k ending run", error=error,failure=failure)
@@ -1220,3 +1220,4 @@ CONTAINS
   END SUBROUTINE run_input
 
 END MODULE cp2k_runs
+

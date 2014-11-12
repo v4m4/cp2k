@@ -183,16 +183,16 @@ CONTAINS
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
           ALLOCATE(sinmat(i)%matrix,stat=stat)
           CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-          CALL cp_dbcsr_init(cosmat(i)%matrix,error=error)
-          CALL cp_dbcsr_init(sinmat(i)%matrix, error=error)
+          CALL cp_dbcsr_init(cosmat(i)%matrix)
+          CALL cp_dbcsr_init(sinmat(i)%matrix)
           CALL cp_dbcsr_create(matrix=sinmat(i)%matrix, template=matrix_s(1)%matrix, &
-               name="sinmat", matrix_type=dbcsr_type_no_symmetry, error=error)
+               name="sinmat", matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_alloc_block_from_nbl(sinmat(i)%matrix,sab_all,error=error)
           CALL cp_dbcsr_create(matrix=cosmat(i)%matrix, template=matrix_s(1)%matrix, &
-               name="cosmat", matrix_type=dbcsr_type_no_symmetry, error=error)
+               name="cosmat", matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_alloc_block_from_nbl(cosmat(i)%matrix,sab_all,error=error)
-          CALL cp_dbcsr_set(cosmat(i)%matrix,0.0_dp,error=error)
-          CALL cp_dbcsr_set(sinmat(i)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(cosmat(i)%matrix,0.0_dp)
+          CALL cp_dbcsr_set(sinmat(i)%matrix,0.0_dp)
           kvec(:) = twopi*cell%h_inv(i,:)
           IF(calculate_forces)THEN
              CALL berry_mat_derivs(qs_env,cosmat(i)%matrix,sinmat(i)%matrix,kvec,calculate_forces,&
@@ -684,8 +684,8 @@ CONTAINS
          particle_set=particle_set,cell=cell,&
          sab_orb=sab_orb,sab_all=sab_all,matrix_s=matrix_s, error=error)
 
-    CALL cp_dbcsr_set(sinmat,0.0_dp,error=error)
-    CALL cp_dbcsr_set(cosmat,0.0_dp,error=error)
+    CALL cp_dbcsr_set(sinmat,0.0_dp)
+    CALL cp_dbcsr_set(cosmat,0.0_dp)
 
     CALL get_qs_kind_set(qs_kind_set, maxco=ldwork )
     ldab = ldwork
@@ -711,8 +711,8 @@ CONTAINS
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
     IF(calculate_forces)THEN
-       CALL cp_dbcsr_allocate_matrix_set(dcosmat,3,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(dsinmat,3,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(dcosmat,3)
+       CALL cp_dbcsr_allocate_matrix_set(dsinmat,3)
 
        DO m=1,3
           cgfsym = cgf_symbol(1,indco(1:3,m+1))
@@ -720,22 +720,22 @@ CONTAINS
           CALL compress(name)
           CALL uppercase(name)
           ALLOCATE(dsinmat(m)%matrix)
-          CALL cp_dbcsr_init(dsinmat(m)%matrix,error=error)
+          CALL cp_dbcsr_init(dsinmat(m)%matrix)
           CALL cp_dbcsr_create(matrix=dsinmat(m)%matrix, template=matrix_s(1)%matrix, &
-               name=TRIM(name), matrix_type=dbcsr_type_no_symmetry, error=error)
+               name=TRIM(name), matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_alloc_block_from_nbl(dsinmat(m)%matrix,sab_all,error=error)
-          CALL cp_dbcsr_set(dsinmat(m)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(dsinmat(m)%matrix,0.0_dp)
 
 
           name = TRIM(cgfsym(4:))//" DERIVATIVE OF COSMAT"
           CALL compress(name)
           CALL uppercase(name)
           ALLOCATE(dcosmat(m)%matrix)
-          CALL cp_dbcsr_init(dcosmat(m)%matrix,error=error)
+          CALL cp_dbcsr_init(dcosmat(m)%matrix)
           CALL cp_dbcsr_create(matrix=dcosmat(m)%matrix, template=matrix_s(1)%matrix, &
-               name=TRIM(name), matrix_type=dbcsr_type_no_symmetry, error=error)
+               name=TRIM(name), matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_alloc_block_from_nbl(dcosmat(m)%matrix,sab_all,error=error)
-          CALL cp_dbcsr_set(dcosmat(m)%matrix,0.0_dp,error=error)
+          CALL cp_dbcsr_set(dcosmat(m)%matrix,0.0_dp)
 
        ENDDO
     END IF
@@ -862,8 +862,8 @@ CONTAINS
 
     IF(calculate_forces)THEN
        DO j = 1,3
-          CALL cp_dbcsr_finalize(dcosmat(j)%matrix,error=error)
-          CALL cp_dbcsr_finalize(dsinmat(j)%matrix,error=error)
+          CALL cp_dbcsr_finalize(dcosmat(j)%matrix)
+          CALL cp_dbcsr_finalize(dsinmat(j)%matrix)
        ENDDO
     END IF
     DEALLOCATE (basis_set_list,STAT=istat)
@@ -951,3 +951,4 @@ CONTAINS
   END SUBROUTINE contract_all
 
 END MODULE qs_efield_berry
+

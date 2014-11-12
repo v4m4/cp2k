@@ -304,7 +304,7 @@ CONTAINS
        CALL pw_cuda_init()
 
        ! Initialize the DBCSR configuration
-       CALL cp_dbcsr_init_lib (group=mpi_comm_default, error=error)
+       CALL cp_dbcsr_init_lib (group=mpi_comm_default)
 
     ELSE
        ierr=cp_failure_level
@@ -332,7 +332,7 @@ CONTAINS
        ierr=cp_failure_level
     ELSE
        ! Finalize the DBCSR configuration
-       CALL cp_dbcsr_finalize_lib (group=default_para_env%group, output_unit=0, error=error)
+       CALL cp_dbcsr_finalize_lib (group=default_para_env%group, output_unit=0)
        IF (has_ma .OR. has_ma_topology) THEN
          CALL cp_ma_finalize_lib(error=error)
        ENDIF
@@ -1685,3 +1685,4 @@ CPSourceFileRef,&
   END SUBROUTINE do_shake
 
 END MODULE f77_interface
+

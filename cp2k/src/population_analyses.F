@@ -352,19 +352,18 @@ CONTAINS
       ALLOCATE (sm_ps,STAT=stat)
       CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
       headline = "MULLIKEN NET ATOMIC ORBITAL AND OVERLAP POPULATION MATRIX"
-      CALL cp_dbcsr_init(sm_ps,error=error)
+      CALL cp_dbcsr_init(sm_ps)
       CALL cp_dbcsr_copy(matrix_b=sm_ps,&
                          matrix_a=sm_s,&
-                         name=TRIM(headline),&
-                         error=error)
-      CALL cp_dbcsr_set(sm_ps,0.0_dp,error=error)
+                         name=TRIM(headline))
+      CALL cp_dbcsr_set(sm_ps,0.0_dp)
     END IF
 
     ! Build Mulliken population matrix for each spin
     DO ispin=1,nspin
       sm_p => matrix_p(ispin)%matrix ! Density matrix for spin ispin in sparse format
       ! Calculate Hadamard product of P and S as sparse matrix (Mulliken)
-      ! CALL cp_dbcsr_hadamard_product(sm_p,sm_s,sm_ps,error=error)
+      ! CALL cp_dbcsr_hadamard_product(sm_p,sm_s,sm_ps)
       CALL cp_dbcsr_iterator_start(iter,sm_s)
       DO WHILE (cp_dbcsr_iterator_blocks_left(iter))
         CALL cp_dbcsr_iterator_next_block(iter,iatom,jatom,s_block,blk)
@@ -429,7 +428,7 @@ CONTAINS
     END IF
 
     ! Release local working storage
-    IF (ASSOCIATED(sm_ps)) CALL cp_dbcsr_deallocate_matrix(sm_ps,error=error)
+    IF (ASSOCIATED(sm_ps)) CALL cp_dbcsr_deallocate_matrix(sm_ps)
     IF (ASSOCIATED(orbpop)) THEN
       DEALLOCATE (orbpop,STAT=stat)
       CPPostcondition((stat == 0),cp_failure_level,routineP,error,failure)
@@ -605,3 +604,4 @@ CONTAINS
   END SUBROUTINE write_orbpop
 
 END MODULE population_analyses
+

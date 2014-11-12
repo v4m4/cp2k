@@ -303,14 +303,12 @@ CONTAINS
        mscfg_env%nmosets_of_frag(ifrag)=nmosets_of_frag
        DO imo=1,nmosets_of_frag
           ! the matrices have been allocated already - copy the results there  
-          CALL cp_dbcsr_init(mscfg_env%mos_of_frag(ifrag,imo),error)
+          CALL cp_dbcsr_init(mscfg_env%mos_of_frag(ifrag,imo))
           CALL cp_dbcsr_create(mscfg_env%mos_of_frag(ifrag,imo),&
                   template=mos_of_frag(imo)%mo_set%mo_coeff_b,&
-                  matrix_type=dbcsr_type_no_symmetry,&
-                  error=error)
+                  matrix_type=dbcsr_type_no_symmetry)
           CALL cp_dbcsr_copy(mscfg_env%mos_of_frag(ifrag,imo),&
-                  mos_of_frag(imo)%mo_set%mo_coeff_b,&
-                  error=error)
+                  mos_of_frag(imo)%mo_set%mo_coeff_b)
        ENDDO
        !
        ! Clean up
@@ -488,5 +486,6 @@ CONTAINS
   END FUNCTION do_mol_loop
 
 END MODULE mscfg_methods
+
 
 

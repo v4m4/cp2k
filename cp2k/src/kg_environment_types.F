@@ -110,7 +110,7 @@ CONTAINS
     END IF
 
     IF (ASSOCIATED(kg_env%tnadd_mat)) THEN
-       CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat,error)
+       CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat)
     ENDIF
 
     DO isub=1,kg_env%nsubsets
@@ -127,7 +127,7 @@ CONTAINS
 
     IF (ALLOCATED(kg_env%atom_to_molecule)) DEALLOCATE(kg_env%atom_to_molecule) 
 
-    IF (ASSOCIATED(kg_env%tnadd_mat)) CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat,error)
+    IF (ASSOCIATED(kg_env%tnadd_mat)) CALL cp_dbcsr_deallocate_matrix_set(kg_env%tnadd_mat)
 
     DEALLOCATE(kg_env,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
@@ -137,3 +137,4 @@ CONTAINS
   END SUBROUTINE kg_env_release
 
 END MODULE kg_environment_types
+

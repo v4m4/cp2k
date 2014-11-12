@@ -294,11 +294,11 @@ CONTAINS
        !     (as it should not be needed afterwards)
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-2.0_dp, beta_scalar=1.0_dp)
           CALL cp_dbcsr_add(matrix_w(1)%matrix, matrix_w(2)%matrix, &
-                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar= 1.0_dp, beta_scalar=1.0_dp)
        END IF
     ELSE
        IF (cp_print_key_should_output(logger%iter_info,qs_env%input,&
@@ -387,13 +387,13 @@ CONTAINS
     END IF
 
     ! initialize H matrix
-    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
     ALLOCATE(matrix_h(1)%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(matrix_h(1)%matrix, error=error)
+    CALL cp_dbcsr_init(matrix_h(1)%matrix)
     IF (.NOT.ofdft) THEN
        CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_t(1)%matrix,&
-           name="CORE HAMILTONIAN MATRIX",error=error)
+           name="CORE HAMILTONIAN MATRIX")
        ! relativistic atomic correction to kinetic energy
        IF(qs_env%rel_control%rel_method /= rel_none)THEN
           IF(qs_env%rel_control%rel_transformation == rel_trans_atom)THEN
@@ -422,9 +422,9 @@ CONTAINS
        ! *** in the calling force routine after leaving this routine ***
        IF (SIZE(matrix_p) == 2) THEN
           CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, &
-                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp,error=error)
+                         alpha_scalar= 0.5_dp, beta_scalar=0.5_dp)
           CALL cp_dbcsr_add(matrix_p(2)%matrix, matrix_p(1)%matrix, &
-                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp,error=error)
+                         alpha_scalar=-1.0_dp, beta_scalar=1.0_dp)
        END IF
     END IF
 
@@ -620,15 +620,15 @@ CONTAINS
          qs_env%input,"DFT%PRINT%AO_MATRICES/POTENTIAL_ENERGY",error=error),cp_p_file)) THEN
        iw = cp_print_key_unit_nr(logger,qs_env%input,"DFT%PRINT%AO_MATRICES/POTENTIAL_ENERGY",&
             extension=".Log",error=error)
-       CALL cp_dbcsr_allocate_matrix_set(matrix_v,1,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(matrix_v,1)
        ALLOCATE(matrix_v(1)%matrix)
-       CALL cp_dbcsr_init(matrix_v(1)%matrix, error=error)
+       CALL cp_dbcsr_init(matrix_v(1)%matrix)
        CALL cp_dbcsr_copy(matrix_v(1)%matrix,matrix_h(1)%matrix,&
-            name="POTENTIAL ENERGY MATRIX",error=error)
+            name="POTENTIAL ENERGY MATRIX")
        CALL cp_dbcsr_add(matrix_v(1)%matrix,matrix_t(1)%matrix,&
-            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+            alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
        CALL cp_dbcsr_write_sparse_matrix(matrix_v(1)%matrix,4,6,qs_env,para_env,output_unit=iw,error=error)
-       CALL cp_dbcsr_deallocate_matrix_set(matrix_v,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(matrix_v)
        CALL cp_print_key_finished_output(iw,logger,qs_env%input,&
             "DFT%PRINT%AO_MATRICES/POTENTIAL_ENERGY", error=error)
     END IF
@@ -648,3 +648,4 @@ CONTAINS
   END SUBROUTINE dump_info_core_hamiltonian
 
 END MODULE qs_core_hamiltonian
+

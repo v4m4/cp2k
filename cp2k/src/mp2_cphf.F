@@ -254,26 +254,26 @@ MODULE mp2_cphf
 
     ! create work array
     NULLIFY(mat_mu_nu)
-    CALL cp_dbcsr_allocate_matrix_set(mat_mu_nu, dft_control%nspins, error)
+    CALL cp_dbcsr_allocate_matrix_set(mat_mu_nu, dft_control%nspins)
     DO ispin=1,dft_control%nspins
       ALLOCATE(mat_mu_nu(ispin)%matrix)
-      CALL cp_dbcsr_init(mat_mu_nu(ispin)%matrix,error=error)
+      CALL cp_dbcsr_init(mat_mu_nu(ispin)%matrix)
       CALL cp_dbcsr_create(matrix=mat_mu_nu(ispin)%matrix,&
            name="T_mu_nu",&
            dist=cp_dbcsr_distribution(matrix_s(1)%matrix), matrix_type=dbcsr_type_symmetric,&
            row_blk_size=cp_dbcsr_row_block_sizes(matrix_s(1)%matrix),&
            col_blk_size=cp_dbcsr_col_block_sizes(matrix_s(1)%matrix),&
-           nblks=0, nze=0, error=error)
+           nblks=0, nze=0)
       CALL cp_dbcsr_alloc_block_from_nbl(mat_mu_nu(ispin)%matrix,sab_orb,error=error)
-      CALL cp_dbcsr_set(mat_mu_nu(ispin)%matrix,0.0_dp,error=error)
+      CALL cp_dbcsr_set(mat_mu_nu(ispin)%matrix,0.0_dp)
     END DO
 
     ALLOCATE(P_mu_nu%matrix)
-    CALL cp_dbcsr_init(P_mu_nu%matrix,error=error)
-    ! CALL cp_dbcsr_create(P_mu_nu%matrix,template=mat_mu_nu(1)%matrix,error=error)
-    ! CALL cp_dbcsr_copy(P_mu_nu%matrix,mat_mu_nu(1)%matrix,name="P_mu_nu",error=error)
-    CALL cp_dbcsr_copy(P_mu_nu%matrix,rho%rho_ao(1)%matrix,name="P_mu_nu",error=error)
-    CALL cp_dbcsr_set(P_mu_nu%matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_init(P_mu_nu%matrix)
+    ! CALL cp_dbcsr_create(P_mu_nu%matrix,template=mat_mu_nu(1)%matrix)
+    ! CALL cp_dbcsr_copy(P_mu_nu%matrix,mat_mu_nu(1)%matrix,name="P_mu_nu")
+    CALL cp_dbcsr_copy(P_mu_nu%matrix,rho%rho_ao(1)%matrix,name="P_mu_nu")
+    CALL cp_dbcsr_set(P_mu_nu%matrix,0.0_dp)
 
     NULLIFY(fm_G_mu_nu, fm_struct_tmp)
     CALL cp_fm_struct_create(fm_struct_tmp,para_env=para_env,context=blacs_env, &
@@ -440,12 +440,12 @@ MODULE mp2_cphf
 
     ! release DBCSR stuff
     DO ispin=1, dft_control%nspins
-      CALL cp_dbcsr_release(mat_mu_nu(ispin)%matrix,error=error)
+      CALL cp_dbcsr_release(mat_mu_nu(ispin)%matrix)
       DEALLOCATE(mat_mu_nu(ispin)%matrix,STAT=stat)
     END DO
     DEALLOCATE(mat_mu_nu,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_release(P_mu_nu%matrix,error=error)
+    CALL cp_dbcsr_release(P_mu_nu%matrix)
     DEALLOCATE(P_mu_nu%matrix,STAT=stat)
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     ! release fm stuff
@@ -537,13 +537,13 @@ MODULE mp2_cphf
     CALL copy_fm_to_dbcsr(W_mo, matrix_w_mp2(1)%matrix, keep_sparsity=.TRUE.,error=error)
 
     ! create mp2 DBCSR density
-    CALL cp_dbcsr_allocate_matrix_set(matrix_p_mp2,dft_control%nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_p_mp2,dft_control%nspins)
     DO ispin=1, dft_control%nspins
        ALLOCATE(matrix_p_mp2(ispin)%matrix)
-       CALL cp_dbcsr_init(matrix_p_mp2(ispin)%matrix,error=error)
+       CALL cp_dbcsr_init(matrix_p_mp2(ispin)%matrix)
        CALL cp_dbcsr_copy(matrix_p_mp2(ispin)%matrix,rho%rho_ao(ispin)%matrix,&
-            name="P MATRIX MP2",error=error)
-       CALL cp_dbcsr_set(matrix_p_mp2(ispin)%matrix,0.0_dp,error=error)
+            name="P MATRIX MP2")
+       CALL cp_dbcsr_set(matrix_p_mp2(ispin)%matrix,0.0_dp)
        CALL copy_fm_to_dbcsr(P_mo, matrix_p_mp2(ispin)%matrix,keep_sparsity=.TRUE.,error=error)
     END DO
     CALL set_ks_env(ks_env, matrix_p_mp2=matrix_p_mp2, error=error)
@@ -643,7 +643,7 @@ MODULE mp2_cphf
     END IF
 
     DO ispin=1, dft_control%nspins
-      CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix, matrix_p_mp2(ispin)%matrix, 1.0_dp,  1.0_dp, error)
+      CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix, matrix_p_mp2(ispin)%matrix, 1.0_dp,  1.0_dp)
     END DO
 
     ! release stuff
@@ -877,7 +877,7 @@ MODULE mp2_cphf
     END SELECT
 
     ! copy fm into DBCSR
-    CALL cp_dbcsr_set(P_mu_nu%matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(P_mu_nu%matrix,0.0_dp)
     CALL copy_fm_to_dbcsr(fm_ao, P_mu_nu%matrix, keep_sparsity=.TRUE., error=error)
 
     ! calculate associated density 
@@ -891,15 +891,15 @@ MODULE mp2_cphf
     CALL pw_transfer(pot_g%pw, rho_r%pw, error=error)
     CALL pw_scale(rho_r%pw,rho_r%pw%pw_grid%dvol, error=error)
     ! integrate the potential
-    CALL cp_dbcsr_set(mat_mu_nu(1)%matrix,0.0_dp,error=error)
+    CALL cp_dbcsr_set(mat_mu_nu(1)%matrix,0.0_dp)
     CALL integrate_v_rspace(rho_r, h=mat_mu_nu(1), &
                             qs_env=qs_env,calculate_forces=.FALSE.,compute_tau=.FALSE.,gapw=.FALSE.,&
                             basis_set_id=use_orb_basis_set,&
                             error=error)
     ! update with the exchange like contributions
     ! copy mat_mu_nu into rho_ao work
-    CALL cp_dbcsr_set(rho_work%rho_ao(1)%matrix,0.0_dp,error=error)
-    CALL cp_dbcsr_copy(rho_work%rho_ao(1)%matrix,P_mu_nu%matrix,error=error)
+    CALL cp_dbcsr_set(rho_work%rho_ao(1)%matrix,0.0_dp)
+    CALL cp_dbcsr_copy(rho_work%rho_ao(1)%matrix,P_mu_nu%matrix)
     ! save old EX energy
     ex_energy=energy%ex
     DO irep=1, n_rep_hf
@@ -911,7 +911,7 @@ MODULE mp2_cphf
     energy%ex=ex_energy
 
     ! scale by factor 4.0
-    CALL cp_dbcsr_scale(mat_mu_nu(1)%matrix,4.0_dp,error=error)
+    CALL cp_dbcsr_scale(mat_mu_nu(1)%matrix,4.0_dp)
 
     ! copy back to fm
     CALL cp_fm_set_all(fm_ao, 0.0_dp,error=error)
@@ -1399,3 +1399,6 @@ MODULE mp2_cphf
   END SUBROUTINE
 
 END MODULE mp2_cphf
+
+
+

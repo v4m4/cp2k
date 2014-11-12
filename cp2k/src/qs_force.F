@@ -248,13 +248,13 @@ CONTAINS
                     error=error)
 
     IF (qs_env%run_rtp) THEN
-       CALL cp_dbcsr_allocate_matrix_set(matrix_w,dft_control%nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(matrix_w,dft_control%nspins)
        DO ispin=1,dft_control%nspins
           ALLOCATE(matrix_w(ispin)%matrix)
-          CALL cp_dbcsr_init(matrix_w(ispin)%matrix,error=error)
+          CALL cp_dbcsr_init(matrix_w(ispin)%matrix)
           CALL cp_dbcsr_copy(matrix_w(ispin)%matrix,matrix_s(1)%matrix,&
-               name="W MATRIX",error=error)
-          CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp,error=error)
+               name="W MATRIX")
+          CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp)
        END DO
        CALL set_ks_env(ks_env,matrix_w=matrix_w,error=error)
 
@@ -326,7 +326,7 @@ CONTAINS
          ! with MP2 we have to recalculate the SCF energy with the
          ! correct density
          DO ispin=1, dft_control%nspins
-           CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix, matrix_p_mp2(ispin)%matrix, 1.0_dp,  -1.0_dp, error)
+           CALL cp_dbcsr_add(rho%rho_ao(ispin)%matrix, matrix_p_mp2(ispin)%matrix, 1.0_dp,  -1.0_dp)
          END DO
          CALL qs_rho_update_rho(rho, qs_env=qs_env, error=error)
          CALL qs_ks_did_change(ks_env,rho_changed=.TRUE.,&
@@ -335,7 +335,7 @@ CONTAINS
          CALL qs_ks_update_qs_env(qs_env, just_energy=.TRUE., error=error)
          energy%total = energy%total + energy%mp2
          ! deallocate mp2_W 
-         CALL cp_dbcsr_deallocate_matrix_set(matrix_w_mp2,error=error)
+         CALL cp_dbcsr_deallocate_matrix_set(matrix_w_mp2)
          CALL set_ks_env(ks_env,matrix_w_mp2=Null(),error=error)
        END IF
 
@@ -482,7 +482,7 @@ CONTAINS
        END DO
     END IF
 
-    CALL cp_dbcsr_deallocate_matrix_set(matrix_w,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(matrix_w)
     CALL set_ks_env(ks_env,matrix_w=Null(),error=error)
 
     DEALLOCATE (atom_of_kind,STAT=istat)
@@ -724,3 +724,4 @@ CONTAINS
   END SUBROUTINE write_forces
 
 END MODULE qs_force
+

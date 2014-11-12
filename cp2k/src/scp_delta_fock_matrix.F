@@ -216,8 +216,8 @@ CONTAINS
           CALL get_atomic_kind_set(atomic_kind_set=atomic_kind_set,atom_of_kind=atom_of_kind)
        END IF
 
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins,error=error)
-       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins,error=error)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_ks,nspins)
+       CALL cp_dbcsr_allocate_matrix_set(diagmat_p,nspins)
        ALLOCATE ( delta_ks )
        ALLOCATE ( delta_ks_tmp )
        ALLOCATE ( pmat_loc )
@@ -226,35 +226,35 @@ CONTAINS
        DO ispin=1,nspins
           ! Allocate diagonal block matrices
           ALLOCATE(diagmat_p(ispin)%matrix,diagmat_ks(ispin)%matrix)!sm->dbcsr
-          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix, error=error)
-          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix, error=error)
-          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_init(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_init(diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(matrix_p(ispin)%matrix, diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_get_block_diag(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix)
+          CALL cp_dbcsr_set(diagmat_ks(ispin)%matrix, 0.0_dp)
+          CALL cp_dbcsr_replicate_all(diagmat_p(ispin)%matrix)
+          CALL cp_dbcsr_replicate_all(diagmat_ks(ispin)%matrix)
        END DO
 
-       CALL cp_dbcsr_init(delta_ks_tmp, error=error)
-       CALL cp_dbcsr_get_block_diag(ks_matrix(1)%matrix, delta_ks_tmp, error=error)
-       CALL cp_dbcsr_set(delta_ks_tmp, 0.0_dp, error=error)
-       CALL cp_dbcsr_replicate_all(delta_ks_tmp, error=error)
+       CALL cp_dbcsr_init(delta_ks_tmp)
+       CALL cp_dbcsr_get_block_diag(ks_matrix(1)%matrix, delta_ks_tmp)
+       CALL cp_dbcsr_set(delta_ks_tmp, 0.0_dp)
+       CALL cp_dbcsr_replicate_all(delta_ks_tmp)
 
        CALL get_qs_env(qs_env=qs_env, scp_env=scp_env, error=error)
        CALL get_scp_env(scp_env=scp_env, pscp=pscp, ks_scp=ks_scp, energy=energy_scp, ascp_diag=ascp_diag, error=error)
-       CALL cp_dbcsr_set ( ks_scp, 0.0_dp, error=error )
+       CALL cp_dbcsr_set ( ks_scp, 0.0_dp )
 
-       CALL cp_dbcsr_init(delta_ks, error=error)
-       CALL cp_dbcsr_init(pmat_loc, error=error)
-       CALL cp_dbcsr_init(kmat_loc, error=error)
+       CALL cp_dbcsr_init(delta_ks)
+       CALL cp_dbcsr_init(pmat_loc)
+       CALL cp_dbcsr_init(kmat_loc)
 
-       CALL cp_dbcsr_copy(kmat_loc, ks_scp, error=error)
-       CALL cp_dbcsr_copy(pmat_loc, ks_scp, error=error)
-       CALL cp_dbcsr_copy(delta_ks, ks_scp, error=error)
+       CALL cp_dbcsr_copy(kmat_loc, ks_scp)
+       CALL cp_dbcsr_copy(pmat_loc, ks_scp)
+       CALL cp_dbcsr_copy(delta_ks, ks_scp)
 
-       CALL cp_dbcsr_replicate_all(delta_ks, error=error)
-       CALL cp_dbcsr_replicate_all(pmat_loc, error=error)
-       CALL cp_dbcsr_replicate_all(kmat_loc, error=error)
+       CALL cp_dbcsr_replicate_all(delta_ks)
+       CALL cp_dbcsr_replicate_all(pmat_loc)
+       CALL cp_dbcsr_replicate_all(kmat_loc)
 
        ecore2   = 0.0_dp
        itype    = get_se_type(dft_control%qs_control%method_id)
@@ -541,35 +541,35 @@ CONTAINS
        DEALLOCATE(se_kind_list,se_defined,se_natorb,stat=stat)
        CPPrecondition(stat==0,cp_failure_level,routineP,error,failure)
        ! sum up ks_scp, delta_ks, diagmat_ks on all procs
-       CALL cp_dbcsr_sum_replicated(delta_ks, error=error)
-       CALL cp_dbcsr_sum_replicated(delta_ks_tmp, error=error)
-       CALL cp_dbcsr_sum_replicated( ks_scp, error=error )
+       CALL cp_dbcsr_sum_replicated(delta_ks)
+       CALL cp_dbcsr_sum_replicated(delta_ks_tmp)
+       CALL cp_dbcsr_sum_replicated( ks_scp )
        DO ispin = 1, nspins
-         CALL cp_dbcsr_sum_replicated(diagmat_ks(ispin)%matrix, error=error)
+         CALL cp_dbcsr_sum_replicated(diagmat_ks(ispin)%matrix)
        END DO
        ! Update the fock matrix.  Here K =  Pscp C
-       CALL cp_dbcsr_add ( diagmat_ks(1)%matrix, delta_ks_tmp, 1.0_dp, 1.0_dp, error )
+       CALL cp_dbcsr_add ( diagmat_ks(1)%matrix, delta_ks_tmp, 1.0_dp, 1.0_dp )
        ! add Kscp = Kscp (=C*(P+Z) ) + delta_ks (=C*Pscp).
-       CALL cp_dbcsr_add ( ks_scp, delta_ks, 1.0_dp, 1.0_dp, error )
+       CALL cp_dbcsr_add ( ks_scp, delta_ks, 1.0_dp, 1.0_dp )
        ! ecoul_scp = p C (P + p + Z)
-       CALL cp_dbcsr_trace ( ks_scp, pscp, trace=ecoul_scp, local_sum=.TRUE., error=error )
+       CALL cp_dbcsr_trace ( ks_scp, pscp, trace=ecoul_scp, local_sum=.TRUE. )
        CALL mp_sum(ecore2,para_env%group)
        energy_scp%e_scp_hartree = ecoul_scp + ecore2
        energy_scp%e_scp_hartree = 0.5_dp * energy_scp%e_scp_hartree
        CALL set_scp_env ( scp_env=scp_env, ks_scp = ks_scp, error = error )
        ! put diagmat_ks back into ks_matrix
        DO ispin = 1, nspins
-          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix, error=error)
+          CALL cp_dbcsr_distribute(diagmat_ks(ispin)%matrix)
           CALL cp_dbcsr_add(ks_matrix(ispin)%matrix, diagmat_ks(ispin)%matrix,&
-               1.0_dp,1.0_dp,error=error)
+               1.0_dp,1.0_dp)
        END DO
-!       CALL cp_dbcsr_print ( pscp, matlab_format = .TRUE., error=error )
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p, error=error )
-       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks, error=error )
-       CALL cp_dbcsr_deallocate_matrix ( delta_ks, error=error )
-       CALL cp_dbcsr_deallocate_matrix ( delta_ks_tmp, error=error )
-       CALL cp_dbcsr_deallocate_matrix ( pmat_loc, error=error )
-       CALL cp_dbcsr_deallocate_matrix ( kmat_loc, error=error )
+!       CALL cp_dbcsr_print ( pscp, matlab_format = .TRUE. )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_p )
+       CALL cp_dbcsr_deallocate_matrix_set ( diagmat_ks )
+       CALL cp_dbcsr_deallocate_matrix ( delta_ks )
+       CALL cp_dbcsr_deallocate_matrix ( delta_ks_tmp )
+       CALL cp_dbcsr_deallocate_matrix ( pmat_loc )
+       CALL cp_dbcsr_deallocate_matrix ( kmat_loc )
 
       ! evalulate kernel and forces on the SCP coeffs
        CALL evaluate_scp_force ( atomic_kind_set, qs_kind_set, pscp, ks_scp, ascp_diag, &
@@ -590,4 +590,5 @@ CONTAINS
   END SUBROUTINE build_delta_fock_matrix
 
 END MODULE scp_delta_fock_matrix
+
 

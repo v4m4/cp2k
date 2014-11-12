@@ -117,7 +117,7 @@ CONTAINS
     CALL timeset(routineN,handle)
 
     IF (ASSOCIATED(preconditioner_env%sparse_matrix)) THEN
-       CALL cp_dbcsr_deallocate_matrix(preconditioner_env%sparse_matrix,error=error)
+       CALL cp_dbcsr_deallocate_matrix(preconditioner_env%sparse_matrix)
        NULLIFY(preconditioner_env%sparse_matrix)
     ENDIF
 
@@ -125,7 +125,7 @@ CONTAINS
        CALL cp_fm_release(preconditioner_env%fm,error=error)
     ENDIF
     IF (ASSOCIATED(preconditioner_env%dbcsr_matrix)) THEN
-       CALL cp_dbcsr_release_p (preconditioner_env%dbcsr_matrix, error=error)
+       CALL cp_dbcsr_release_p (preconditioner_env%dbcsr_matrix)
     ENDIF
     IF (ASSOCIATED(preconditioner_env%occ_evals)) THEN
        DEALLOCATE(preconditioner_env%occ_evals)
@@ -143,4 +143,5 @@ CONTAINS
   END SUBROUTINE destroy_preconditioner
 
 END MODULE preconditioner_types
+
 

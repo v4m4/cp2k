@@ -166,10 +166,10 @@ CONTAINS
     IF (my_rebuild_ao.OR.(.NOT.ASSOCIATED(rho%rho_ao))) THEN
        IF (.NOT.failure) THEN
           IF (ASSOCIATED(rho%rho_ao)) THEN
-             CALL cp_dbcsr_deallocate_matrix_set(rho%rho_ao,error=error)
+             CALL cp_dbcsr_deallocate_matrix_set(rho%rho_ao)
           END IF
           ! Create a new density matrix set
-          CALL cp_dbcsr_allocate_matrix_set(rho%rho_ao,nspins,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(rho%rho_ao,nspins)
           DO i=1,nspins
              ALLOCATE(rho%rho_ao(i)%matrix,STAT=stat)
              CPPostconditionNoFail(stat==0,cp_failure_level,routineP,error)
@@ -183,36 +183,36 @@ CONTAINS
              ELSE
                 headline = "DENSITY MATRIX"
              END IF
-             CALL cp_dbcsr_init(tmatrix, error=error)
+             CALL cp_dbcsr_init(tmatrix)
              CALL cp_dbcsr_create(matrix=tmatrix, name=TRIM(headline),&
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                   row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
                   col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                  nblks=0, nze=0, error=error)
-             CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error=error)
-             CALL cp_dbcsr_set(tmatrix,0.0_dp,error=error)
+                  nblks=0, nze=0)
+             CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error)
+             CALL cp_dbcsr_set(tmatrix,0.0_dp)
           END DO
           ! kpoints
           IF(dokp) THEN
              IF (ASSOCIATED(rho%rho_ao_kp)) THEN
-                CALL cp_dbcsr_deallocate_matrix_set(rho%rho_ao_kp,error=error)
+                CALL cp_dbcsr_deallocate_matrix_set(rho%rho_ao_kp)
              END IF
              ! Create a new density matrix set
-             CALL cp_dbcsr_allocate_matrix_set(rho%rho_ao_kp,nspins,ncount,error=error)
+             CALL cp_dbcsr_allocate_matrix_set(rho%rho_ao_kp,nspins,ncount)
              DO i=1,nspins
                 DO ic=1,ncount
                    ALLOCATE(rho%rho_ao_kp(i,ic)%matrix,STAT=stat)
                    CPPostconditionNoFail(stat==0,cp_failure_level,routineP,error)
                    tmatrix => rho%rho_ao_kp(i,ic)%matrix
                    headline = "DENSITY MATRIX (lattice vector)"
-                   CALL cp_dbcsr_init(tmatrix, error=error)
+                   CALL cp_dbcsr_init(tmatrix)
                    CALL cp_dbcsr_create(matrix=tmatrix, name=TRIM(headline),&
                         dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
                         row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
                         col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                        nblks=0, nze=0, error=error)
-                   CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error=error)
-                   CALL cp_dbcsr_set(tmatrix,0.0_dp,error=error)
+                        nblks=0, nze=0)
+                   CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error)
+                   CALL cp_dbcsr_set(tmatrix,0.0_dp)
                 END DO
              END DO
           END IF
@@ -490,7 +490,7 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
          CALL calculate_rho_atom_coeff(qs_env,rho_struct%rho_ao,error=error)
          ! copy rho%rho_ao into rho_xc%rho_ao
          DO ispin=1,nspins
-           CALL cp_dbcsr_copy(rho_xc%rho_ao(ispin)%matrix, rho_struct%rho_ao(ispin)%matrix, error=error)
+           CALL cp_dbcsr_copy(rho_xc%rho_ao(ispin)%matrix, rho_struct%rho_ao(ispin)%matrix)
          END DO
          DO ispin=1,nspins
            CALL calculate_rho_elec(matrix_p=rho_xc%rho_ao(ispin)%matrix,&
@@ -584,14 +584,13 @@ END SUBROUTINE qs_rho_update_rho
 
     ! rho_ao
     IF (ASSOCIATED(rho_input%rho_ao)) THEN
-      CALL cp_dbcsr_allocate_matrix_set(rho_output%rho_ao, nspins,error=error)
+      CALL cp_dbcsr_allocate_matrix_set(rho_output%rho_ao, nspins)
       DO i = 1, nspins
          ALLOCATE(rho_output%rho_ao(i)%matrix)
-         CALL cp_dbcsr_init(rho_output%rho_ao(i)%matrix, error=error)
+         CALL cp_dbcsr_init(rho_output%rho_ao(i)%matrix)
          CALL cp_dbcsr_copy(rho_output%rho_ao(i)%matrix,rho_input%rho_ao(i)%matrix, &
-              name="myDensityMatrix_for_Spin_"//TRIM(ADJUSTL(cp_to_string(i))), &
-              error=error)
-         CALL cp_dbcsr_set(rho_output%rho_ao(i)%matrix,0.0_dp,error=error)
+              name="myDensityMatrix_for_Spin_"//TRIM(ADJUSTL(cp_to_string(i))))
+         CALL cp_dbcsr_set(rho_output%rho_ao(i)%matrix,0.0_dp)
       END DO
     END IF
 
@@ -699,4 +698,5 @@ END SUBROUTINE qs_rho_update_rho
   END SUBROUTINE duplicate_rho_type
 
 END MODULE qs_rho_methods
+
 

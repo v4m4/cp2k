@@ -121,7 +121,7 @@ CONTAINS
     IF (ALLOCATED(env%mos_of_frag)) THEN
        DO ifrag=1,SIZE(env%mos_of_frag,1)
          DO jfrag=1,env%nmosets_of_frag(ifrag)
-            CALL cp_dbcsr_release(env%mos_of_frag(ifrag,jfrag),error=error)
+            CALL cp_dbcsr_release(env%mos_of_frag(ifrag,jfrag))
          ENDDO
        ENDDO
        DEALLOCATE(env%mos_of_frag)
@@ -164,12 +164,11 @@ CONTAINS
 
     CPPostcondition(iset.le.mscfg_max_moset_size,cp_failure_level,routineP,error,failure)
     
-    CALL cp_dbcsr_init(matrix_temp,error)
+    CALL cp_dbcsr_init(matrix_temp)
     CALL cp_dbcsr_create(matrix_temp,&
             template=matrix_out,&
-            matrix_type=dbcsr_type_no_symmetry,&
-            error=error)
-    CALL cp_dbcsr_set(matrix_out, 0.0_dp, error=error)
+            matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_set(matrix_out, 0.0_dp)
     
     matrix_size(1) = cp_dbcsr_nfullrows_total(matrix_out)
     matrix_size(2) = cp_dbcsr_nfullcols_total(matrix_out)
@@ -188,7 +187,7 @@ CONTAINS
        CALL copy_submatrix_into_matrix(mscfg_env%mos_of_frag(ifrag,iset),&
                matrix_temp, offset, submatrix_size, matrix_size, error)
 
-       CALL cp_dbcsr_add(matrix_out,matrix_temp,1.0_dp,1.0_dp,error=error)
+       CALL cp_dbcsr_add(matrix_out,matrix_temp,1.0_dp,1.0_dp)
        
        offset(1)=offset(1)+submatrix_size(1)
        offset(2)=offset(2)+submatrix_size(2)
@@ -202,7 +201,7 @@ CONTAINS
     CPPostcondition(offset(1).eq.matrix_size(1),cp_failure_level,routineP,error,failure)
     CPPostcondition(offset(2).eq.matrix_size(2),cp_failure_level,routineP,error,failure)
     
-    CALL cp_dbcsr_release(matrix_temp,error=error)
+    CALL cp_dbcsr_release(matrix_temp)
 
     CALL timestop (handle)
 
@@ -306,20 +305,19 @@ CONTAINS
     CALL array_release(row_distr_new)
     
     ! Create big the matrix
-    CALL cp_dbcsr_init(matrix_new,error=error)
+    CALL cp_dbcsr_init(matrix_new)
     CALL cp_dbcsr_create(matrix_new, "BIG_AND_FAKE",&
             dist_new, dbcsr_type_no_symmetry,&
-            row_sizes_new, col_sizes_new,&
-            error=error)
+            row_sizes_new, col_sizes_new)
     CALL array_release(col_sizes_new)
     CALL array_release(row_sizes_new)
     CALL cp_dbcsr_distribution_release(dist_new)
     
-    !CALL cp_dbcsr_finalize(matrix_new,error=error)
+    !CALL cp_dbcsr_finalize(matrix_new)
 
     ! copy blocks of the small matrix to the big matrix
     !mynode = dbcsr_mp_mynode(dbcsr_distribution_mp(cp_dbcsr_distribution(matrix_new)))
-    CALL cp_dbcsr_work_create(matrix_new, work_mutable=.TRUE., error=error)
+    CALL cp_dbcsr_work_create(matrix_new, work_mutable=.TRUE.)
 
     ! iterate over local blocks of the small matrix
     CALL cp_dbcsr_iterator_start(iter,submatrix_in)
@@ -347,15 +345,15 @@ CONTAINS
     ENDDO
     CALL cp_dbcsr_iterator_stop(iter)
    
-    CALL cp_dbcsr_finalize(matrix_new,error=error)
+    CALL cp_dbcsr_finalize(matrix_new)
 
     ! finally call complete redistribute to get the matrix of the entire system
-    CALL cp_dbcsr_set(matrix_out, 0.0_dp, error=error)
-    CALL cp_dbcsr_complete_redistribute(matrix_new, matrix_out,&
-            error=error);
-    CALL cp_dbcsr_release (matrix_new, error=error)
+    CALL cp_dbcsr_set(matrix_out, 0.0_dp)
+    CALL cp_dbcsr_complete_redistribute(matrix_new, matrix_out)
+    CALL cp_dbcsr_release (matrix_new)
 
   END SUBROUTINE copy_submatrix_into_matrix
   
 END MODULE mscfg_types
+
 

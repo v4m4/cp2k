@@ -99,11 +99,11 @@ CONTAINS
              IF(qs_env%et_coupling%first_run)THEN
                 NULLIFY(qs_env%et_coupling%rest_mat(1)%matrix)
                 ALLOCATE(qs_env%et_coupling%rest_mat(1)%matrix)
-                CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(1)%matrix, error=error)
+                CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(1)%matrix)
                 CALL cp_dbcsr_copy(qs_env%et_coupling%rest_mat(1)%matrix, matrix_s(1)%matrix, &
-                     name="ET_RESTRAINT_MATRIX_A", error=error)
-                CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(1)%matrix,0.0_dp,error=error)
-                !CALL cp_dbcsr_from_sm(qs_env%et_coupling%rest_mat(1)%matrix, matrix_s(1)%matrix, error)
+                     name="ET_RESTRAINT_MATRIX_A")
+                CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(1)%matrix,0.0_dp)
+                !CALL cp_dbcsr_from_sm(qs_env%et_coupling%rest_mat(1)%matrix, matrix_s(1)%matrix)
                 !CALL replicate_matrix_structure(source=matrix_s(1)%matrix,&
                 !     TARGET=qs_env%et_coupling%rest_mat(1)%matrix,&
                 !     target_name="ET_RESTRAINT_MATRIX_A",error=error)
@@ -116,11 +116,11 @@ CONTAINS
              ELSE
                 NULLIFY(qs_env%et_coupling%rest_mat(2)%matrix)
                 ALLOCATE(qs_env%et_coupling%rest_mat(2)%matrix)
-                CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(2)%matrix, error=error)
+                CALL cp_dbcsr_init(qs_env%et_coupling%rest_mat(2)%matrix)
                 CALL cp_dbcsr_copy(qs_env%et_coupling%rest_mat(2)%matrix, matrix_s(1)%matrix, &
-                     name="ET_RESTRAINT_MATRIX_B", error=error)
-                CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(2)%matrix,0.0_dp,error=error)
-                !CALL cp_dbcsr_from_sm(qs_env%et_coupling%rest_mat(2)%matrix, matrix_s(1)%matrix, error)
+                     name="ET_RESTRAINT_MATRIX_B")
+                CALL cp_dbcsr_set(qs_env%et_coupling%rest_mat(2)%matrix,0.0_dp)
+                !CALL cp_dbcsr_from_sm(qs_env%et_coupling%rest_mat(2)%matrix, matrix_s(1)%matrix)
                 !CALL replicate_matrix_structure(source=matrix_s(1)%matrix,&
                 !     TARGET=qs_env%et_coupling%rest_mat(2)%matrix,&
                 !     target_name="ET_RESTRAINT_MATRIX_B",error=error)
@@ -250,3 +250,4 @@ CONTAINS
   END SUBROUTINE qs_ks_s2_restraint
 
 END MODULE qs_ks_apply_restraints
+

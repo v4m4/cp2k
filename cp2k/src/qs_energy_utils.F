@@ -147,24 +147,24 @@ CONTAINS
        IF(do_kpoints) THEN
           CPPostcondition(.FALSE.,cp_warning_level,routineP,error,failure)
        ELSE
-          CALL cp_dbcsr_allocate_matrix_set(matrix_w,dft_control%nspins,error=error)
+          CALL cp_dbcsr_allocate_matrix_set(matrix_w,dft_control%nspins)
           DO ispin=1,dft_control%nspins
              ALLOCATE(matrix_w(ispin)%matrix)
-             CALL cp_dbcsr_init(matrix_w(ispin)%matrix,error=error)
+             CALL cp_dbcsr_init(matrix_w(ispin)%matrix)
              CALL cp_dbcsr_copy(matrix_w(ispin)%matrix,matrix_s(1)%matrix,&
-                  name="W MATRIX",error=error)
-             CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp,error=error)
+                  name="W MATRIX")
+             CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp)
           END DO
           CALL set_ks_env(ks_env,matrix_w=matrix_w,error=error)
           IF (ASSOCIATED(qs_env%mp2_env)) THEN
              ! create the MP2 energy weighted density matrix
-             CALL cp_dbcsr_allocate_matrix_set(matrix_w_mp2,dft_control%nspins,error=error)
+             CALL cp_dbcsr_allocate_matrix_set(matrix_w_mp2,dft_control%nspins)
              DO ispin=1,dft_control%nspins
                 ALLOCATE(matrix_w_mp2(ispin)%matrix)
-                CALL cp_dbcsr_init(matrix_w_mp2(ispin)%matrix,error=error)
+                CALL cp_dbcsr_init(matrix_w_mp2(ispin)%matrix)
                 CALL cp_dbcsr_copy(matrix_w_mp2(ispin)%matrix,matrix_s(1)%matrix,&
-                     name="W MATRIX MP2",error=error)
-                CALL cp_dbcsr_set(matrix_w_mp2(ispin)%matrix,0.0_dp,error=error)
+                     name="W MATRIX MP2")
+                CALL cp_dbcsr_set(matrix_w_mp2(ispin)%matrix,0.0_dp)
              END DO
              CALL set_ks_env(ks_env,matrix_w_mp2=matrix_w_mp2,error=error)
           END IF
@@ -426,7 +426,7 @@ CONTAINS
              IF (scf_control%use_ot) THEN
                 IF (ispin > 1) THEN
                    ! not very elegant, indeed ...
-                   CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp,error=error)
+                   CALL cp_dbcsr_set(matrix_w(ispin)%matrix,0.0_dp)
                 ELSE
                    CALL calculate_w_matrix_ot(mo_set,mo_derivs(ispin)%matrix,&
                         matrix_w(ispin)%matrix,matrix_s(1)%matrix,error=error)
@@ -448,7 +448,7 @@ CONTAINS
           END IF
           ! if MP2 time to update the W matrix with the MP2 contribution
           IF(ASSOCIATED(qs_env%mp2_env)) THEN
-            CALL cp_dbcsr_add(matrix_w(ispin)%matrix, matrix_w_mp2(ispin)%matrix, 1.0_dp, -1.0_dp, error)
+            CALL cp_dbcsr_add(matrix_w(ispin)%matrix, matrix_w_mp2(ispin)%matrix, 1.0_dp, -1.0_dp)
           END IF
        END DO
     END IF
@@ -695,3 +695,4 @@ CONTAINS
   END SUBROUTINE qs_energies_mp2
 
 END MODULE qs_energy_utils
+

@@ -179,7 +179,7 @@ CONTAINS
        matrix_p => rho%rho_ao
 
        IF (SIZE(matrix_p) == 2) THEN
-          CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, alpha_scalar=1.0_dp, beta_scalar=1.0_dp, error=error)
+          CALL cp_dbcsr_add(matrix_p(1)%matrix, matrix_p(2)%matrix, alpha_scalar=1.0_dp, beta_scalar=1.0_dp)
        END IF
        natom = SIZE (particle_set)
        ALLOCATE (atom_of_kind(natom),STAT=istat)
@@ -189,26 +189,26 @@ CONTAINS
                                 atom_of_kind=atom_of_kind)
        ALLOCATE(diagmat_p,STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-       CALL cp_dbcsr_init (diagmat_p, error=error)
-       CALL cp_dbcsr_get_block_diag(matrix_p(1)%matrix, diagmat_p, error=error)
-       CALL cp_dbcsr_replicate_all(diagmat_p,error=error)
+       CALL cp_dbcsr_init (diagmat_p)
+       CALL cp_dbcsr_get_block_diag(matrix_p(1)%matrix, diagmat_p)
+       CALL cp_dbcsr_replicate_all(diagmat_p)
      END IF
 
      ! Allocate the core Hamiltonian matrix
-     CALL cp_dbcsr_allocate_matrix_set(matrix_h,1,error=error)
+     CALL cp_dbcsr_allocate_matrix_set(matrix_h,1)
      ALLOCATE(matrix_h(1)%matrix,STAT=istat)
      CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-     CALL cp_dbcsr_init(matrix_h(1)%matrix, error=error)
-     CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_s(1)%matrix,"CORE HAMILTONIAN MATRIX",error=error)
-     CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp,error=error)
+     CALL cp_dbcsr_init(matrix_h(1)%matrix)
+     CALL cp_dbcsr_copy(matrix_h(1)%matrix,matrix_s(1)%matrix,"CORE HAMILTONIAN MATRIX")
+     CALL cp_dbcsr_set(matrix_h(1)%matrix,0.0_dp)
 
      ! Allocate a diagonal block matrix
      ALLOCATE(diagmat_h,STAT=istat)
      CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-     CALL cp_dbcsr_init(diagmat_h, error=error)
-     CALL cp_dbcsr_get_block_diag(matrix_s(1)%matrix, diagmat_h, error=error)
-     CALL cp_dbcsr_set(diagmat_h, 0.0_dp, error=error)
-     CALL cp_dbcsr_replicate_all(diagmat_h,error=error)
+     CALL cp_dbcsr_init(diagmat_h)
+     CALL cp_dbcsr_get_block_diag(matrix_s(1)%matrix, diagmat_h)
+     CALL cp_dbcsr_set(diagmat_h, 0.0_dp)
+     CALL cp_dbcsr_replicate_all(diagmat_h)
 
      ! kh might be set in qs_control
      itype = get_se_type(dft_control%qs_control%method_id)
@@ -410,9 +410,9 @@ CONTAINS
      DEALLOCATE (se_defined,hmt,umt,ZSt,ZPt,nrt,STAT=istat)
      CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
-     CALL cp_dbcsr_sum_replicated(diagmat_h, error=error)
-     CALL cp_dbcsr_distribute(diagmat_h,error=error)
-     CALL cp_dbcsr_add(matrix_h(1)%matrix, diagmat_h,1.0_dp,1.0_dp,error=error)
+     CALL cp_dbcsr_sum_replicated(diagmat_h)
+     CALL cp_dbcsr_distribute(diagmat_h)
+     CALL cp_dbcsr_add(matrix_h(1)%matrix, diagmat_h,1.0_dp,1.0_dp)
      CALL set_ks_env(ks_env,matrix_h=matrix_h,error=error)
 
      IF (BTEST(cp_print_key_should_output(logger%iter_info,&
@@ -427,14 +427,14 @@ CONTAINS
 
      IF(calculate_forces) THEN
        IF (SIZE(matrix_p) == 2) THEN
-          CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,alpha_scalar=1.0_dp,beta_scalar=-1.0_dp,error=error)
+          CALL cp_dbcsr_add(matrix_p(1)%matrix,matrix_p(2)%matrix,alpha_scalar=1.0_dp,beta_scalar=-1.0_dp)
        END IF
        DEALLOCATE(atom_of_kind,STAT=istat)
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-       CALL cp_dbcsr_deallocate_matrix(diagmat_p,error=error)
+       CALL cp_dbcsr_deallocate_matrix(diagmat_p)
      END IF
 
-     CALL cp_dbcsr_deallocate_matrix(diagmat_h,error=error)
+     CALL cp_dbcsr_deallocate_matrix(diagmat_h)
 
      CALL timestop(handle)
 
@@ -1623,4 +1623,5 @@ ENDIF
 END FUNCTION BB
 
 END MODULE se_core_matrix
+
 

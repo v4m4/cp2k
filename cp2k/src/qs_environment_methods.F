@@ -301,13 +301,13 @@ SUBROUTINE qs_env_update_s_mstruct(qs_env,error)
                     error=error)
 
     ! *** deallocate matrices that will have the wrong structure ***
-    CALL cp_dbcsr_deallocate_matrix_set(matrix_ks,error=error)
+    CALL cp_dbcsr_deallocate_matrix_set(matrix_ks)
     CALL set_ks_env(ks_env,matrix_ks=matrix_ks,error=error)
 
 
     IF( dft_control%do_admm) THEN
       ! *** deallocate matrices that will have the wrong structure ***
-      CALL cp_dbcsr_deallocate_matrix_set(matrix_ks_aux_fit,error=error)
+      CALL cp_dbcsr_deallocate_matrix_set(matrix_ks_aux_fit)
       CALL set_ks_env(ks_env,matrix_ks_aux_fit=matrix_ks_aux_fit,error=error)
     END IF
 
@@ -816,3 +816,4 @@ SUBROUTINE qs_env_rebuild_rho(qs_env, rebuild_ao, rebuild_grids, error)
 END SUBROUTINE qs_env_rebuild_rho
 
 END MODULE qs_environment_methods
+

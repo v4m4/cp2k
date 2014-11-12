@@ -1139,7 +1139,7 @@ MODULE mp2
 
     ! put matrix_ks to zero
     DO i=1, SIZE(matrix_ks)
-      CALL cp_dbcsr_set(matrix_ks(i)%matrix,0.0_dp,error=error)
+      CALL cp_dbcsr_set(matrix_ks(i)%matrix,0.0_dp)
     END DO
  
     ! Remove the Exchange-correlation energy contributions from the total energy
@@ -1171,5 +1171,6 @@ MODULE mp2
   END SUBROUTINE calculate_exx
 
 END MODULE mp2
+
 
 

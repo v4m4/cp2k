@@ -435,7 +435,7 @@ CONTAINS
 
     re=2*ispin-1 ; im =2*ispin
     alpha=3.0_dp-REAL(SIZE(rtp_coeff_aux_fit)/2,dp)
-    CALL cp_dbcsr_set(density_matrix_aux,0.0_dp,error=error)
+    CALL cp_dbcsr_set(density_matrix_aux,0.0_dp)
     CALL cp_fm_get_info(rtp_coeff_aux_fit(re)%matrix,ncol_global=ncol,error=error)
     CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=density_matrix_aux,&
                             matrix_v=rtp_coeff_aux_fit(re)%matrix,&
@@ -450,7 +450,7 @@ CONTAINS
                      alpha=alpha,error=error)
 
 !   compute the imaginary part of the dm
-    CALL cp_dbcsr_set(density_matrix_aux_im,0.0_dp,error=error)
+    CALL cp_dbcsr_set(density_matrix_aux_im,0.0_dp)
     CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=density_matrix_aux_im,&
                             matrix_v=rtp_coeff_aux_fit(im)%matrix,&
                             matrix_g=rtp_coeff_aux_fit(re)%matrix,&
@@ -573,11 +573,11 @@ CONTAINS
     nao_aux_fit = admm_env%nao_aux_fit
     nao_orb = admm_env%nao_orb
     nmo = admm_env%nmo(ispin)
-    CALL cp_dbcsr_init (matrix_ks_nosym, error)
+    CALL cp_dbcsr_init (matrix_ks_nosym)
     CALL cp_dbcsr_create (matrix_ks_nosym, template=matrix_ks_aux_fit(ispin)%matrix,&
-                 matrix_type=dbcsr_type_no_symmetry, error=error)
-    CALL cp_dbcsr_set(matrix_ks_nosym,0.0_dp,error)
-    CALL cp_dbcsr_desymmetrize(matrix_ks_aux_fit(ispin)%matrix,matrix_ks_nosym,error)
+                 matrix_type=dbcsr_type_no_symmetry)
+    CALL cp_dbcsr_set(matrix_ks_nosym,0.0_dp)
+    CALL cp_dbcsr_desymmetrize(matrix_ks_aux_fit(ispin)%matrix,matrix_ks_nosym)
 
     CALL copy_dbcsr_to_fm(matrix_ks_nosym,admm_env%K(ispin)%matrix,error)
 
@@ -593,23 +593,23 @@ CONTAINS
 
     NULLIFY(matrix_k_tilde)
     ALLOCATE(matrix_k_tilde)
-    CALL cp_dbcsr_init (matrix_k_tilde, error)
+    CALL cp_dbcsr_init (matrix_k_tilde)
     CALL cp_dbcsr_create(matrix_k_tilde, 'MATRIX K_tilde', &
          cp_dbcsr_distribution(matrix_ks(ispin)%matrix), cp_dbcsr_get_matrix_type(matrix_ks_aux_fit(ispin)%matrix),&
          cp_dbcsr_row_block_sizes(matrix_ks(ispin)%matrix),&
          cp_dbcsr_col_block_sizes(matrix_ks(ispin)%matrix), &
          cp_dbcsr_get_num_blocks(matrix_ks(ispin)%matrix), cp_dbcsr_get_data_size(matrix_ks(ispin)%matrix),&
-         cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix), error=error)
+         cp_dbcsr_get_data_type(matrix_ks(ispin)%matrix))
 
-    CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix, error=error)
-    CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp, error)
+    CALL cp_dbcsr_copy(matrix_k_tilde, matrix_ks(ispin)%matrix)
+    CALL cp_dbcsr_set(matrix_k_tilde, 0.0_dp)
     CALL copy_fm_to_dbcsr(admm_env%work_orb_orb, matrix_k_tilde, keep_sparsity=.TRUE.,&
          error=error)
 
-    CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp, error)
+    CALL cp_dbcsr_add(matrix_ks(ispin)%matrix, matrix_k_tilde, 1.0_dp, 1.0_dp)
 
-    CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde,error)
-    CALL cp_dbcsr_release(matrix_ks_nosym,error)
+    CALL cp_dbcsr_deallocate_matrix(matrix_k_tilde)
+    CALL cp_dbcsr_release(matrix_ks_nosym)
 
     CALL timestop(handle)
 
@@ -725,21 +725,20 @@ CONTAINS
                     error=error)
 
     ALLOCATE(matrix_w_s)
-    CALL cp_dbcsr_init (matrix_w_s, error)
+    CALL cp_dbcsr_init (matrix_w_s)
     CALL cp_dbcsr_create(matrix_w_s, 'W MATRIX AUX S', &
          cp_dbcsr_distribution(matrix_s_aux_fit(1)%matrix), dbcsr_type_no_symmetry, &
          cp_dbcsr_row_block_sizes(matrix_s_aux_fit(1)%matrix),&
          cp_dbcsr_col_block_sizes(matrix_s_aux_fit(1)%matrix), &
          cp_dbcsr_get_num_blocks(matrix_s_aux_fit(1)%matrix), &
          cp_dbcsr_get_data_size(matrix_s_aux_fit(1)%matrix),&
-         cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix), &
-         error=error)
+         cp_dbcsr_get_data_type(matrix_s_aux_fit(1)%matrix))
     CALL cp_dbcsr_alloc_block_from_nbl(matrix_w_s,sab_aux_fit_asymm,error=error)
 
     ALLOCATE(matrix_w_q)
-    CALL cp_dbcsr_init(matrix_w_q, error=error)
+    CALL cp_dbcsr_init(matrix_w_q)
     CALL cp_dbcsr_copy(matrix_w_q,matrix_s_aux_fit_vs_orb(1)%matrix,&
-                    "W MATRIX AUX Q",error=error)
+                    "W MATRIX AUX Q")
 
     DO ispin=1,SIZE(KS_aux_re)
        re=2*ispin-1; im=2*ispin
@@ -810,8 +809,8 @@ CONTAINS
        CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
        
        ! *** Deallocated weighted density matrices
-       CALL cp_dbcsr_deallocate_matrix(matrix_w_s,error)
-       CALL cp_dbcsr_deallocate_matrix(matrix_w_q,error)
+       CALL cp_dbcsr_deallocate_matrix(matrix_w_s)
+       CALL cp_dbcsr_deallocate_matrix(matrix_w_q)
        CALL cp_fm_vect_dealloc(tmp_aux_aux,error)
        CALL cp_fm_vect_dealloc(tmp_aux_nao,error)
        CALL cp_fm_vect_dealloc(tmp_aux_mo,error)
@@ -822,3 +821,4 @@ CONTAINS
 
 
 END MODULE rtp_admm_methods
+

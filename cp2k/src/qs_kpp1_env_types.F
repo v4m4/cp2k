@@ -124,7 +124,7 @@ CONTAINS
           IF (ASSOCIATED(kpp1_env%v_ao)) THEN
              DO ispin=1,SIZE(kpp1_env%v_ao)
                 IF (ASSOCIATED(kpp1_env%v_ao(ispin)%matrix)) THEN
-                   CALL cp_dbcsr_deallocate_matrix(kpp1_env%v_ao(ispin)%matrix,error=error)
+                   CALL cp_dbcsr_deallocate_matrix(kpp1_env%v_ao(ispin)%matrix)
                 END IF
              END DO
              DEALLOCATE(kpp1_env%v_ao, stat=stat)
@@ -393,3 +393,4 @@ CONTAINS
   END SUBROUTINE kpp1_write
 
 END MODULE qs_kpp1_env_types
+

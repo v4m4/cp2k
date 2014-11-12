@@ -1489,7 +1489,7 @@ MODULE mp2_ri_grad_util
 
     ! allocate G_P_ia (DBCSR)
     NULLIFY(mp2_env%ri_grad%G_P_ia)
-    CALL cp_dbcsr_allocate_matrix_set(mp2_env%ri_grad%G_P_ia,my_group_L_size,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(mp2_env%ri_grad%G_P_ia,my_group_L_size)
 
     ! create sub blacs env
     NULLIFY(blacs_env)
@@ -1769,9 +1769,9 @@ MODULE mp2_ri_grad_util
 
       ! now create the DBCSR matrix and copy fm_ia into it
       ALLOCATE(mp2_env%ri_grad%G_P_ia(kkB)%matrix)
-      CALL cp_dbcsr_init(mp2_env%ri_grad%G_P_ia(kkB)%matrix,error=error)
+      CALL cp_dbcsr_init(mp2_env%ri_grad%G_P_ia(kkB)%matrix)
       CALL cp_dbcsr_create(mp2_env%ri_grad%G_P_ia(kkB)%matrix,"matrix_ia_K",dist,dbcsr_type_no_symmetry,&
-                           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default,error=error)
+                           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default)
       CALL copy_fm_to_dbcsr(fm_ia,mp2_env%ri_grad%G_P_ia(kkB)%matrix,keep_sparsity=.FALSE.,error=error)
 
     END DO
@@ -1833,3 +1833,4 @@ MODULE mp2_ri_grad_util
   END SUBROUTINE
 
 END MODULE mp2_ri_grad_util
+

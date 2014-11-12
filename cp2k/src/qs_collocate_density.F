@@ -1903,8 +1903,8 @@ CONTAINS
        NULLIFY(deltap)
        !CALL replicate_matrix(matrix_p,deltap,target_name="DeltaP",error=error)
        ALLOCATE(deltap)
-       CALL cp_dbcsr_init(deltap, error=error)
-       CALL cp_dbcsr_copy(deltap,matrix_p,name="DeltaP",error=error)
+       CALL cp_dbcsr_init(deltap)
+       CALL cp_dbcsr_copy(deltap,matrix_p,name="DeltaP")
        ! this matrix has no strict sparsity pattern in parallel
        !deltap%sparsity_id=-1
     ELSE
@@ -2198,7 +2198,7 @@ CONTAINS
     !   *** Release work storage ***
 
     IF (distributed_rs_grids) THEN
-       CALL cp_dbcsr_deallocate_matrix ( deltap ,error=error)
+       CALL cp_dbcsr_deallocate_matrix ( deltap )
     ENDIF
 
     DEALLOCATE (pabt,STAT=stat)
@@ -2399,8 +2399,8 @@ CONTAINS
     IF (distributed_rs_grids) THEN
        NULLIFY(deltap)
        ALLOCATE(deltap)
-       CALL cp_dbcsr_init(deltap, error=error)
-       CALL cp_dbcsr_copy(deltap,matrix_p,name="DeltaP",error=error)
+       CALL cp_dbcsr_init(deltap)
+       CALL cp_dbcsr_copy(deltap,matrix_p,name="DeltaP")
        !CALL replicate_matrix(matrix_p,deltap,target_name="DeltaP",error=error)
        ! this matrix has no strict sparsity pattern in parallel
        !deltap%sparsity_id=-1
@@ -2603,7 +2603,7 @@ CONTAINS
       END DO
     END IF
     IF (distributed_rs_grids) THEN
-      CALL cp_dbcsr_deallocate_matrix ( deltap ,error=error)
+      CALL cp_dbcsr_deallocate_matrix ( deltap )
     ENDIF
 
     DEALLOCATE (pabt,STAT=stat)
@@ -4243,3 +4243,4 @@ CONTAINS
   END SUBROUTINE collocate_pgf_product_gspace
 
 END MODULE qs_collocate_density
+

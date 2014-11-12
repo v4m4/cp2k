@@ -352,7 +352,7 @@ CONTAINS
       nspins = dft_control%nspins
       DO ispin = 1,nspins
         CALL cp_dbcsr_trace(matrix_ks(ispin)%matrix, rho_ao(ispin)%matrix, &
-                         trace=harris_energy%sum_of_eigenvalues, error=error)
+                         trace=harris_energy%sum_of_eigenvalues)
       END DO
 
       harris_energy%Eharris = harris_energy%sum_of_eigenvalues &
@@ -419,8 +419,7 @@ CONTAINS
       nspins = dft_control%nspins
       DO ispin = 1,nspins
         CALL cp_dbcsr_trace(matrix_ks(ispin)%matrix, scf_env%p_mix_new(ispin)%matrix, &
-                            trace=harris_energy%sum_of_eigenvalues, &
-                            error=error)
+                            trace=harris_energy%sum_of_eigenvalues)
       END DO
 
       harris_energy%Eharris = harris_energy%sum_of_eigenvalues + &
@@ -494,3 +493,4 @@ CONTAINS
   END SUBROUTINE harris_postprocessing
 
 END MODULE harris_functional
+

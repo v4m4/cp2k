@@ -253,8 +253,8 @@ MODULE mp2_ri_gpw
        PRESENT(mo_coeff_v_beta)) do_alpha_beta=.TRUE.
 
     ! initialize and create the matrix (K|jnu)
-    CALL cp_dbcsr_init(matrix_ia_jnu,error=error_sub)
-    CALL cp_dbcsr_create(matrix_ia_jnu,template=mo_coeff_o,error=error_sub)
+    CALL cp_dbcsr_init(matrix_ia_jnu)
+    CALL cp_dbcsr_create(matrix_ia_jnu,template=mo_coeff_o)
 
     ! Allocate Sparse matrices: (K|jb)
     CALL cp_create_bl_distribution (col_dist, col_blk_size, nmo-homo, &
@@ -263,9 +263,9 @@ MODULE mp2_ri_gpw
           dbcsr_mp_nprows(dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o))))
     CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o)),&
           row_dist,col_dist)
-    CALL cp_dbcsr_init(matrix_ia_jb,error=error_sub)
+    CALL cp_dbcsr_init(matrix_ia_jb)
     CALL cp_dbcsr_create(matrix_ia_jb,"matrix_ia_jb",dist,dbcsr_type_no_symmetry,&
-         row_blk_size,col_blk_size,0,0,dbcsr_type_real_default,error=error_sub)
+         row_blk_size,col_blk_size,0,0,dbcsr_type_real_default)
     CALL cp_dbcsr_distribution_release (dist)
     CALL array_release (col_blk_size)
     CALL array_release (col_dist)
@@ -273,9 +273,9 @@ MODULE mp2_ri_gpw
     CALL array_release (row_dist)
 
     ! set all to zero in such a way that the memory is actually allocated
-    CALL cp_dbcsr_set(matrix_ia_jnu,0.0_dp,error=error_sub)
-    CALL cp_dbcsr_set(matrix_ia_jb,0.0_dp,error=error_sub)
-    CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+    CALL cp_dbcsr_set(matrix_ia_jnu,0.0_dp)
+    CALL cp_dbcsr_set(matrix_ia_jb,0.0_dp)
+    CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
      
     ! create the analogous of matrix_ia_jb in fm type
     NULLIFY(fm_BIb_jb)
@@ -311,8 +311,8 @@ MODULE mp2_ri_gpw
 
     IF(do_alpha_beta) THEN
       ! initialize and create the matrix (K|jnu)
-      CALL cp_dbcsr_init(matrix_ia_jnu_beta,error=error_sub)
-      CALL cp_dbcsr_create(matrix_ia_jnu_beta,template=mo_coeff_o_beta,error=error_sub)
+      CALL cp_dbcsr_init(matrix_ia_jnu_beta)
+      CALL cp_dbcsr_create(matrix_ia_jnu_beta,template=mo_coeff_o_beta)
 
       ! Allocate Sparse matrices: (K|jb)
       CALL cp_create_bl_distribution (col_dist, col_blk_size, nmo-homo_beta, &
@@ -321,9 +321,9 @@ MODULE mp2_ri_gpw
             dbcsr_mp_nprows(dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o_beta))))
       CALL dbcsr_distribution_new (dist, dbcsr_distribution_mp(cp_dbcsr_distribution(mo_coeff_o_beta)),&
             row_dist,col_dist)
-      CALL cp_dbcsr_init(matrix_ia_jb_beta,error=error_sub)
+      CALL cp_dbcsr_init(matrix_ia_jb_beta)
       CALL cp_dbcsr_create(matrix_ia_jb_beta,"matrix_ia_jb_beta",dist,dbcsr_type_no_symmetry,&
-           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default,error=error_sub)
+           row_blk_size,col_blk_size,0,0,dbcsr_type_real_default)
       CALL cp_dbcsr_distribution_release (dist)
       CALL array_release (col_blk_size)
       CALL array_release (col_dist)
@@ -331,8 +331,8 @@ MODULE mp2_ri_gpw
       CALL array_release (row_dist)
       virtual_beta=nmo-homo_beta
 
-      CALL cp_dbcsr_set(matrix_ia_jnu_beta,0.0_dp,error=error_sub)
-      CALL cp_dbcsr_set(matrix_ia_jb_beta,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(matrix_ia_jnu_beta,0.0_dp)
+      CALL cp_dbcsr_set(matrix_ia_jb_beta,0.0_dp)
 
       ! create the analogous of matrix_ia_jb_beta in fm type
       NULLIFY(fm_BIb_jb_beta)
@@ -520,7 +520,7 @@ MODULE mp2_ri_gpw
 
       ! and finally (K|mu nu)
       CALL timeset(routineN//"_int",handle3)
-      CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp,error=error_sub)
+      CALL cp_dbcsr_set(mat_munu%matrix,0.0_dp)
       CALL integrate_v_rspace(rho_r, h=mat_munu,qs_env=qs_env,calculate_forces=.FALSE.,compute_tau=.FALSE.,gapw=.FALSE.,&
          basis_set_id=use_orb_basis_set, pw_env_external=pw_env_sub, task_list_external=task_list_sub, error=error_sub)
       CALL timestop(handle3)
@@ -528,20 +528,20 @@ MODULE mp2_ri_gpw
       ! multiply and goooooooo ...
       CALL timeset(routineN//"_mult_o",handle3)
       CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, mo_coeff_o, &
-                              0.0_dp, matrix_ia_jnu, filter_eps=eps_filter, error=error_sub) 
+                              0.0_dp, matrix_ia_jnu, filter_eps=eps_filter)
       IF(do_alpha_beta) THEN
         ! transform orbitals using the beta coeff matrix
         CALL cp_dbcsr_multiply("N", "N", 1.0_dp, mat_munu%matrix, mo_coeff_o_beta, &
-                                0.0_dp, matrix_ia_jnu_beta, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jnu_beta, filter_eps=eps_filter)
       END IF
       CALL timestop(handle3)
       CALL timeset(routineN//"_mult_v",handle3)
       CALL cp_dbcsr_multiply("T", "N", 1.0_dp, matrix_ia_jnu, mo_coeff_v, &
-                              0.0_dp, matrix_ia_jb, filter_eps=eps_filter, error=error_sub)
+                              0.0_dp, matrix_ia_jb, filter_eps=eps_filter)
       IF(do_alpha_beta) THEN
         ! transform orbitals using the beta coeff matrix
         CALL cp_dbcsr_multiply("T", "N", 1.0_dp, matrix_ia_jnu_beta, mo_coeff_v_beta, &
-                                0.0_dp, matrix_ia_jb_beta, filter_eps=eps_filter, error=error_sub)
+                                0.0_dp, matrix_ia_jb_beta, filter_eps=eps_filter)
       END IF
       CALL timestop(handle3)
 
@@ -570,11 +570,11 @@ MODULE mp2_ri_gpw
     CALL cp_fm_release(fm_BIb_jb, error=error_sub)
     DEALLOCATE(local_col_row_info)
 
-    CALL cp_dbcsr_release(matrix_ia_jnu,error=error_sub)
-    CALL cp_dbcsr_release(matrix_ia_jb,error=error_sub)
+    CALL cp_dbcsr_release(matrix_ia_jnu)
+    CALL cp_dbcsr_release(matrix_ia_jb)
     IF(do_alpha_beta) THEN
-      CALL cp_dbcsr_release(matrix_ia_jnu_beta,error=error_sub)
-      CALL cp_dbcsr_release(matrix_ia_jb_beta,error=error_sub)
+      CALL cp_dbcsr_release(matrix_ia_jnu_beta)
+      CALL cp_dbcsr_release(matrix_ia_jb_beta)
       CALL cp_fm_release(fm_BIb_jb_beta, error=error_sub)
       DEALLOCATE(local_col_row_info_beta)
     END IF
@@ -3288,3 +3288,4 @@ MODULE mp2_ri_gpw
      END SUBROUTINE
 
 END MODULE mp2_ri_gpw
+

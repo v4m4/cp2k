@@ -715,12 +715,12 @@ CONTAINS
                     matrix_s=matrix_s,&
                     error=error)
 
-    CALL cp_dbcsr_allocate_matrix_set(matrix_ks,dft_control%nspins,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_ks,dft_control%nspins)
     DO ispin=1,dft_control%nspins
        ALLOCATE (matrix_ks(ispin)%matrix)
-       CALL cp_dbcsr_init(matrix_ks(ispin)%matrix,error=error)
+       CALL cp_dbcsr_init(matrix_ks(ispin)%matrix)
        CALL cp_dbcsr_copy(matrix_ks(ispin)%matrix,matrix_s(1)%matrix,&
-            "KOHN-SHAM MATRIX-"//ADJUSTL(cp_to_string(ispin)),error=error)
+            "KOHN-SHAM MATRIX-"//ADJUSTL(cp_to_string(ispin)))
     END DO
 
     CALL set_ks_env(ks_env,matrix_ks=matrix_ks,error=error)
@@ -1517,13 +1517,12 @@ CONTAINS
     !   *** Allocate matrix_ks and put it in the QS environment ***
 
     IF (.not.ASSOCIATED(matrix_ks)) THEN
-       CALL cp_dbcsr_allocate_matrix_set( matrix_ks, dft_control%nspins, error )
+       CALL cp_dbcsr_allocate_matrix_set( matrix_ks, dft_control%nspins )
        DO ispin=1,SIZE(matrix_ks)
           ALLOCATE(matrix_ks(ispin)%matrix)
-          CALL cp_dbcsr_init(matrix_ks(ispin)%matrix,error=error)
+          CALL cp_dbcsr_init(matrix_ks(ispin)%matrix)
           CALL cp_dbcsr_copy(matrix_ks(ispin)%matrix, matrix_s(ispin)%matrix,&
-               name="EP"//TRIM(cp_iter_string(logger%iter_info,error=error))//&
-               "KOHN-SHAM_MATRIX", error=error)
+               name="EP"//TRIM(cp_iter_string(logger%iter_info,error=error))//"KOHN-SHAM_MATRIX")
        ENDDO
 
        CALL set_ks_env(ks_env,matrix_ks=matrix_ks,error=error)
@@ -1773,14 +1772,14 @@ CONTAINS
          " update qs_env%rho and ks matrix",error=error)
     CALL get_qs_env(qs_env, rho=rho, mos=mos, error=error)
     DO ispin=1,ep_env%nspins
-       CALL cp_dbcsr_set(rho%rho_ao(ispin)%matrix,0._dp,error=error)
+       CALL cp_dbcsr_set(rho%rho_ao(ispin)%matrix,0._dp)
        CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=rho%rho_ao(ispin)%matrix,&
             matrix_v=mos(ispin)%mo_set%mo_coeff,&
             matrix_g=ep_env%main_p_env%psi0d(ispin)%matrix,&
             ncol=ep_env%full_nmo(ispin),&
             error=error)
        CALL get_mo_set(mos(ispin)%mo_set, maxocc=maxocc)
-       CALL cp_dbcsr_scale(rho%rho_ao(ispin)%matrix,alpha_scalar=maxocc,error=error)
+       CALL cp_dbcsr_scale(rho%rho_ao(ispin)%matrix,alpha_scalar=maxocc)
     END DO
     CALL qs_rho_update_rho(rho, qs_env=qs_env, error=error)
     CALL qs_ks_did_change(ks_env,rho_changed=.TRUE.,error=error)
@@ -1971,12 +1970,12 @@ CONTAINS
          " creating w_matrix main_qs_env",error=error)
     nspin = SIZE(mos)
     CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
-    CALL cp_dbcsr_allocate_matrix_set(matrix_w,nspin,error=error)
+    CALL cp_dbcsr_allocate_matrix_set(matrix_w,nspin)
     DO ispin=1,nspin
        ALLOCATE(matrix_w(ispin)%matrix)
-       CALL cp_dbcsr_init(matrix_w(ispin)%matrix,error=error)
+       CALL cp_dbcsr_init(matrix_w(ispin)%matrix)
        CALL cp_dbcsr_copy(matrix_w(ispin)%matrix,matrix_s(1)%matrix,&
-            "W MATRIX"//TRIM(ADJUSTL(cp_to_string(ispin))),error=error)
+            "W MATRIX"//TRIM(ADJUSTL(cp_to_string(ispin))))
     END DO
 
     CALL ep_calc_w_matrix_full(ep_env,matrix_w,error=error)
@@ -2083,7 +2082,7 @@ CONTAINS
        !     ot_precond_sparse_diag) ! these are 'independent'
     END IF
 
-    CALL cp_dbcsr_deallocate_matrix_set( matrix_w, error=error )
+    CALL cp_dbcsr_deallocate_matrix_set( matrix_w )
 
     CALL set_ks_env(ks_env,matrix_w=matrix_w,error=error)
 
@@ -2141,7 +2140,7 @@ CONTAINS
        CALL cp_fm_symm('R', 'U', ep_env%full_nao(ispin), ep_env%full_nmo(ispin), &
             -REAL(3-ep_env%nspins,dp), &
             ep_env%main_p_env%m_epsilon(ispin)%matrix,psi0, 0.0_dp,weighted_vectors,error=error)
-       CALL cp_dbcsr_set(w_matrix(ispin)%matrix,0.0_dp,error=error)
+       CALL cp_dbcsr_set(w_matrix(ispin)%matrix,0.0_dp)
        CALL cp_dbcsr_plus_fm_fm_t(sparse_matrix=w_matrix(ispin)%matrix,&
             matrix_v=psi0,&
             matrix_g=weighted_vectors,&
@@ -2976,3 +2975,4 @@ CONTAINS
 
 
 END MODULE ep_methods
+

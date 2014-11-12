@@ -227,11 +227,11 @@ CONTAINS
     END IF
 
     IF (ASSOCIATED(rho_struct%rho_ao))&
-       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao)
     IF (ASSOCIATED(rho_struct%rho_ao_im))&
-       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao_im,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao_im)
     IF (ASSOCIATED(rho_struct%rho_ao_kp))&
-       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao_kp,error=error)
+       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao_kp)
     IF (ASSOCIATED(rho_struct%tot_rho_r))&
        DEALLOCATE(rho_struct%tot_rho_r)
     IF (ASSOCIATED(rho_struct%tot_rho_g))&
@@ -370,4 +370,5 @@ CONTAINS
   END SUBROUTINE qs_rho_get
 
 END MODULE qs_rho_types
+
 
