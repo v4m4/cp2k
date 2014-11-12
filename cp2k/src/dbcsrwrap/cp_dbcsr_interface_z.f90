@@ -23,13 +23,12 @@
 !> \param rep_col a work col vector replicated on all proc_rows. 
 ! *****************************************************************************
    SUBROUTINE cp_dbcsr_matrix_colvec_multiply_z(matrix,vec_in,vec_out,alpha,beta,&
-                                                rep_row,rep_col,error)
+                                                rep_row,rep_col)
     TYPE(cp_dbcsr_type), INTENT(IN)          :: matrix
     TYPE(cp_dbcsr_type), INTENT(IN)          :: vec_in
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: vec_out
     COMPLEX(kind=real_8), INTENT(IN)                      :: alpha, beta
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: rep_row, rep_col
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_matrix_colvec_mult_z', &
       routineP = moduleN//':'//routineN
@@ -46,13 +45,11 @@
 !>        type of the matrix.
 !> \param scalar ...
 !> \param matrix ...
-!> \param error ...
 !> \retval encapsulated ...
 ! *****************************************************************************
-  FUNCTION make_conformant_scalar_z (scalar, matrix, error) RESULT (encapsulated)
+  FUNCTION make_conformant_scalar_z (scalar, matrix) RESULT (encapsulated)
     COMPLEX(kind=real_8), INTENT(IN)                      :: scalar
     TYPE(cp_dbcsr_type), INTENT(IN)          :: matrix
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'make_conformant_scalar_z', &
       routineP = moduleN//':'//routineN
@@ -66,10 +63,9 @@
     scalar_data_type = dbcsr_scalar_get_type(encapsulated)
     IF (scalar_data_type .EQ. dbcsr_type_complex_4 .OR.&
         scalar_data_type .EQ. dbcsr_type_complex_8) THEN
-       CALL cp_assert (data_type .EQ. dbcsr_type_complex_4 .OR.&
-            data_type .EQ. dbcsr_type_complex_8,&
-            cp_fatal_level, cp_wrong_args_error, routineN,&
-            "Can not conform a complex to a real number", error=error)
+       IF(.NOT.(data_type .EQ. dbcsr_type_complex_4 .OR.&
+            data_type .EQ. dbcsr_type_complex_8))&
+            STOP "make_conformant_scalar_z: Can not conform a complex to a real number"
     END IF
     CALL dbcsr_scalar_set_type (encapsulated,data_type)
   END FUNCTION make_conformant_scalar_z
@@ -95,9 +91,6 @@
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_reserve_block2d_z', &
       routineP = moduleN//':'//routineN
 
-    TYPE(cp_error_type)                      :: error
-
-    CALL cp_error_init (error)
     CALL dbcsr_reserve_block2d(matrix%matrix, row, col, block,&
          transposed, existed)
 
@@ -134,8 +127,7 @@
     CALL dbcsr_iterator_next_block (iterator, row, column,&
        block, transposed,&
        block_number, row_size, col_size, row_offset, col_offset)
-    CALL cp_assert(.NOT. transposed, cp_fatal_level, cp_internal_error,&
-         routineN, "CP2K does not handle transposed blocks.")
+    IF(transposed) STOP "cp_iterator_next_2d_block_z: CP2K does not handle transposed blocks."
 
   END SUBROUTINE cp_iterator_next_2d_block_z
 
@@ -168,8 +160,7 @@
 
     CALL dbcsr_iterator_next_block (iterator, row, column, block,&
        transposed, block_number, row_size, col_size, row_offset, col_offset)
-    CALL cp_assert(.NOT. transposed, cp_fatal_level, cp_internal_error,&
-         routineN, "CP2K does not handle transposed blocks.")
+    IF(transposed) STOP "cp_iterator_next_1d_block_z: CP2K does not handle transposed blocks."
 
   END SUBROUTINE cp_iterator_next_1d_block_z
 
@@ -194,9 +185,6 @@
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_put_block2d_z', &
       routineP = moduleN//':'//routineN
 
-    TYPE(cp_error_type)                      :: error
-
-    CALL cp_error_init (error)
     CALL dbcsr_put_block(matrix%matrix, row, col, block,&
        summation=summation, scale=scale)
 
@@ -223,9 +211,6 @@
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_put_block_z', &
       routineP = moduleN//':'//routineN
 
-    TYPE(cp_error_type)                      :: error
-
-    CALL cp_error_init (error)
     CALL dbcsr_put_block(matrix%matrix, row, col, block,&
        summation=summation, scale=scale)
 
@@ -254,9 +239,7 @@
       routineP = moduleN//':'//routineN
 
     LOGICAL                                  :: tr
-    TYPE(cp_error_type)                      :: error
 
-    CALL cp_error_init (error)
     tr=.FALSE.
     CALL dbcsr_get_block(matrix%matrix,row,col,block,tr,found,&
        row_size, col_size)
@@ -289,8 +272,7 @@
 
     CALL dbcsr_get_block_p(matrix%matrix,row,col,block,tr,found,&
          row_size, col_size)
-    CALL cp_assert(.NOT. tr, cp_fatal_level, cp_internal_error,&
-         routineN, "CP2K does not handle transposed blocks.")
+    IF(tr) STOP "cp_dbcsr_get_2d_block_p_z: CP2K does not handle transposed blocks."
   END SUBROUTINE cp_dbcsr_get_2d_block_p_z
 
 
@@ -316,13 +298,10 @@
       routineP = moduleN//':'//routineN
 
     LOGICAL                                   :: tr
-    TYPE(cp_error_type)                       :: error
 
-    CALL cp_error_init (error)
     CALL dbcsr_get_block_p(matrix%matrix,row,col,block,tr,found,&
        row_size, col_size)
-    CALL cp_assert(.NOT. tr, cp_fatal_level, cp_internal_error,&
-         routineN, "CP2K does not handle transposed blocks.")
+    IF(tr) STOP "cp_dbcsr_get_block_p_z: CP2K does not handle transposed blocks."
 
   END SUBROUTINE cp_dbcsr_get_block_p_z
 
@@ -331,12 +310,10 @@
 !> \brief ...
 !> \param matrix_a ...
 !> \param trace ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_trace_a_z (matrix_a, trace, error)
+  SUBROUTINE cp_dbcsr_trace_a_z (matrix_a, trace)
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: matrix_a
     COMPLEX(kind=real_8), INTENT(OUT)                     :: trace
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_trace_a_z', &
       routineP = moduleN//':'//routineN
@@ -359,14 +336,12 @@
 !> \param trans_a ...
 !> \param trans_b ...
 !> \param local_sum ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_trace_ab_z (matrix_a, matrix_b, trace, trans_a, trans_b, local_sum, error)
+  SUBROUTINE cp_dbcsr_trace_ab_z (matrix_a, matrix_b, trace, trans_a, trans_b, local_sum)
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: matrix_a, matrix_b
     COMPLEX(kind=real_8), INTENT(INOUT)                   :: trace
     CHARACTER(LEN=*), INTENT(IN), OPTIONAL   :: trans_a, trans_b
     LOGICAL, INTENT(IN), OPTIONAL            :: local_sum
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_trace_ab_z', &
       routineP = moduleN//':'//routineN
@@ -394,7 +369,6 @@
 !> \param last_k ...
 !> \param retain_sparsity ...
 !> \param filter_eps ...
-!> \param error ...
 !> \param flop ...
 ! *****************************************************************************
   SUBROUTINE cp_dbcsr_multiply_z (transa, transb,&
@@ -402,7 +376,7 @@
        first_row, last_row, first_column, last_column, first_k, last_k,&
        retain_sparsity, &
        filter_eps,&
-       error, flop)
+       flop)
     CHARACTER(LEN=1), INTENT(IN)             :: transa, transb
     COMPLEX(kind=real_8), INTENT(IN)                      :: alpha
     TYPE(cp_dbcsr_type), INTENT(IN)          :: matrix_a, matrix_b
@@ -413,7 +387,6 @@
                                                 first_k, last_k
     LOGICAL, INTENT(IN), OPTIONAL            :: retain_sparsity
     REAL(kind=real_8), INTENT(IN), OPTIONAL :: filter_eps
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
     INTEGER(int_8), INTENT(OUT), OPTIONAL    :: flop
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_multiply_z', &
@@ -437,7 +410,7 @@
     shape_b='R'
     IF(cp_dbcsr_nfullcols_total(matrix_b).EQ.cp_dbcsr_nfullrows_total(matrix_b)) shape_b='S'
     CALL matrix_match_sizes (matrix_c, matrix_a, transa, matrix_b, transb,&
-         new_a, new_b, new_a_is_new, new_b_is_new, error)
+         new_a, new_b, new_a_is_new, new_b_is_new)
     CALL dbcsr_multiply(transa, transb,&
          alpha, new_a%matrix, new_b%matrix, beta, matrix_c%matrix,&
          first_row, last_row, first_column, last_column, first_k, last_k,&
@@ -445,16 +418,16 @@
          filter_eps=filter_eps,&
          error=dbcsr_error, flop=flop)
     IF (new_a_is_new) THEN
-       CALL cp_dbcsr_release (new_a, error=error)
+       CALL cp_dbcsr_release (new_a)
     ENDIF
     IF (new_b_is_new) THEN
-       CALL cp_dbcsr_release (new_b, error=error)
+       CALL cp_dbcsr_release (new_b)
     ENDIF
     IF (prnt) THEN
        CALL cp_dbcsr_print (matrix_c, matlab_format=.TRUE.,&
-            variable_name="mpo", error=error)
+            variable_name="mpo")
     ENDIF
-    IF (verify) cs_b = cp_dbcsr_checksum (matrix_c, error=error)
+    IF (verify) cs_b = cp_dbcsr_checksum (matrix_c)
 
     IF (verify) THEN
        WRITE(*,'(A,4(1X,E9.3))')routineN//" checksums", cs_c, cs_b,&
@@ -473,13 +446,11 @@
 !> \param matrix_a ...
 !> \param alpha ...
 !> \param side ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_scale_by_vector_z (matrix_a, alpha, side, error)
+  SUBROUTINE cp_dbcsr_scale_by_vector_z (matrix_a, alpha, side)
     TYPE(cp_dbcsr_type), INTENT(INOUT)        :: matrix_a
     COMPLEX(kind=real_8), DIMENSION(:), INTENT(IN), TARGET :: alpha
     CHARACTER(LEN=*), INTENT(IN)              :: side
-    TYPE(cp_error_type), INTENT(INOUT)        :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_scale_by_vector_z ', &
       routineP = moduleN//':'//routineN
@@ -495,13 +466,11 @@
 !> \param matrix_a ...
 !> \param alpha_scalar ...
 !> \param last_column ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_scale_z (matrix_a, alpha_scalar, last_column, error)
+  SUBROUTINE cp_dbcsr_scale_z (matrix_a, alpha_scalar, last_column)
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: matrix_a
     COMPLEX(kind=real_8), INTENT(IN)                      :: alpha_scalar
     INTEGER, INTENT(IN), OPTIONAL            :: last_column
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_scale_z', &
       routineP = moduleN//':'//routineN
@@ -516,19 +485,17 @@
 !> \brief ...
 !> \param matrix ...
 !> \param alpha ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_set_z (matrix, alpha, error)
+  SUBROUTINE cp_dbcsr_set_z (matrix, alpha)
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: matrix
     COMPLEX(kind=real_8), INTENT(IN)                      :: alpha
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_set_z', &
       routineP = moduleN//':'//routineN
 
     TYPE(dbcsr_error_type)                   :: dbcsr_error
 
-    CALL dbcsr_set(matrix%matrix, cp_dbcsr_conform_scalar (alpha, matrix, error), dbcsr_error)
+    CALL dbcsr_set(matrix%matrix, cp_dbcsr_conform_scalar(alpha, matrix), dbcsr_error)
   END SUBROUTINE cp_dbcsr_set_z
 
 
@@ -538,13 +505,11 @@
 !> \param matrix_b ...
 !> \param alpha_scalar ...
 !> \param beta_scalar ...
-!> \param error ...
 ! *****************************************************************************
-  SUBROUTINE cp_dbcsr_add_z (matrix_a, matrix_b, alpha_scalar, beta_scalar, error)
+  SUBROUTINE cp_dbcsr_add_z (matrix_a, matrix_b, alpha_scalar, beta_scalar)
     TYPE(cp_dbcsr_type), INTENT(INOUT)       :: matrix_a
     TYPE(cp_dbcsr_type), INTENT(IN)          :: matrix_b
     COMPLEX(kind=real_8), INTENT(IN)                      :: alpha_scalar, beta_scalar
-    TYPE(cp_error_type), INTENT(INOUT)       :: error
 
     CHARACTER(len=*), PARAMETER :: routineN = 'cp_dbcsr_add_z', &
       routineP = moduleN//':'//routineN
