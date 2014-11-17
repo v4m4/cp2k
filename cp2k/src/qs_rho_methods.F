@@ -105,8 +105,6 @@ CONTAINS
     LOGICAL                                  :: dokp, failure, my_rebuild_ao, &
                                                 my_rebuild_grids
     REAL(KIND=dp), DIMENSION(:), POINTER     :: tot_rho_r
-    TYPE(cp_dbcsr_p_type), DIMENSION(:), &
-      POINTER                                :: matrix_s, rho_ao
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
       POINTER                                :: matrixkp_s, rho_ao_kp
     TYPE(cp_dbcsr_type), POINTER             :: refmatrix, tmatrix
@@ -135,29 +133,23 @@ CONTAINS
       my_basis_set_id = use_orb_basis_set
     END IF
 
-    CALL get_qs_env(qs_env, kpoints=kpoints, do_kpoints=dokp, error=error)
+    CALL get_qs_env(qs_env,&
+                    kpoints=kpoints,&
+                    do_kpoints=dokp,&
+                    pw_env=pw_env,&
+                    dft_control=dft_control,&
+                    error=error)
 
-    IF(dokp) THEN
-       SELECT CASE (my_basis_set_id)
-       CASE (use_orb_basis_set)
-         CALL get_qs_env(qs_env, sab_orb=sab_orb, error=error)
-         CALL get_kpoint_info(kpoints, matrix_s=matrixkp_s, error=error)
-       CASE (use_aux_fit_basis_set)
-         CPPostcondition(.FALSE.,cp_failure_level,routineP,error,failure)
-       END SELECT
-       refmatrix => matrixkp_s(1,1)%matrix
-       CALL get_kpoint_info(kpoints, ncount=ncount, error=error)
-    ELSE
-       SELECT CASE (my_basis_set_id)
-       CASE (use_orb_basis_set)
-         CALL get_qs_env(qs_env, matrix_s=matrix_s, sab_orb=sab_orb, error=error)
-       CASE (use_aux_fit_basis_set)
-         CALL get_qs_env(qs_env, matrix_s_aux_fit=matrix_s, sab_aux_fit=sab_orb, error=error)
-       END SELECT
-       refmatrix => matrix_s(1)%matrix
-    END IF
+    CALL get_kpoint_info(kpoints, ncount=ncount, error=error)
 
-    CALL get_qs_env(qs_env, pw_env=pw_env, dft_control=dft_control, error=error)
+    SELECT CASE (my_basis_set_id)
+      CASE (use_orb_basis_set)
+        CALL get_qs_env(qs_env, matrix_s=matrix_s, sab_orb=sab_orb, error=error)
+      CASE (use_aux_fit_basis_set)
+        CPPostcondition(.NOT.dokp, cp_failure_level,routineP,error,failure)
+        CALL get_qs_env(qs_env, matrix_s_aux_fit=matrix_s, sab_aux_fit=sab_orb, error=error)
+    END SELECT
+    refmatrix => matrix_s(1)%matrix
 
     CALL pw_env_get(pw_env,auxbas_pw_pool=auxbas_pw_pool,error=error)
     nspins=dft_control%nspins

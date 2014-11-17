@@ -326,7 +326,7 @@ CONTAINS
                cp_to_string(scf_env%method),error,failure)
        CASE(general_diag_method_nr)
           ! Diagonlization in non orthonormal case
-          CALL get_kpoint_info(kpoints,matrix_ks=matrix_ks,matrix_s=matrix_s,error=error)
+          CALL get_qs_env(qs_env,matrix_ks_kp=matrix_ks,matrix_s_kp=matrix_s,error=error)
           CALL do_general_diag_kp(scf_env,matrix_ks,matrix_s,kpoints,&
                scf_control,scf_section,diis_step,error=error)
        CASE(special_diag_method_nr)
@@ -347,7 +347,7 @@ CONTAINS
                cp_to_string(scf_env%method),error,failure)
     END SELECT
  
-  END SUBROUTINE qs_scf_new_mos_kp 
+  END SUBROUTINE qs_scf_new_mos_kp
 
 ! *****************************************************************************
 !> \brief the inner loop of scf, specific to using to the orbital transformation method

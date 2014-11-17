@@ -426,14 +426,15 @@ CONTAINS
                     para_env=para_env,&
                     ks_env=ks_env,&
                     dft_control=dft_control,&
+                    matrix_h_kp=matrix_h,&
+                    kinetic_kp=matrix_t,&
+                    matrix_s_kp=matrix_s,&
                     error=error)
 
     CALL get_kpoint_info(kpoint=kpoints,&
                          index_to_cell=index_to_cell,&
                          cell_to_index=cell_to_index,&
-                         matrix_h=matrix_h,&
-                         matrix_s=matrix_s,&
-                         matrix_t=matrix_t,error=error)
+                         error=error)
 
     nkind = SIZE(qs_kind_set)
     natom = SIZE(particle_set)
@@ -566,11 +567,12 @@ CONTAINS
     DEALLOCATE (umt,hmt,STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
 
-    ! *** Put the core Hamiltonian matrix in the QS environment ***
-    CALL set_kpoint_info(kpoint=kpoints,&
-                         matrix_s=matrix_s,&
-                         matrix_t=matrix_t,&
-                         matrix_h=matrix_h,error=error)
+    ! *** Put the core Hamiltonian matrix in the KS environment ***
+     CALL set_ks_env(ks_env,&
+                     matrix_h_kp=matrix_h,&
+                     kinetic_kp=matrix_t,&
+                     matrix_s_kp=matrix_s,&
+                     error=error)
 
 !   ! Print matrices if requested
 !   CALL dump_info_core_hamiltonian(matrix_s, matrix_t, matrix_h, &

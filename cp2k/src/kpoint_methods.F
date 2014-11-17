@@ -45,7 +45,6 @@ MODULE kpoint_methods
   USE kinds,                           ONLY: default_string_length,&
                                              dp
   USE kpoint_types,                    ONLY: get_kpoint_info,&
-                                             kp_opmat_create,&
                                              kpoint_env_create,&
                                              kpoint_env_p_type,&
                                              kpoint_env_type,&
@@ -258,8 +257,6 @@ CPSourceFileRef,&
     para_env => kpoint%para_env
     CPAssert(ASSOCIATED(para_env),cp_failure_level,routineP,error,failure)
     CPAssert(.NOT.ASSOCIATED(kpoint%kp_env),cp_failure_level,routineP,error,failure)
-
-    CALL kp_opmat_create(kpoint%opmats,error)
 
     NULLIFY(kp_env)
     nkp = kpoint%nkp
@@ -551,17 +548,17 @@ CPSourceFileRef,&
     itm(3) = MAXVAL(ABS(list(3,1:icount)))
     CALL mp_max(itm,para_env%group)
     it = MAXVAL(itm(1:3))
-    IF(ASSOCIATED(kpoint%opmats%index_to_cell)) THEN
-       DEALLOCATE(kpoint%opmats%index_to_cell,STAT=ierr)
+    IF(ASSOCIATED(kpoint%index_to_cell)) THEN
+       DEALLOCATE(kpoint%index_to_cell,STAT=ierr)
        CPPostcondition(ierr==0, cp_failure_level, routineP, error, failure)
     END IF
-    IF(ASSOCIATED(kpoint%opmats%cell_to_index)) THEN
-       DEALLOCATE(kpoint%opmats%cell_to_index,STAT=ierr)
+    IF(ASSOCIATED(kpoint%cell_to_index)) THEN
+       DEALLOCATE(kpoint%cell_to_index,STAT=ierr)
        CPPostcondition(ierr==0, cp_failure_level, routineP, error, failure)
     END IF
-    ALLOCATE(kpoint%opmats%cell_to_index(-itm(1):itm(1),-itm(2):itm(2),-itm(3):itm(3)),STAT=ierr)
+    ALLOCATE(kpoint%cell_to_index(-itm(1):itm(1),-itm(2):itm(2),-itm(3):itm(3)),STAT=ierr)
     CPPostcondition(ierr==0,cp_failure_level,routineP,error,failure)
-    cti => kpoint%opmats%cell_to_index
+    cti => kpoint%cell_to_index
     cti(:,:,:) = 0
     DO ic=1,icount
        i1 = list(1,ic)
@@ -584,7 +581,7 @@ CPSourceFileRef,&
         END DO
       END DO
     END DO
-    ALLOCATE(kpoint%opmats%index_to_cell(3,ncount),STAT=ierr)
+    ALLOCATE(kpoint%index_to_cell(3,ncount),STAT=ierr)
     CPPostcondition(ierr==0,cp_failure_level,routineP,error,failure)
     DO ic=1,ncount
        cell = MINLOC(cti)
@@ -592,23 +589,24 @@ CPSourceFileRef,&
        i2 = cell(2) - 1 - itm(2)
        i3 = cell(3) - 1 - itm(3)
        cti(i1,i2,i3) = 1000000
-       kpoint%opmats%index_to_cell(1,ic) = i1
-       kpoint%opmats%index_to_cell(2,ic) = i2
-       kpoint%opmats%index_to_cell(3,ic) = i3
+       kpoint%index_to_cell(1,ic) = i1
+       kpoint%index_to_cell(2,ic) = i2
+       kpoint%index_to_cell(3,ic) = i3
     END DO
     cti(:,:,:) = 0
     DO ic=1,ncount
-       i1 = kpoint%opmats%index_to_cell(1,ic)
-       i2 = kpoint%opmats%index_to_cell(2,ic)
-       i3 = kpoint%opmats%index_to_cell(3,ic)
+       i1 = kpoint%index_to_cell(1,ic)
+       i2 = kpoint%index_to_cell(2,ic)
+       i3 = kpoint%index_to_cell(3,ic)
        cti(i1,i2,i3) = ic
     END DO
 
     DEALLOCATE(list,STAT=ierr)
     CPPostcondition(ierr==0,cp_failure_level,routineP,error,failure)
 
-    ! keep pointer to this neighborlist 
-    kpoint%opmats%sab_nl => sab_nl
+    ! keep pointer to this neighborlist
+    STOP "TODO:    kpoint_init_cell_index"
+    !kpoint%opmats%sab_nl => sab_nl
 
   END SUBROUTINE kpoint_init_cell_index
 
@@ -909,103 +907,104 @@ CPSourceFileRef,&
     CPPostcondition(stat==0,cp_failure_level,routineP,error,failure)
     CALL cp_dbcsr_init(rpmat,error=error)
     CALL cp_dbcsr_init(cpmat,error=error)
-    CALL get_kpoint_info(kpoint,matrix_s=refmatrix,sab_nl=sab_nl,error=error)
-    CALL cp_dbcsr_create(rpmat,template=refmatrix(1,1)%matrix,&
-         matrix_type=dbcsr_type_symmetric,error=error)
-    CALL cp_dbcsr_create(cpmat,template=refmatrix(1,1)%matrix,&
-         matrix_type=dbcsr_type_antisymmetric,error=error)
-    CALL cp_dbcsr_alloc_block_from_nbl(rpmat,sab_nl,error)
-    CALL cp_dbcsr_alloc_block_from_nbl(cpmat,sab_nl,error)
-
-    CALL get_kpoint_info(kpoint,nkp=nkp,xkp=xkp,wkp=wkp,&
-                         para_env_inter_kp=para_env_inter_kp,&
-                         sab_nl=sab_nl,cell_to_index=cell_to_index,&
-                         ncount=ncount,error=error)
-    ! initialize real space density matrices
-    kp => kpoint%kp_env(1)%kpoint_env
-    nspin = SIZE(kp%mos,2)
-    nc = SIZE(kp%mos,1)
-    real_only = (nc==1)
-    bcntxt = kpoint%blacs_env_all%group
-    NULLIFY(fmdummy)
-    DO ispin=1,nspin
-       DO ic=1,ncount
-          CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp,error=error)
-       END DO
-       !
-       DO ik=1,nkp
-          my_kpgrp = (ik >= kpoint%kp_range(1) .AND. ik <= kpoint%kp_range(2))
-          IF(my_kpgrp) THEN
-            ikk = ik - kpoint%kp_range(1) + 1
-            kp => kpoint%kp_env(ikk)%kpoint_env
-          ELSE
-            NULLIFY(kp)
-          END IF
-          ! collect this density matrix on all processors
-          DO ic=1,nc
-             IF(my_kpgrp) THEN
-                CALL cp_fm_copy_general(kp%pmat(ic,ispin)%matrix,fmwork(ic)%matrix,bcntxt,error)
-             ELSE
-                CALL cp_fm_copy_general(fmdummy,fmwork(ic)%matrix,bcntxt,error)
-             END IF
-          END DO
-          ! reduce to dbcsr storage
-          IF(real_only) THEN
-             CALL copy_fm_to_dbcsr(fmwork(1)%matrix,rpmat,keep_sparsity=.TRUE.,error=error)
-          ELSE
-             CALL copy_fm_to_dbcsr(fmwork(1)%matrix,rpmat,keep_sparsity=.TRUE.,error=error)
-             ! it seems this copy to a antisymmetric dbcsr matrix changes sign!
-             CALL copy_fm_to_dbcsr(fmwork(2)%matrix,cpmat,keep_sparsity=.TRUE.,error=error)
-          END IF
-
-          ! transformation
-          CALL get_neighbor_list_set_p(neighbor_list_sets=sab_nl,symmetric=do_symmetric)
-          CALL neighbor_list_iterator_create(nl_iterator,sab_nl)
-          DO WHILE (neighbor_list_iterate(nl_iterator)==0)
-             CALL get_iterator_info(nl_iterator,iatom=iatom,jatom=jatom,cell=cell)
-
-             ! fc = +/-1 sign change from above, is used to get correct sign due to
-             !           a<->b ==> cell = -cell
-             irow = iatom
-             icol = jatom
-             fc = -1.0_dp
-             IF( do_symmetric .AND. iatom > jatom) THEN
-                irow = jatom
-                icol = iatom
-                fc = 1.0_dp
-             END IF
-             icell = cell_to_index(cell(1),cell(2),cell(3))
-             arg = REAL(cell(1),dp)*xkp(1,ik)+REAL(cell(2),dp)*xkp(2,ik)+REAL(cell(3),dp)*xkp(3,ik) 
-             coskl = wkp(ik)*COS(twopi*arg)
-             sinkl = wkp(ik)*fc*SIN(twopi*arg)
-
-             CALL cp_dbcsr_get_block_p(matrix=denmat(ispin,icell)%matrix,row=irow,col=icol,&
-                                       block=dblock,found=found)
-             CPPostcondition(found,cp_failure_level,routineP,error,failure)
-
-             IF(real_only) THEN
-                CALL cp_dbcsr_get_block_p(matrix=rpmat,row=irow,col=icol,&
-                                       block=rblock,found=found)
-                CPPostcondition(found,cp_failure_level,routineP,error,failure)
-                dblock = dblock + coskl*rblock
-             ELSE
-                CALL cp_dbcsr_get_block_p(matrix=rpmat,row=irow,col=icol,&
-                                       block=rblock,found=found)
-                CPPostcondition(found,cp_failure_level,routineP,error,failure)
-                CALL cp_dbcsr_get_block_p(matrix=cpmat,row=irow,col=icol,&
-                                       block=cblock,found=found)
-                CPPostcondition(found,cp_failure_level,routineP,error,failure)
-                dblock = dblock + coskl*rblock
-                dblock = dblock + sinkl*cblock
-             END IF
-          END DO
-          CALL neighbor_list_iterator_release(nl_iterator)
-
-       END DO
-    END DO
-
-    CALL cp_dbcsr_deallocate_matrix(rpmat,error)
-    CALL cp_dbcsr_deallocate_matrix(cpmat,error)
+    STOP "TODO: kpoint_methods"
+    !CALL get_kpoint_info(kpoint,matrix_s=refmatrix,sab_nl=sab_nl,error=error)
+    !CALL cp_dbcsr_create(rpmat,template=refmatrix(1,1)%matrix,&
+    !     matrix_type=dbcsr_type_symmetric,error=error)
+    !CALL cp_dbcsr_create(cpmat,template=refmatrix(1,1)%matrix,&
+    !     matrix_type=dbcsr_type_antisymmetric,error=error)
+    !CALL cp_dbcsr_alloc_block_from_nbl(rpmat,sab_nl,error)
+    !CALL cp_dbcsr_alloc_block_from_nbl(cpmat,sab_nl,error)
+    !
+    !CALL get_kpoint_info(kpoint,nkp=nkp,xkp=xkp,wkp=wkp,&
+    !                     para_env_inter_kp=para_env_inter_kp,&
+    !                     sab_nl=sab_nl,cell_to_index=cell_to_index,&
+    !                     ncount=ncount,error=error)
+    !! initialize real space density matrices
+    !kp => kpoint%kp_env(1)%kpoint_env
+    !nspin = SIZE(kp%mos,2)
+    !nc = SIZE(kp%mos,1)
+    !real_only = (nc==1)
+    !bcntxt = kpoint%blacs_env_all%group
+    !NULLIFY(fmdummy)
+    !DO ispin=1,nspin
+    !   DO ic=1,ncount
+    !      CALL cp_dbcsr_set(denmat(ispin,ic)%matrix,0.0_dp,error=error)
+    !   END DO
+    !   !
+    !   DO ik=1,nkp
+    !      my_kpgrp = (ik >= kpoint%kp_range(1) .AND. ik <= kpoint%kp_range(2))
+    !      IF(my_kpgrp) THEN
+    !        ikk = ik - kpoint%kp_range(1) + 1
+    !        kp => kpoint%kp_env(ikk)%kpoint_env
+    !      ELSE
+    !        NULLIFY(kp)
+    !      END IF
+    !      ! collect this density matrix on all processors
+    !      DO ic=1,nc
+    !         IF(my_kpgrp) THEN
+    !            CALL cp_fm_copy_general(kp%pmat(ic,ispin)%matrix,fmwork(ic)%matrix,bcntxt,error)
+    !         ELSE
+    !            CALL cp_fm_copy_general(fmdummy,fmwork(ic)%matrix,bcntxt,error)
+    !         END IF
+    !      END DO
+    !      ! reduce to dbcsr storage
+    !      IF(real_only) THEN
+    !         CALL copy_fm_to_dbcsr(fmwork(1)%matrix,rpmat,keep_sparsity=.TRUE.,error=error)
+    !      ELSE
+    !         CALL copy_fm_to_dbcsr(fmwork(1)%matrix,rpmat,keep_sparsity=.TRUE.,error=error)
+    !         ! it seems this copy to a antisymmetric dbcsr matrix changes sign!
+    !         CALL copy_fm_to_dbcsr(fmwork(2)%matrix,cpmat,keep_sparsity=.TRUE.,error=error)
+    !      END IF
+    !
+    !      ! transformation
+    !      CALL get_neighbor_list_set_p(neighbor_list_sets=sab_nl,symmetric=do_symmetric)
+    !      CALL neighbor_list_iterator_create(nl_iterator,sab_nl)
+    !      DO WHILE (neighbor_list_iterate(nl_iterator)==0)
+    !         CALL get_iterator_info(nl_iterator,iatom=iatom,jatom=jatom,cell=cell)
+    !
+    !         ! fc = +/-1 sign change from above, is used to get correct sign due to
+    !         !           a<->b ==> cell = -cell
+    !         irow = iatom
+    !         icol = jatom
+    !         fc = -1.0_dp
+    !         IF( do_symmetric .AND. iatom > jatom) THEN
+    !            irow = jatom
+    !            icol = iatom
+    !            fc = 1.0_dp
+    !         END IF
+    !         icell = cell_to_index(cell(1),cell(2),cell(3))
+    !         arg = REAL(cell(1),dp)*xkp(1,ik)+REAL(cell(2),dp)*xkp(2,ik)+REAL(cell(3),dp)*xkp(3,ik) 
+    !         coskl = wkp(ik)*COS(twopi*arg)
+    !         sinkl = wkp(ik)*fc*SIN(twopi*arg)
+    !
+    !         CALL cp_dbcsr_get_block_p(matrix=denmat(ispin,icell)%matrix,row=irow,col=icol,&
+    !                                   block=dblock,found=found)
+    !         CPPostcondition(found,cp_failure_level,routineP,error,failure)
+    !
+    !         IF(real_only) THEN
+    !            CALL cp_dbcsr_get_block_p(matrix=rpmat,row=irow,col=icol,&
+    !                                   block=rblock,found=found)
+    !            CPPostcondition(found,cp_failure_level,routineP,error,failure)
+    !            dblock = dblock + coskl*rblock
+    !         ELSE
+    !            CALL cp_dbcsr_get_block_p(matrix=rpmat,row=irow,col=icol,&
+    !                                   block=rblock,found=found)
+    !            CPPostcondition(found,cp_failure_level,routineP,error,failure)
+    !            CALL cp_dbcsr_get_block_p(matrix=cpmat,row=irow,col=icol,&
+    !                                   block=cblock,found=found)
+    !            CPPostcondition(found,cp_failure_level,routineP,error,failure)
+    !            dblock = dblock + coskl*rblock
+    !            dblock = dblock + sinkl*cblock
+    !         END IF
+    !      END DO
+    !      CALL neighbor_list_iterator_release(nl_iterator)
+    !
+    !   END DO
+    !END DO
+    !
+    !CALL cp_dbcsr_deallocate_matrix(rpmat,error)
+    !CALL cp_dbcsr_deallocate_matrix(cpmat,error)
 
   END SUBROUTINE kpoint_density_transform
 
