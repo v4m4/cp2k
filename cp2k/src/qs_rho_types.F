@@ -322,7 +322,7 @@ CONTAINS
   END SUBROUTINE qs_rho_get
 
 ! *****************************************************************************
-!> \brief Ensure that non-kpoint code does not run during a k-point calculation.
+!> \brief TODO
 !> \author Ole Schuett
 ! *****************************************************************************
   FUNCTION get_gamma_point(matrix_set) RESULT(res)
@@ -393,7 +393,7 @@ CONTAINS
     CPPrecondition(ASSOCIATED(rho_struct),cp_failure_level,routineP,error,failure)
     CPPrecondition(rho_struct%ref_count>0,cp_failure_level,routineP,error,failure)
 
-    IF (PRESENT(rho_ao)) rho_struct%rho_ao_kp(1:SIZE(rho_ao), 1:1) => rho_ao
+    IF (PRESENT(rho_ao)) CALL set_gamma_point(rho_struct%rho_ao_kp, rho_ao)
     IF (PRESENT(rho_ao_im)) rho_struct%rho_ao_im => rho_ao_im
     IF (PRESENT(rho_ao_kp)) rho_struct%rho_ao_kp => rho_ao_kp
     IF (PRESENT(rho_r))  rho_struct%rho_r  => rho_r
@@ -414,6 +414,23 @@ CONTAINS
     IF (PRESENT(tot_rho_g)) rho_struct%tot_rho_g => tot_rho_g
 
   END SUBROUTINE qs_rho_set
+
+! *****************************************************************************
+!> \brief TODO
+!> \author Ole Schuett
+! *****************************************************************************
+  SUBROUTINE set_gamma_point(matrix_set_kp, matrix_set_gamma)
+     TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER :: matrix_set_kp
+     TYPE(cp_dbcsr_p_type), DIMENSION(:), POINTER :: matrix_set_gamma
+     INTEGER                                        :: n
+
+     IF(ASSOCIATED(matrix_set_gamma)) THEN
+        n = SIZE(matrix_set_gamma)
+        matrix_set_kp(1:n, 1:1) => matrix_set_gamma
+     ELSE
+         matrix_set_kp => Null()
+     ENDIF
+  END SUBROUTINE set_gamma_point
 
 END MODULE qs_rho_types
 

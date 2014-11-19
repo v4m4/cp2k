@@ -512,7 +512,7 @@ END SUBROUTINE qs_ks_env_create
   END SUBROUTINE get_ks_env
 
 ! *****************************************************************************
-!> \brief Ensure that non-kpoint code does not run during a k-point calculation.
+!> \brief TODO
 !> \author Ole Schuett
 ! *****************************************************************************
   FUNCTION get_gamma_point(matrix_set) RESULT(res)
@@ -650,19 +650,19 @@ END SUBROUTINE qs_ks_env_create
      IF (PRESENT(v_hartree_rspace)) ks_env%v_hartree_rspace => v_hartree_rspace
 
      IF (PRESENT(matrix_h_kp)) ks_env%matrix_h_kp => matrix_h_kp
-     IF (PRESENT(matrix_h)) ks_env%matrix_h_kp(1:SIZE(matrix_h), 1:1) => matrix_h
+     IF (PRESENT(matrix_h))  CALL set_gamma_point(ks_env%matrix_h_kp, matrix_h)
 
      IF (PRESENT(matrix_ks_kp)) ks_env%matrix_ks_kp => matrix_ks_kp
-     IF (PRESENT(matrix_ks)) ks_env%matrix_ks_kp(1:SIZE(matrix_ks), 1:1) => matrix_ks
+     IF (PRESENT(matrix_ks)) CALL set_gamma_point(ks_env%matrix_ks_kp, matrix_ks)
 
      IF (PRESENT(matrix_vxc_kp)) ks_env%matrix_vxc_kp => matrix_vxc_kp
-     IF (PRESENT(matrix_vxc)) ks_env%matrix_vxc_kp(1:SIZE(matrix_vxc), 1:1) => matrix_vxc
+     IF (PRESENT(matrix_vxc)) CALL set_gamma_point(ks_env%matrix_vxc_kp, matrix_vxc)
 
      IF (PRESENT(matrix_s_kp)) ks_env%matrix_s_kp => matrix_s_kp
-     IF (PRESENT(matrix_s)) ks_env%matrix_s_kp(1:SIZE(matrix_s), 1:1) => matrix_s
+     IF (PRESENT(matrix_s)) CALL set_gamma_point(ks_env%matrix_s_kp, matrix_s)
 
      IF (PRESENT(kinetic_kp)) ks_env%kinetic_kp => kinetic_kp
-     IF (PRESENT(kinetic)) ks_env%kinetic_kp(1:SIZE(kinetic), 1:1) => kinetic
+     IF (PRESENT(kinetic))  CALL set_gamma_point(ks_env%kinetic_kp, kinetic)
 
      IF (PRESENT(matrix_ks_im)) ks_env%matrix_ks_im => matrix_ks_im
      IF (PRESENT(matrix_ks_aux_fit)) ks_env%matrix_ks_aux_fit => matrix_ks_aux_fit
@@ -741,6 +741,23 @@ END SUBROUTINE qs_ks_env_create
        ks_env%blacs_env => blacs_env
     ENDIF
   END SUBROUTINE set_ks_env
+
+! *****************************************************************************
+!> \brief TODO
+!> \author Ole Schuett
+! *****************************************************************************
+  SUBROUTINE set_gamma_point(matrix_set_kp, matrix_set_gamma)
+     TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER :: matrix_set_kp
+     TYPE(cp_dbcsr_p_type), DIMENSION(:), POINTER :: matrix_set_gamma
+     INTEGER                                        :: n
+
+     IF(ASSOCIATED(matrix_set_gamma)) THEN
+        n = SIZE(matrix_set_gamma)
+        matrix_set_kp(1:n, 1:1) => matrix_set_gamma
+     ELSE
+         matrix_set_kp => Null()
+     ENDIF
+  END SUBROUTINE set_gamma_point
 
 ! *****************************************************************************
 !> \brief releases the ks_env (see doc/ReferenceCounting.html)
