@@ -421,11 +421,11 @@ END SUBROUTINE qs_ks_env_create
      IF (PRESENT(forces_up_to_date)) forces_up_to_date = ks_env%forces_up_to_date
      IF (PRESENT(v_hartree_rspace)) v_hartree_rspace => ks_env%v_hartree_rspace
 
-     IF (PRESENT(matrix_ks)) matrix_ks => ks_env%matrix_ks_kp(1,:)
-     IF (PRESENT(matrix_s)) matrix_s => ks_env%matrix_s_kp(1,:)
-     IF (PRESENT(kinetic)) kinetic => ks_env%kinetic_kp(1,:)
-     IF (PRESENT(matrix_h)) matrix_h => ks_env%matrix_h_kp(1,:)
-     IF (PRESENT(matrix_vxc)) matrix_vxc => ks_env%matrix_vxc_kp(1,:)
+     IF (PRESENT(matrix_ks)) matrix_ks => get_gamma_point(ks_env%matrix_ks_kp)
+     IF (PRESENT(matrix_s)) matrix_s => get_gamma_point(ks_env%matrix_s_kp)
+     IF (PRESENT(kinetic)) kinetic => get_gamma_point(ks_env%kinetic_kp)
+     IF (PRESENT(matrix_h)) matrix_h => get_gamma_point(ks_env%matrix_h_kp)
+     IF (PRESENT(matrix_vxc)) matrix_vxc => get_gamma_point(ks_env%matrix_vxc_kp)
 
      IF (PRESENT(matrix_ks_kp)) matrix_ks_kp => ks_env%matrix_ks_kp
      IF (PRESENT(matrix_s_kp)) matrix_s_kp => ks_env%matrix_s_kp
@@ -511,6 +511,21 @@ END SUBROUTINE qs_ks_env_create
 
   END SUBROUTINE get_ks_env
 
+! *****************************************************************************
+!> \brief Ensure that non-kpoint code does not run during a k-point calculation.
+!> \author Ole Schuett
+! *****************************************************************************
+  FUNCTION get_gamma_point(matrix_set) RESULT(res)
+     TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER :: matrix_set
+     TYPE(cp_dbcsr_p_type), DIMENSION(:),   POINTER :: res
+     IF(ASSOCIATED(matrix_set)) THEN
+        IF(SIZE(matrix_set, 2) /= 1) &
+           CALL ABORT() !STOP "get_ks_env: not implemented for k-points"
+        res => matrix_set(:,1)
+     ELSE
+        res => Null()
+     ENDIF
+  END FUNCTION get_gamma_point
 
 ! *****************************************************************************
 !> \brief ...
@@ -634,40 +649,20 @@ END SUBROUTINE qs_ks_env_create
           ks_env%forces_up_to_date=.FALSE.
      IF (PRESENT(v_hartree_rspace)) ks_env%v_hartree_rspace => v_hartree_rspace
 
-     IF (PRESENT(matrix_h_kp) .OR. PRESENT(matrix_h)) THEN
-         IF(ASSOCIATED(ks_env%matrix_h_kp))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_h_kp, error)
-         IF (PRESENT(matrix_h_kp)) ks_env%matrix_h_kp => matrix_h_kp
-         IF (PRESENT(matrix_h)) ks_env%matrix_h_kp(1:1, 1:SIZE(matrix_h)) => matrix_h
-     ENDIF
+     IF (PRESENT(matrix_h_kp)) ks_env%matrix_h_kp => matrix_h_kp
+     IF (PRESENT(matrix_h)) ks_env%matrix_h_kp(1:SIZE(matrix_h), 1:1) => matrix_h
 
-     IF (PRESENT(matrix_ks_kp) .OR. PRESENT(matrix_ks)) THEN
-         IF(ASSOCIATED(ks_env%matrix_ks_kp))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_ks_kp, error)
-         IF (PRESENT(matrix_ks_kp)) ks_env%matrix_ks_kp => matrix_ks_kp
-         IF (PRESENT(matrix_ks)) ks_env%matrix_ks_kp(1:1, 1:SIZE(matrix_ks)) => matrix_ks
-     ENDIF
+     IF (PRESENT(matrix_ks_kp)) ks_env%matrix_ks_kp => matrix_ks_kp
+     IF (PRESENT(matrix_ks)) ks_env%matrix_ks_kp(1:SIZE(matrix_ks), 1:1) => matrix_ks
 
-     IF (PRESENT(matrix_vxc_kp) .OR. PRESENT(matrix_vxc)) THEN
-         IF(ASSOCIATED(ks_env%matrix_vxc_kp))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_vxc_kp, error)
-         IF (PRESENT(matrix_vxc_kp)) ks_env%matrix_vxc_kp => matrix_vxc_kp
-         IF (PRESENT(matrix_vxc)) ks_env%matrix_vxc_kp(1:1, 1:SIZE(matrix_vxc)) => matrix_vxc
-     ENDIF
+     IF (PRESENT(matrix_vxc_kp)) ks_env%matrix_vxc_kp => matrix_vxc_kp
+     IF (PRESENT(matrix_vxc)) ks_env%matrix_vxc_kp(1:SIZE(matrix_vxc), 1:1) => matrix_vxc
 
-     IF (PRESENT(matrix_s_kp) .OR. PRESENT(matrix_s)) THEN
-         IF(ASSOCIATED(ks_env%matrix_s_kp))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%matrix_s_kp, error)
-         IF (PRESENT(matrix_s_kp)) ks_env%matrix_s_kp => matrix_s_kp
-         IF (PRESENT(matrix_s)) ks_env%matrix_s_kp(1:1, 1:SIZE(matrix_s)) => matrix_s
-     ENDIF
+     IF (PRESENT(matrix_s_kp)) ks_env%matrix_s_kp => matrix_s_kp
+     IF (PRESENT(matrix_s)) ks_env%matrix_s_kp(1:SIZE(matrix_s), 1:1) => matrix_s
 
-     IF (PRESENT(kinetic_kp) .OR. PRESENT(kinetic)) THEN
-         IF(ASSOCIATED(ks_env%kinetic_kp))&
-            CALL cp_dbcsr_deallocate_matrix_set(ks_env%kinetic_kp, error)
-         IF (PRESENT(kinetic_kp)) ks_env%kinetic_kp => kinetic_kp
-         IF (PRESENT(kinetic)) ks_env%kinetic_kp(1:1, 1:SIZE(kinetic)) => kinetic
-     ENDIF
+     IF (PRESENT(kinetic_kp)) ks_env%kinetic_kp => kinetic_kp
+     IF (PRESENT(kinetic)) ks_env%kinetic_kp(1:SIZE(kinetic), 1:1) => kinetic
 
      IF (PRESENT(matrix_ks_im)) ks_env%matrix_ks_im => matrix_ks_im
      IF (PRESENT(matrix_ks_aux_fit)) ks_env%matrix_ks_aux_fit => matrix_ks_aux_fit

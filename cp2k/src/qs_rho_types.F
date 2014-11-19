@@ -58,8 +58,7 @@ MODULE qs_rho_types
 ! *****************************************************************************
   TYPE qs_rho_type
      PRIVATE
-     TYPE(cp_dbcsr_p_type), DIMENSION(:), POINTER   :: rho_ao => Null(),&
-                                                       rho_ao_im => Null()
+     TYPE(cp_dbcsr_p_type), DIMENSION(:), POINTER   :: rho_ao_im => Null()
      TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER :: rho_ao_kp => Null()
      TYPE(pw_p_type), DIMENSION(:), POINTER :: rho_g  => Null(),&
                                                rho_r  => Null(),&
@@ -227,8 +226,6 @@ CONTAINS
        DEALLOCATE(rho_struct%tau_g)
     END IF
 
-    IF (ASSOCIATED(rho_struct%rho_ao))&
-       CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao,error=error)
     IF (ASSOCIATED(rho_struct%rho_ao_im))&
        CALL cp_dbcsr_deallocate_matrix_set(rho_struct%rho_ao_im,error=error)
     IF (ASSOCIATED(rho_struct%rho_ao_kp))&
@@ -301,7 +298,8 @@ CONTAINS
     CPPrecondition(ASSOCIATED(rho_struct),cp_failure_level,routineP,error,failure)
     CPPrecondition(rho_struct%ref_count>0,cp_failure_level,routineP,error,failure)
 
-    IF (PRESENT(rho_ao)) rho_ao => rho_struct%rho_ao
+    IF (PRESENT(rho_ao)) rho_ao => get_gamma_point(rho_struct%rho_ao_kp)
+
     IF (PRESENT(rho_ao_im)) rho_ao_im => rho_struct%rho_ao_im
     IF (PRESENT(rho_ao_kp)) rho_ao_kp => rho_struct%rho_ao_kp
     IF (PRESENT(rho_r)) rho_r => rho_struct%rho_r
@@ -323,6 +321,21 @@ CONTAINS
 
   END SUBROUTINE qs_rho_get
 
+! *****************************************************************************
+!> \brief Ensure that non-kpoint code does not run during a k-point calculation.
+!> \author Ole Schuett
+! *****************************************************************************
+  FUNCTION get_gamma_point(matrix_set) RESULT(res)
+     TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER :: matrix_set
+     TYPE(cp_dbcsr_p_type), DIMENSION(:),   POINTER :: res
+     IF(ASSOCIATED(matrix_set)) THEN
+        IF(SIZE(matrix_set, 2) /= 1) &
+           CALL ABORT() !STOP "qs_rho_get: not implemented for k-points"
+        res => matrix_set(:,1)
+     ELSE
+        res => Null()
+     ENDIF
+  END FUNCTION get_gamma_point
 
 ! *****************************************************************************
 !> \brief ...
@@ -380,7 +393,7 @@ CONTAINS
     CPPrecondition(ASSOCIATED(rho_struct),cp_failure_level,routineP,error,failure)
     CPPrecondition(rho_struct%ref_count>0,cp_failure_level,routineP,error,failure)
 
-    IF (PRESENT(rho_ao)) rho_struct%rho_ao => rho_ao
+    IF (PRESENT(rho_ao)) rho_struct%rho_ao_kp(1:SIZE(rho_ao), 1:1) => rho_ao
     IF (PRESENT(rho_ao_im)) rho_struct%rho_ao_im => rho_ao_im
     IF (PRESENT(rho_ao_kp)) rho_struct%rho_ao_kp => rho_ao_kp
     IF (PRESENT(rho_r))  rho_struct%rho_r  => rho_r

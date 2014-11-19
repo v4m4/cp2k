@@ -105,8 +105,10 @@ CONTAINS
     LOGICAL                                  :: dokp, failure, my_rebuild_ao, &
                                                 my_rebuild_grids
     REAL(KIND=dp), DIMENSION(:), POINTER     :: tot_rho_r
+    TYPE(cp_dbcsr_p_type), DIMENSION(:), &
+      POINTER                                :: matrix_s
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
-      POINTER                                :: matrixkp_s, rho_ao_kp
+      POINTER                                :: rho_ao_kp
     TYPE(cp_dbcsr_type), POINTER             :: refmatrix, tmatrix
     TYPE(dft_control_type), POINTER          :: dft_control
     TYPE(kpoint_type), POINTER               :: kpoints
@@ -118,7 +120,7 @@ CONTAINS
     TYPE(pw_pool_type), POINTER              :: auxbas_pw_pool
 
     NULLIFY (pw_env,auxbas_pw_pool,matrix_s,dft_control)
-    NULLIFY (tot_rho_r,rho_ao,rho_ao_kp,rho_r,rho_g,drho_r,drho_g,tau_r,tau_g)
+    NULLIFY (tot_rho_r,rho_ao_kp,rho_r,rho_g,drho_r,drho_g,tau_r,tau_g)
     NULLIFY (sab_orb)
     CALL timeset(routineN,handle)
     failure=.FALSE.
@@ -157,7 +159,6 @@ CONTAINS
     IF (.NOT.ASSOCIATED(rho)) STOP routineP//" rho not associated"
     CALL qs_rho_get(rho,&
                     tot_rho_r=tot_rho_r,&
-                    rho_ao=rho_ao,&
                     rho_ao_kp=rho_ao_kp,&
                     rho_r=rho_r,&
                     rho_g=rho_g,&
@@ -174,17 +175,14 @@ CONTAINS
     ENDIF
 
     ! rho_ao
-    IF (my_rebuild_ao.OR.(.NOT.ASSOCIATED(rho_ao))) THEN
-       IF (.NOT.failure) THEN
-          IF (ASSOCIATED(rho_ao)) THEN
-             CALL cp_dbcsr_deallocate_matrix_set(rho_ao,error=error)
-          END IF
-          ! Create a new density matrix set
-          CALL cp_dbcsr_allocate_matrix_set(rho_ao,nspins,error=error)
-          CALL qs_rho_set(rho, rho_ao=rho_ao, error=error)
-          DO i=1,nspins
-             ALLOCATE(rho_ao(i)%matrix)
-             tmatrix => rho_ao(i)%matrix
+    IF (my_rebuild_ao.OR.(.NOT.ASSOCIATED(rho_ao_kp))) THEN
+       IF (ASSOCIATED(rho_ao_kp)) &
+          CALL cp_dbcsr_deallocate_matrix_set(rho_ao_kp,error=error)
+       ! Create a new density matrix set
+       CALL cp_dbcsr_allocate_matrix_set(rho_ao_kp,nspins,ncount,error=error)
+       CALL qs_rho_set(rho, rho_ao_kp=rho_ao_kp, error=error)
+       DO i=1,nspins
+          DO ic=1,ncount
              IF (nspins > 1) THEN
                 IF (i == 1) THEN
                    headline = "DENSITY MATRIX FOR ALPHA SPIN"
@@ -194,6 +192,8 @@ CONTAINS
              ELSE
                 headline = "DENSITY MATRIX"
              END IF
+             ALLOCATE(rho_ao_kp(i,ic)%matrix)
+             tmatrix => rho_ao_kp(i,ic)%matrix
              CALL cp_dbcsr_init(tmatrix, error=error)
              CALL cp_dbcsr_create(matrix=tmatrix, name=TRIM(headline),&
                   dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
@@ -203,31 +203,7 @@ CONTAINS
              CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error=error)
              CALL cp_dbcsr_set(tmatrix,0.0_dp,error=error)
           END DO
-          ! kpoints
-          IF(dokp) THEN
-             IF (ASSOCIATED(rho_ao_kp)) THEN
-                CALL cp_dbcsr_deallocate_matrix_set(rho_ao_kp,error=error)
-             END IF
-             ! Create a new density matrix set
-             CALL cp_dbcsr_allocate_matrix_set(rho_ao_kp,nspins,ncount,error=error)
-             CALL qs_rho_set(rho, rho_ao_kp=rho_ao_kp, error=error)
-             DO i=1,nspins
-                DO ic=1,ncount
-                   ALLOCATE(rho_ao_kp(i,ic)%matrix)
-                   tmatrix => rho_ao_kp(i,ic)%matrix
-                   headline = "DENSITY MATRIX (lattice vector)"
-                   CALL cp_dbcsr_init(tmatrix, error=error)
-                   CALL cp_dbcsr_create(matrix=tmatrix, name=TRIM(headline),&
-                        dist=cp_dbcsr_distribution(refmatrix), matrix_type=dbcsr_type_symmetric,&
-                        row_blk_size=cp_dbcsr_row_block_sizes(refmatrix),&
-                        col_blk_size=cp_dbcsr_col_block_sizes(refmatrix),&
-                        nblks=0, nze=0, error=error)
-                   CALL cp_dbcsr_alloc_block_from_nbl(tmatrix,sab_orb,error=error)
-                   CALL cp_dbcsr_set(tmatrix,0.0_dp,error=error)
-                END DO
-             END DO
-          END IF
-       END IF
+       END DO
     END IF
 
     ! rho_r

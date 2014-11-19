@@ -1661,7 +1661,7 @@ CONTAINS
     INTEGER, DIMENSION(:, :), POINTER        :: index_to_cell
     LOGICAL                                  :: do_kpoints
     TYPE(cp_dbcsr_p_type), DIMENSION(:), &
-      POINTER                                :: matrix_ks, matrix_ks_aux_fit, &
+      POINTER                                :: matrix_ks_aux_fit, &
                                                 matrix_s, matrix_s_aux_fit
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
       POINTER                                :: matrixkp_ks

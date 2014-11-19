@@ -229,6 +229,9 @@ CONTAINS
     CALL get_qs_env(qs_env=qs_env,&
                     atomic_kind_set=atomic_kind_set,&
                     qs_kind_set=qs_kind_set,&
+                    matrix_h=matrix_h,&
+                    kinetic=matrix_t,&
+                    matrix_s=matrix_s,&
                     oce=oce, &
                     particle_set=particle_set,&
                     sab_orb=sab_orb,&
