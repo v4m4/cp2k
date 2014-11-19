@@ -218,10 +218,6 @@ CONTAINS
 
     CALL qs_rho_get(rho, rho_ao_kp=rho_ao_kp, error=error)
 
-
-    IF(do_kpoints .AND. density_guess==restart_guess) &
-       STOP "calculate_first_density_matrix: restart not implemented for k-points"
-
     ! just initialize the first image, the other density are set to zero
     DO ispin=1, dft_control%nspins
        DO ic=1,SIZE(rho_ao_kp,2)
@@ -243,6 +239,9 @@ CONTAINS
     ofgpw = dft_control%qs_control%ofgpw
     density_guess=scf_control%density_guess
     do_std_diag = .FALSE.
+
+    IF(do_kpoints .AND. density_guess==restart_guess) &
+       STOP "calculate_first_density_matrix: restart not implemented for k-points"
 
     safe_density_guess = atomic_guess
     IF ( dft_control%qs_control%semi_empirical .OR. dft_control%qs_control%dftb .OR. &
