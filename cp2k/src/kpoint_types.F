@@ -48,31 +48,7 @@ MODULE kpoint_types
   PUBLIC :: read_kpoint_section, write_kpoint_info
   PUBLIC :: kpoint_env_type, kpoint_env_p_type
   PUBLIC :: kpoint_env_create
-  !PUBLIC :: kp_opmat_create
 
-! *****************************************************************************  
-!> \brief Keeps operator matrices in real space form
-!> \param index_to_cell   given a real space index, returns a cell triple
-!> \param cell_to_index   given a cell triple, returns the real space index
-!> \param sab_nl          neighbourlist that defines real space matrices
-!> \param matrix_ks       Kohn-Sham matrices (spin,rs index)
-!> \param matrix_s        Overlap matrices (spin,rs index)
-!> \param matrix_t        Kinetic energy matrices (spin,rs index)
-!> \param matrix_vhxc     Potential matrices (spin,rs index)
-!> \param matrix_h        Core matrices (spin,rs index)
-!> \author JGH   
-! *****************************************************************************
-  !TYPE opmat_type
-  !   INTEGER, DIMENSION(:,:), POINTER                  :: index_to_cell
-  !   INTEGER, DIMENSION(:,:,:), POINTER                :: cell_to_index
-  !   TYPE(neighbor_list_set_p_type), DIMENSION(:),&
-  !      POINTER                                        :: sab_nl
-  !   !TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER    :: matrix_ks
-  !   !TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER    :: matrix_s
-  !   !TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER    :: matrix_t
-  !   !TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER    :: matrix_vhxc
-  !   !TYPE(cp_dbcsr_p_type), DIMENSION(:,:), POINTER    :: matrix_h
-  !END TYPE opmat_type
 
 ! *****************************************************************************  
 !> \brief Keeps information about a specific k-point
@@ -157,10 +133,13 @@ MODULE kpoint_types
      TYPE(cp_blacs_env_type), POINTER        :: blacs_env => Null()
      INTEGER, DIMENSION(:,:), POINTER        :: index_to_cell => Null()
      INTEGER, DIMENSION(:,:,:), POINTER      :: cell_to_index => Null()
+     TYPE(neighbor_list_set_p_type), &
+       DIMENSION(:), POINTER                 :: sab_nl => Null()
      ! environment
      TYPE(kpoint_env_p_type), DIMENSION(:),&
        POINTER                               :: kp_env => Null()
      TYPE(qs_matrix_pools_type), POINTER     :: mpools => Null()
+     
   END TYPE kpoint_type
 
 ! *****************************************************************************  
@@ -374,7 +353,7 @@ CONTAINS
       POINTER                                :: cell_to_index
     INTEGER, OPTIONAL                        :: ncount
     TYPE(neighbor_list_set_p_type), &
-      DIMENSION(:), OPTIONAL, POINTER        :: sab_nl
+             DIMENSION(:), OPTIONAL, POINTER :: sab_nl
     TYPE(cp_error_type), INTENT(inout)       :: error
 
     CHARACTER(LEN=*), PARAMETER :: routineN = 'get_kpoint_info', &
@@ -420,7 +399,7 @@ CONTAINS
     IF(PRESENT(index_to_cell)) index_to_cell => kpoint%index_to_cell
     IF(PRESENT(cell_to_index)) cell_to_index => kpoint%cell_to_index
     IF(PRESENT(ncount)) ncount = SIZE(kpoint%index_to_cell,2)
-!    IF(PRESENT(sab_nl)) sab_nl => kpoint%opmats%sab_nl
+    IF(PRESENT(sab_nl)) sab_nl => kpoint%sab_nl
 
   END SUBROUTINE get_kpoint_info
 

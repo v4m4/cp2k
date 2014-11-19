@@ -176,7 +176,6 @@ CONTAINS
                       energy=energy,&
                       matrix_h_kp=matrixkp_h,&
                       matrix_ks_kp=ks_matrixkp,&
-                      matrix_ks=ks_matrix,&
                       error=error)
 
       CPPrecondition(SIZE(ks_matrixkp,1)>0,cp_failure_level,routineP,error,failure)
@@ -213,7 +212,11 @@ CONTAINS
       IF (do_es) THEN
          CPPrecondition(.NOT.do_kp,cp_failure_level,routineP,error,failure)
          ! Mulliken charges
-         CALL get_qs_env(qs_env=qs_env,particle_set=particle_set,matrix_s=matrix_s,error=error)
+         CALL get_qs_env(qs_env,&
+                         particle_set=particle_set,&
+                         matrix_s=matrix_s,&
+                         matrix_ks=ks_matrix,&
+                         error=error)
          CALL qs_rho_get(rho, rho_ao=matrix_p, error=error)
          natom=SIZE(particle_set)
          ALLOCATE(charges(natom,nspins),STAT=istat)

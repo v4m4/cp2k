@@ -1677,7 +1677,7 @@ CONTAINS
     INTEGER                                  :: handle, i, iat, ic, ispin, &
                                                 natom, nbuffer, ncount, stat
     LOGICAL                                  :: do_kpoints, failure
-    TYPE(cp_dbcsr_p_type), DIMENSION(:), &
+    TYPE(cp_dbcsr_p_type), DIMENSION(:,:), &
       POINTER                                :: matrix_s
     TYPE(cp_dbcsr_type), POINTER             :: refmatrix
     TYPE(dft_control_type), POINTER          :: dft_control
@@ -1696,11 +1696,12 @@ CONTAINS
     CALL get_qs_env(qs_env,&
                     sab_orb=sab_orb, &
                     scf_env=scf_env, &
-                    matrix_s=matrix_s, &
+                    matrix_s_kp=matrix_s, &
                     do_kpoints=do_kpoints, &
                     dft_control=dft_control,&
                     error=error)
-    refmatrix => matrix_s(1)%matrix
+
+    refmatrix => matrix_s(1,1)%matrix
 
 !   *** allocate p_mix_new ***
     IF (.NOT.ASSOCIATED(scf_env%p_mix_new)) THEN

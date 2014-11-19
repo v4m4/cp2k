@@ -108,7 +108,7 @@ CONTAINS
     TYPE(cp_dbcsr_p_type), DIMENSION(:), &
       POINTER                                :: matrix_s
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
-      POINTER                                :: rho_ao_kp
+      POINTER                                :: rho_ao_kp, matrix_s_kp
     TYPE(cp_dbcsr_type), POINTER             :: refmatrix, tmatrix
     TYPE(dft_control_type), POINTER          :: dft_control
     TYPE(kpoint_type), POINTER               :: kpoints
@@ -119,7 +119,7 @@ CONTAINS
                                                 tau_g, tau_r
     TYPE(pw_pool_type), POINTER              :: auxbas_pw_pool
 
-    NULLIFY (pw_env,auxbas_pw_pool,matrix_s,dft_control)
+    NULLIFY (pw_env,auxbas_pw_pool,matrix_s,matrix_s_kp,dft_control)
     NULLIFY (tot_rho_r,rho_ao_kp,rho_r,rho_g,drho_r,drho_g,tau_r,tau_g)
     NULLIFY (sab_orb)
     CALL timeset(routineN,handle)
@@ -146,12 +146,14 @@ CONTAINS
 
     SELECT CASE (my_basis_set_id)
       CASE (use_orb_basis_set)
-        CALL get_qs_env(qs_env, matrix_s=matrix_s, sab_orb=sab_orb, error=error)
+        CALL get_qs_env(qs_env, matrix_s_kp=matrix_s_kp, sab_orb=sab_orb, error=error)
+        refmatrix => matrix_s_kp(1,1)%matrix
       CASE (use_aux_fit_basis_set)
         CPPostcondition(.NOT.dokp, cp_failure_level,routineP,error,failure)
         CALL get_qs_env(qs_env, matrix_s_aux_fit=matrix_s, sab_aux_fit=sab_orb, error=error)
+        refmatrix => matrix_s(1)%matrix
     END SELECT
-    refmatrix => matrix_s(1)%matrix
+
 
     CALL pw_env_get(pw_env,auxbas_pw_pool=auxbas_pw_pool,error=error)
     nspins=dft_control%nspins
@@ -400,7 +402,6 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
                       error=error)
 
       CALL qs_rho_get(rho_struct,&
-                      rho_ao=rho_ao,&
                       rho_r=rho_r,&
                       rho_g=rho_g,&
                       tot_rho_r=tot_rho_r,&
@@ -424,11 +425,13 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
       ELSEIF(dft_control%qs_control%scptb) THEN
         !
       ELSEIF(dft_control%qs_control%lrigpw) THEN
+        CALL qs_rho_get(rho_struct, rho_ao=rho_ao, error=error)
         CALL calculate_lri_densities(lri_env,lri_density,qs_env,rho_ao,&
                                      lri_rho_struct=rho_struct,&
                                      atomic_kind_set=atomic_kind_set,&
                                      para_env=para_env,error=error)
       ELSE
+        CALL qs_rho_get(rho_struct, rho_ao=rho_ao, error=error)
         DO ispin=1,nspins
            CALL calculate_rho_elec(matrix_p=rho_ao(ispin)%matrix,&
                 rho=rho_r(ispin),&
@@ -443,6 +446,7 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
 
       ! if needed compute also the gradient of the density
       IF (dft_control%drho_by_collocation) THEN
+         CALL qs_rho_get(rho_struct, rho_ao=rho_ao, error=error)
          DO ispin=1,nspins
            CPPrecondition(.NOT.PRESENT(task_list_external),cp_failure_level,routineP,error,failure)
            CALL calculate_drho_elec(matrix_p=rho_ao(ispin)%matrix,&
@@ -459,6 +463,7 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
             CALL stop_program(routineN,moduleN,__LINE__,&
              "LRIGPW not implemented for meta-GGAs")
          ENDIF
+         CALL qs_rho_get(rho_struct, rho_ao=rho_ao, error=error)
          DO ispin=1,nspins
             CPPrecondition(.NOT.PRESENT(task_list_external),cp_failure_level,routineP,error,failure)
             CALL calculate_rho_elec(matrix_p=rho_ao(ispin)%matrix,&
@@ -475,6 +480,7 @@ SUBROUTINE qs_rho_update_rho(rho_struct, qs_env, local_rho_set, task_list_extern
      ! GAPW o GAPW_XC require the calculation of hard and soft local densities
       IF(gapw ) THEN
          CPPrecondition(.NOT.PRESENT(task_list_external),cp_failure_level,routineP,error,failure)
+         CALL qs_rho_get(rho_struct, rho_ao=rho_ao, error=error)
          IF(PRESENT(local_rho_set)) THEN
             CALL calculate_rho_atom_coeff(qs_env,rho_ao,local_rho_set%rho_atom_set,error=error)
          ELSE

@@ -1662,9 +1662,9 @@ CONTAINS
     LOGICAL                                  :: do_kpoints
     TYPE(cp_dbcsr_p_type), DIMENSION(:), &
       POINTER                                :: matrix_ks_aux_fit, &
-                                                matrix_s, matrix_s_aux_fit
+                                                matrix_s_aux_fit
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
-      POINTER                                :: matrixkp_ks
+      POINTER                                :: matrixkp_ks, matrix_s_kp
     TYPE(cp_dbcsr_type), POINTER             :: refmatrix
     TYPE(dft_control_type), POINTER          :: dft_control
     TYPE(kpoint_type), POINTER               :: kpoints
@@ -1672,13 +1672,13 @@ CONTAINS
       DIMENSION(:), POINTER                  :: sab_aux_fit, sab_orb
     TYPE(qs_ks_env_type), POINTER            :: ks_env
 
-    NULLIFY(dft_control,ks_env,matrix_s, matrix_s_aux_fit, sab_orb, sab_aux_fit, matrixkp_ks)
+    NULLIFY(dft_control,ks_env,matrix_s_kp, matrix_s_aux_fit, sab_orb, sab_aux_fit, matrixkp_ks)
 
     CALL get_qs_env(qs_env,&
                     do_kpoints=do_kpoints,&
                     kpoints=kpoints,&
                     dft_control=dft_control,&
-                    matrix_s=matrix_s,&
+                    matrix_s_kp=matrix_s_kp,&
                     ks_env=ks_env,&
                     sab_orb=sab_orb,&
                     sab_aux_fit=sab_aux_fit,&
@@ -1689,7 +1689,7 @@ CONTAINS
        CALL get_kpoint_info(kpoint=kpoints,index_to_cell=index_to_cell,error=error)
        ncount = SIZE(index_to_cell,2)
        CALL cp_dbcsr_allocate_matrix_set(matrixkp_ks, dft_control%nspins, ncount, error)
-       refmatrix => matrix_s(1)%matrix
+       refmatrix => matrix_s_kp(1,1)%matrix
        DO ispin=1,dft_control%nspins
           DO ic=1,ncount
              IF (dft_control%nspins > 1) THEN

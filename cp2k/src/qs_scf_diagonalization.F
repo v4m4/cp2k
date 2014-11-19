@@ -510,7 +510,7 @@ CONTAINS
     ! density matrices
     CALL kpoint_density_matrices(kpoints,error)
     ! density matrices in real space
-    CALL kpoint_density_transform(kpoints,scf_env%p_mix_kp,fmwork,error)
+    CALL kpoint_density_transform(kpoints,scf_env%p_mix_kp,matrix_s,sab_nl,fmwork,error)
 
     CALL cp_dbcsr_deallocate_matrix(rmatrix,error=error)
     CALL cp_dbcsr_deallocate_matrix(cmatrix,error=error)
