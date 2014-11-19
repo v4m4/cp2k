@@ -749,7 +749,7 @@ CONTAINS
 ! Diagonalization: additional check whether we are in an orthonormal basis
       CASE(diag_standard)
         scf_env%method=general_diag_method_nr
-        scf_env%needs_ortho=.NOT.has_unit_metric
+        scf_env%needs_ortho = (.NOT.has_unit_metric) .AND. (.NOT.do_kpoints)
         IF (has_unit_metric) THEN
             scf_env%method=special_diag_method_nr
         END IF
@@ -941,34 +941,33 @@ CONTAINS
     ! calc ortho matrix
     ndep = 0
     IF (scf_env%needs_ortho)THEN
-       WRITE (*,*) "TODO: qs_scf_initialization"
-       !CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
-       !CALL copy_dbcsr_to_fm(matrix_s(1)%matrix,scf_env%ortho,error=error)
-       !IF (scf_env%cholesky_method>cholesky_off) THEN
-       !  CALL cp_fm_cholesky_decompose(scf_env%ortho,error=error)
-       !  IF(scf_env%cholesky_method == cholesky_dbcsr) THEN
-       !     CALL cp_fm_triangular_invert(scf_env%ortho,error=error)
-       !     CALL cp_fm_set_all(scf_env%scf_work2,0.0_dp,error=error)
-       !     CALL cp_fm_to_fm_triangular(scf_env%ortho,scf_env%scf_work2,"U",error=error)
-       !     CALL copy_fm_to_dbcsr(scf_env%scf_work2, scf_env%ortho_dbcsr, error=error)
-       !  ELSE IF(scf_env%cholesky_method==cholesky_inverse) THEN
-       !     CALL cp_fm_to_fm(scf_env%ortho,scf_env%ortho_m1,error=error)
-       !     CALL cp_fm_triangular_invert(scf_env%ortho_m1,error=error)
-       !  END IF
-       !ELSE
-       !     CALL cp_fm_power(scf_env%ortho,scf_env%scf_work2,-0.5_dp,&
-       !                     scf_control%eps_eigval,ndep,error=error)
-       !     s_minus_half_available = .TRUE.
-       !END IF
-       !
-       !IF (BTEST(cp_print_key_should_output(logger%iter_info,&
-       !       qs_env%input,"DFT%PRINT%AO_MATRICES/ORTHO",error=error),cp_p_file)) THEN
-       !     iw = cp_print_key_unit_nr(logger,qs_env%input,"DFT%PRINT%AO_MATRICES/ORTHO",&
-       !          extension=".Log",error=error)
-       !     CALL write_fm_with_basis_info(scf_env%ortho,4,6,qs_env,para_env,output_unit=iw,error=error)
-       !     CALL cp_print_key_finished_output(iw,logger,qs_env%input,&
-       !          "DFT%PRINT%AO_MATRICES/ORTHO", error=error)
-       !END IF
+       CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
+       CALL copy_dbcsr_to_fm(matrix_s(1)%matrix,scf_env%ortho,error=error)
+       IF (scf_env%cholesky_method>cholesky_off) THEN
+         CALL cp_fm_cholesky_decompose(scf_env%ortho,error=error)
+         IF(scf_env%cholesky_method == cholesky_dbcsr) THEN
+            CALL cp_fm_triangular_invert(scf_env%ortho,error=error)
+            CALL cp_fm_set_all(scf_env%scf_work2,0.0_dp,error=error)
+            CALL cp_fm_to_fm_triangular(scf_env%ortho,scf_env%scf_work2,"U",error=error)
+            CALL copy_fm_to_dbcsr(scf_env%scf_work2, scf_env%ortho_dbcsr, error=error)
+         ELSE IF(scf_env%cholesky_method==cholesky_inverse) THEN
+            CALL cp_fm_to_fm(scf_env%ortho,scf_env%ortho_m1,error=error)
+            CALL cp_fm_triangular_invert(scf_env%ortho_m1,error=error)
+         END IF
+       ELSE
+            CALL cp_fm_power(scf_env%ortho,scf_env%scf_work2,-0.5_dp,&
+                            scf_control%eps_eigval,ndep,error=error)
+            s_minus_half_available = .TRUE.
+       END IF
+
+       IF (BTEST(cp_print_key_should_output(logger%iter_info,&
+              qs_env%input,"DFT%PRINT%AO_MATRICES/ORTHO",error=error),cp_p_file)) THEN
+            iw = cp_print_key_unit_nr(logger,qs_env%input,"DFT%PRINT%AO_MATRICES/ORTHO",&
+                 extension=".Log",error=error)
+            CALL write_fm_with_basis_info(scf_env%ortho,4,6,qs_env,para_env,output_unit=iw,error=error)
+            CALL cp_print_key_finished_output(iw,logger,qs_env%input,&
+                 "DFT%PRINT%AO_MATRICES/ORTHO", error=error)
+       END IF
     END IF
 
     CALL get_mo_set(mo_set=mos(1)%mo_set,nao=nao)
