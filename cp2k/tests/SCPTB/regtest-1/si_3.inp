@@ -2,6 +2,7 @@
   &DFT
     &QS
       METHOD SCPTB
+      EXTRAPOLATION USE_GUESS
       &SCPTB
         DISPERSION .FALSE.
         DISPERSION_PARAMETER_FILE ../../../data/dftd3.dat

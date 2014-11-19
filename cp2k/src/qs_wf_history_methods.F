@@ -287,14 +287,14 @@ SUBROUTINE wfs_update(snapshot,wf_history,qs_env,dt,error)
     TYPE(qs_environment_type), POINTER       :: qs_env
     REAL(KIND=dp), INTENT(in), OPTIONAL      :: dt
     TYPE(cp_error_type), INTENT(inout)       :: error
-
+                                                    
     CHARACTER(len=*), PARAMETER :: routineN = 'wfs_update', &
       routineP = moduleN//':'//routineN
 
     INTEGER                                  :: handle, ispin, nspins, stat
     LOGICAL                                  :: failure
     TYPE(cp_dbcsr_p_type), DIMENSION(:), &
-      POINTER                                :: rho_ao, s_array
+      POINTER                                :: rho_ao, matrix_s
     TYPE(cp_fm_pool_p_type), DIMENSION(:), &
       POINTER                                :: ao_mo_pools
     TYPE(cp_fm_type), POINTER                :: mo_coeff
@@ -310,7 +310,7 @@ SUBROUTINE wfs_update(snapshot,wf_history,qs_env,dt,error)
 
   failure=.FALSE.
   NULLIFY(pw_env, auxbas_pw_pool, ao_mo_pools, dft_control, mos, mo_coeff,&
-       rho, rho_r,rho_g,rho_ao, s_array)
+       rho, rho_r,rho_g,rho_ao, matrix_s)
   CALL get_qs_env(qs_env, pw_env=pw_env,&
        dft_control=dft_control,rho=rho, error=error)
   CALL mpools_get(qs_env%mpools, ao_mo_fm_pools=ao_mo_pools, &
@@ -419,12 +419,12 @@ SUBROUTINE wfs_update(snapshot,wf_history,qs_env,dt,error)
         CALL cp_dbcsr_deallocate_matrix(snapshot%overlap,error=error)
      END IF
      IF (wf_history%store_overlap) THEN
-        WRITE (*,*) "TODO: wfs_update"
-        !CPPrecondition(ASSOCIATED(s_array),cp_failure_level,routineP,error,failure)
-        !CPPrecondition(ASSOCIATED(s_array(1)%matrix),cp_failure_level,routineP,error,failure)
-        !ALLOCATE(snapshot%overlap)
-        !CALL cp_dbcsr_init(snapshot%overlap,error=error)
-        !CALL cp_dbcsr_copy(snapshot%overlap,s_array(1)%matrix,error=error)
+        CALL get_qs_env(qs_env, matrix_s=matrix_s, error=error)
+        CPPrecondition(ASSOCIATED(matrix_s),cp_failure_level,routineP,error,failure)
+        CPPrecondition(ASSOCIATED(matrix_s(1)%matrix),cp_failure_level,routineP,error,failure)
+        ALLOCATE(snapshot%overlap)
+        CALL cp_dbcsr_init(snapshot%overlap, error=error)
+        CALL cp_dbcsr_copy(snapshot%overlap, matrix_s(1)%matrix, error=error)
      END IF
 
      IF (wf_history%store_frozen_density) THEN
