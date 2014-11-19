@@ -388,8 +388,6 @@ CONTAINS
       DIMENSION(:, :)                        :: hmt, kk, umt
     REAL(KIND=dp), DIMENSION(3)              :: rij
     REAL(KIND=dp), DIMENSION(:, :), POINTER  :: h_block, s_block
-    TYPE(cp_dbcsr_p_type), DIMENSION(:), &
-      POINTER                                :: gamma_s
     TYPE(cp_dbcsr_p_type), DIMENSION(:, :), &
       POINTER                                :: matrix_h, matrix_s, matrix_t
     TYPE(cp_logger_type), POINTER            :: logger
@@ -471,21 +469,6 @@ CONTAINS
        CALL cp_dbcsr_copy(matrix_h(1,ic)%matrix,matrix_t(1,ic)%matrix,&
                           name="CORE HAMILTONIAN MATRIX",error=error)
     END DO
-
-    ! initialize the overlap matrix in the qs_env (gamma)
-    ! used many times later as the template for the setup of matrices
-    CALL get_qs_env(qs_env=qs_env,matrix_s=gamma_s,error=error)
-    CALL cp_dbcsr_allocate_matrix_set(gamma_s,1,error)
-    ALLOCATE(gamma_s(1)%matrix,STAT=istat)
-    CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
-    CALL cp_dbcsr_init(gamma_s(1)%matrix, error=error)
-    CALL cp_dbcsr_copy(gamma_s(1)%matrix,matrix_s(1,1)%matrix,&
-                          name="OVERLAP MATRIX GAMMA",error=error)
-    DO ic=2,ncount
-       CALL cp_dbcsr_add(gamma_s(1)%matrix,matrix_s(1,ic)%matrix,&
-                   alpha_scalar=1.0_dp,beta_scalar=1.0_dp,error=error)
-    END DO
-    CALL set_ks_env(ks_env, matrix_s=gamma_s, error=error)
 
     ALLOCATE (scptb_kind_param(nkind),scptb_defined(nkind),STAT=istat)
     CPPostcondition(istat==0,cp_failure_level,routineP,error,failure)
